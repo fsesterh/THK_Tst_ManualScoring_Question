@@ -1,0 +1,5 @@
+noRefIdPassedInQuery#:#No ref id was passed as query parameter
+cmdNotFound#:#Command was not found
+manualScoringSaved#:#Manual scoring was saved
+filterWasApplied#:#Filter was applied
+filterWasReset#:#Filter was reset

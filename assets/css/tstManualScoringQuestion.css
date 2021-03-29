@@ -1,0 +1,33 @@
+.tmsq-scoring-container .tmsq-scoring-panel-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.tmsq-scoring-panel-container {
+    padding-top: 1rem;
+    background: white;
+}
+
+.tmsq-scoring-panel {
+    background: #f0f0f0;
+    padding: 1rem;
+}
+
+.tmsq-scoring-question-panel {
+    background: #f0f0f0;
+    padding-top: 2rem;
+}
+
+.tmsq-scoring-panel-answer-container {
+    background: white;
+}
+
+.tmsq-scoring-panel-header {
+    font-size: 1.8rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tmsq-scoring-question-header {
+    font-size: 1.8rem;
+}

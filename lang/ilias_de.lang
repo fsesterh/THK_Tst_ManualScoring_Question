@@ -1,0 +1,5 @@
+noRefIdPassedInQuery#:#Es wurde keine ref id als query parameter übergeben
+cmdNotFound#:#Kommando wurde nicht gefunden
+manualScoringSaved#:#Manuelle Bewertung wurde gespeichert
+filterWasApplied#:#Filter wurde angewendet
+filterWasReset#:#Filter wurde zurückgesetzt
