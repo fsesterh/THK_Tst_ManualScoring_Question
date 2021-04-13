@@ -3,3 +3,10 @@ cmdNotFound#:#Kommando wurde nicht gefunden
 manualScoringSaved#:#Manuelle Bewertung wurde gespeichert
 filterWasApplied#:#Filter wurde angewendet
 filterWasReset#:#Filter wurde zurückgesetzt
+userSolutionForQuestion#:#Benutzerlösung für Frage
+scoreSavingNotPossibleInvalidDataReceived#:#Speichern der Bewertung nicht möglich. Informationen fehlerhaft
+scoreSavingNotPossibleNoQuestionsReceived#:#Speichern der Bewertung nicht möglich. Keine Fragen wurden gesendet
+pointsExceedMaximumPossible#:#Punkte überschreiten die maximal möglichen
+testRefIdMissing#:#Die ref id für den Test fehlt
+participantActiveIdMissing#:#Die active id des Teilnehmers fehlt
+testPassMissing#:#Der Durchlauf für den Test fehlt

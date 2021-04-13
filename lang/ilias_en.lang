@@ -3,3 +3,10 @@ cmdNotFound#:#Command was not found
 manualScoringSaved#:#Manual scoring was saved
 filterWasApplied#:#Filter was applied
 filterWasReset#:#Filter was reset
+userSolutionForQuestion#:#User Solution for Question
+scoreSavingNotPossibleInvalidDataReceived#:#Saving of the score not possible. Information faulty
+scoreSavingNotPossibleNoQuestionsReceived#:#Saving of the score not possible. No questions were send
+pointsExceedMaximumPossible#:#Points exceed maximum possible
+testRefIdMissing#:#The ref id for the test is missing
+participantActiveIdMissing#:#The active id of the participant is missing
+testPassMissing#:#The pass of the test is missing
