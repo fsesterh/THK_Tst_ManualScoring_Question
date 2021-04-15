@@ -4,9 +4,12 @@ manualScoringSaved#:#Manuelle Bewertung wurde gespeichert
 filterWasApplied#:#Filter wurde angewendet
 filterWasReset#:#Filter wurde zurückgesetzt
 userSolutionForQuestion#:#Benutzerlösung für Frage
-scoreSavingNotPossibleInvalidDataReceived#:#Speichern der Bewertung nicht möglich. Informationen fehlerhaft
-scoreSavingNotPossibleNoQuestionsReceived#:#Speichern der Bewertung nicht möglich. Keine Fragen wurden gesendet
+scoreSavingNotPossibleNoParticipantsReceived#:#Speichern der Bewertung nicht möglich. Keine Teilnehmer erhalten
 pointsExceedMaximumPossible#:#Punkte überschreiten die maximal möglichen
-testRefIdMissing#:#Die ref id für den Test fehlt
-participantActiveIdMissing#:#Die active id des Teilnehmers fehlt
-testPassMissing#:#Der Durchlauf für den Test fehlt
+
+missing_testRefId#:#Die ref id für den Test fehlt
+missing_pass#:#Der Durchlauf für den Test fehlt
+missing_questionId#:#Die Id der Frage fehlt
+
+scoreSavingNotPossible_missing_pointsForAnswer#:#Speichern der Bewertung nicht möglich. Punktzahl für Antwort fehlt
+scoreSavingNotPossible_missing_activeId#:#Speichern der Bewertung nicht möglich. ActiveId des Teilnehmers fehlt

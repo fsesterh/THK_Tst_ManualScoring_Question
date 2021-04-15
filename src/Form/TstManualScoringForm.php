@@ -10,6 +10,7 @@ use ilNonEditableValueGUI;
 use ilLanguage;
 use ilNumberInputGUI;
 use ilHiddenInputGUI;
+use assQuestion;
 
 /**
  * Class ManualScoringForm
@@ -21,52 +22,55 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
     public function __construct(
         ilLanguage $lng,
-        array $question,
-        string $answerHtml,
-        int $activeId,
-        int $pass,
         int $testRefId,
-        int $currentPointsForAnswer,
-        int $maximumPointsForAnswer
+        int $questionId,
+        int $pass,
+        int $activeId,
+        string $answerHtml
     ) {
         $this->lng = $lng;
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
 
-        $questionId = $question["question_id"];
+        $maximumPoints = (int) assQuestion::_getMaximumPoints($questionId);
+        $reachedPoints = (int) assQuestion::_getReachedPoints(
+            (int) $activeId,
+            $questionId,
+            $pass
+        );
 
-        $activeIdHiddenInput = new ilHiddenInputGUI("questions[{$questionId}][activeId]");
-        $activeIdHiddenInput->setValue($activeId);
+        $testRefIdHiddenInput = new ilHiddenInputGUI("testRefId");
+        $testRefIdHiddenInput->setValue($testRefId);
 
         $passHiddenInput = new ilHiddenInputGUI("pass");
         $passHiddenInput->setValue($pass);
 
-        $questionIdHiddenInput = new ilHiddenInputGUI("questions[{$questionId}][questionId]");
+        $questionIdHiddenInput = new ilHiddenInputGUI("questionId");
         $questionIdHiddenInput->setValue($questionId);
 
-        $testRefIdHiddenInput = new ilHiddenInputGUI("testRefId");
-        $testRefIdHiddenInput->setValue($testRefId);
+        $activeIdHiddenInput = new ilHiddenInputGUI("participants[{$activeId}][activeId]");
+        $activeIdHiddenInput->setValue($activeId);
+
+        $pointsForAnswerInput = new ilNumberInputGUI(
+            $this->lng->txt("tst_change_points_for_question"),
+            "participants[{$activeId}][pointsForAnswer]"
+        );
+        $pointsForAnswerInput->setMaxValue($maximumPoints);
+        $pointsForAnswerInput->setValue((int) $reachedPoints);
 
         $userSolutionHtmlAreaInput = new ilHtmlAreaInput($this->plugin->txt("userSolutionForQuestion"));
         $userSolutionHtmlAreaInput->setValue($answerHtml);
         $userSolutionHtmlAreaInput->setEditable(false);
         $userSolutionHtmlAreaInput->setHtmlClass("tmsq-html-area-input");
 
-        $pointsForAnswerInput = new ilNumberInputGUI(
-            $this->lng->txt("tst_change_points_for_question"),
-            "questions[{$questionId}][pointsForAnswer]"
-        );
-        $pointsForAnswerInput->setMaxValue($maximumPointsForAnswer);
-        $pointsForAnswerInput->setValue((int) $currentPointsForAnswer);
-
         $maximumPointsNonEditInput = new ilNonEditableValueGUI(
             $this->lng->txt("tst_manscoring_input_max_points_for_question")
         );
-        $maximumPointsNonEditInput->setValue($maximumPointsForAnswer);
+        $maximumPointsNonEditInput->setValue($maximumPoints);
 
+        $this->addItem($testRefIdHiddenInput);
+        $this->addItem($passHiddenInput);
         $this->addItem($questionIdHiddenInput);
         $this->addItem($activeIdHiddenInput);
-        $this->addItem($passHiddenInput);
-        $this->addItem($testRefIdHiddenInput);
         $this->addItem($userSolutionHtmlAreaInput);
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);

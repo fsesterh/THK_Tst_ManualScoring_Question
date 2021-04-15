@@ -163,12 +163,6 @@ class TstManualScoringQuestion
             }
 
             $activeId = (int) $participant->getActiveId();
-            $reachedPoints = (int) assQuestion::_getReachedPoints(
-                (int) $participant->getActiveId(),
-                $questionId,
-                $selectedPass
-            );
-            $maximumPoints = (int) assQuestion::_getMaximumPoints($questionId);
 
             $answerHtml = $this->getAnswerDetail(
                 $test,
@@ -191,13 +185,11 @@ class TstManualScoringQuestion
 
             $manualScoringForm = new TstManualScoringForm(
                 $this->lng,
-                $question,
-                $answerHtml,
-                $activeId,
-                $selectedPass,
                 $refId,
-                $reachedPoints,
-                $maximumPoints
+                $questionId,
+                $selectedPass,
+                $activeId,
+                $answerHtml,
             );
 
             $tpl->setVariable("MANUAL_SCORING_FORM", $manualScoringForm->getHTML());
@@ -214,49 +206,50 @@ class TstManualScoringQuestion
     protected function saveManualScoring(array $post)
     {
         if (!isset($post["testRefId"])) {
-            ilUtil::sendFailure($this->plugin->txt("testRefIdMissing"), true);
+            ilUtil::sendFailure($this->plugin->txt("missing_testRefId"), true);
             $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
         }
         $testRefId = (int) $post["testRefId"];
 
         if (!isset($post["pass"])) {
-            ilUtil::sendFailure($this->plugin->txt("testPassMissing"), true);
+            ilUtil::sendFailure($this->plugin->txt("missing_pass"), true);
+            $this->redirectToManualScoringTab($testRefId);
+        }
+
+        if (!isset($post["questionId"])) {
+            ilUtil::sendFailure($this->plugin->txt("missing_questionId"), true);
             $this->redirectToManualScoringTab($testRefId);
         }
 
         $pass = (int) $post["pass"];
-
+        $questionId = (int) $post["questionId"];
+        $maximumPointsForAnswer = (int) assQuestion::_getMaximumPoints($questionId);
         $test = new ilObjTest($testRefId, true);
         $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+        $questionIsObligatory = ilObjTest::isQuestionObligatory($questionId);
 
         if (!$testAccess->checkScoreParticipantsAccess()) {
             ilObjTestGUI::accessViolationRedirect();
         }
 
-        if (!isset($post["questions"]) || count($post["questions"]) == 0) {
-            ilUtil::sendFailure($this->plugin->txt("scoreSavingNotPossibleNoQuestionsReceived"), true);
+        if (!isset($post["participants"]) || count($post["participants"]) == 0) {
+            ilUtil::sendFailure($this->plugin->txt("scoreSavingNotPossibleNoParticipantsReceived"), true);
             $this->redirectToManualScoringTab($testRefId);
         }
 
-        foreach ($post["questions"] as $question) {
-            if (!isset($question["pointsForAnswer"]) || !isset($question["questionId"])) {
-                ilUtil::sendFailure($this->plugin->txt("scoreSavingNotPossibleInvalidDataReceived"), true);
+        foreach ($post["participants"] as $ratedParticipant) {
+            if (!isset($ratedParticipant["pointsForAnswer"])) {
+                ilUtil::sendFailure($this->plugin->txt("scoreSavingNotPossible_missing_pointsForAnswer"), true);
                 $this->redirectToManualScoringTab($testRefId);
             }
 
-            if (!isset($question["activeId"])) {
-                ilUtil::sendFailure($this->plugin->txt("participantActiveIdMissing"), true);
+            if (!isset($ratedParticipant["activeId"])) {
+                ilUtil::sendFailure($this->plugin->txt("scoreSavingNotPossible_missing_activeId"), true);
                 $this->redirectToManualScoringTab($testRefId);
             }
 
-            $pointsForAnswer = (int) $question["pointsForAnswer"];
-            $questionId = (int) $question["questionId"];
-            $maximumPointsForAnswer = (int) assQuestion::_getMaximumPoints($questionId);
-            $activeId = (int) $question["activeId"];
-            if ($pointsForAnswer > $maximumPointsForAnswer) {
-                ilUtil::sendFailure($this->plugin->txt("pointsExceedMaximumPossible"), true);
-                $this->redirectToManualScoringTab($testRefId);
-            }
+            $pointsForAnswer = (int) $ratedParticipant["pointsForAnswer"];
+            $activeId = (int) $ratedParticipant["activeId"];
 
             $currentPoints = (int) assQuestion::_getReachedPoints($activeId, $questionId, $pass);
             if ($pointsForAnswer !== $currentPoints) {
@@ -267,11 +260,10 @@ class TstManualScoringQuestion
                     $maximumPointsForAnswer,
                     $pass,
                     1,
-                    ilObjTest::isQuestionObligatory($questionId)
+                    $questionIsObligatory
                 );
             }
         }
-
         ilUtil::sendSuccess($this->plugin->txt("manualScoringSaved"), true);
         $this->redirectToManualScoringTab($testRefId);
     }

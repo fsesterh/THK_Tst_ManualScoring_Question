@@ -4,9 +4,12 @@ manualScoringSaved#:#Manual scoring was saved
 filterWasApplied#:#Filter was applied
 filterWasReset#:#Filter was reset
 userSolutionForQuestion#:#User Solution for Question
-scoreSavingNotPossibleInvalidDataReceived#:#Saving of the score not possible. Information faulty
-scoreSavingNotPossibleNoQuestionsReceived#:#Saving of the score not possible. No questions were send
+scoreSavingNotPossibleNoParticipantsReceived#:#Saving of the score not possible. No participants received
 pointsExceedMaximumPossible#:#Points exceed maximum possible
-testRefIdMissing#:#The ref id for the test is missing
-participantActiveIdMissing#:#The active id of the participant is missing
-testPassMissing#:#The pass of the test is missing
+
+missing_testRefId#:#The ref id for the test is missing
+missing_pass#:#The pass of the test is missing
+missing_questionId#:#The id of the question is missing
+
+scoreSavingNotPossible_missing_pointsForAnswer#:#Saving of the score not possible. Points for answer missing
+scoreSavingNotPossible_missing_activeId#:#Saving of the score not possible. ActiveId of participant missing
