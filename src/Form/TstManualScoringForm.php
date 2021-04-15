@@ -12,6 +12,8 @@ use ilNumberInputGUI;
 use ilHiddenInputGUI;
 use ilFormPropertyGUI;
 use Psr\Http\Message\RequestInterface;
+use ilTextAreaInputGUI;
+use TstManualScoringQuestion\Form\Input\RichTextInput\ilRichTextInput;
 
 /**
  * Class ManualScoringForm
@@ -26,7 +28,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
     public function __construct(
         ilLanguage $lng,
         int $activeId,
-        int $maximumPoints,
+        float $maximumPoints,
         string $answerText = ""
     ) {
         global $DIC;
@@ -72,6 +74,10 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $maximumPointsNonEditInput->setRequired(true);
         $maximumPointsNonEditInput->setValue($maximumPoints);
 
+        $manualFeedPackAreaInput = new ilTextAreaInputGUI($this->lng->txt('set_manual_feedback'), "{$activeId}[feedback]");
+        $manualFeedPackAreaInput->setUseRTE(true);
+        $manualFeedPackAreaInput->setRteTagSet('standard');
+
         $this->addItem($testRefIdHiddenInput);
         $this->addItem($passHiddenInput);
         $this->addItem($questionIdHiddenInput);
@@ -79,17 +85,19 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($userSolutionHtmlAreaInput);
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);
+        $this->addItem($manualFeedPackAreaInput);
     }
 
     /**
      * Fills the form values
-     * @param int   $activeId
-     * @param int   $pass
-     * @param float $pointsForAnswer
-     * @param int   $questionId
-     * @param int   $testRefId
+     * @param int    $activeId
+     * @param int    $pass
+     * @param float  $pointsForAnswer
+     * @param int    $questionId
+     * @param int    $testRefId
+     * @param string $feedback
      */
-    public function fillForm(int $activeId, int $pass, float $pointsForAnswer, int $questionId, int $testRefId)
+    public function fillForm(int $activeId, int $pass, float $pointsForAnswer, int $questionId, int $testRefId, string $feedback = "")
     {
         $this->setValuesByArray([
             "{$activeId}[testRefId]" => $testRefId,
@@ -97,6 +105,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
             "{$activeId}[questionId]" => $questionId,
             "{$activeId}[activeId]" => $activeId,
             "{$activeId}[pointsForAnswer]" => $pointsForAnswer,
+            "{$activeId}[feedback]" => $feedback
         ], true);
     }
 }

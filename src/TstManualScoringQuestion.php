@@ -189,15 +189,19 @@ class TstManualScoringQuestion
             $form = new TstManualScoringForm(
                 $this->lng,
                 $questionAnswer->getActiveId(),
-                $questionAnswer->getMaximumPoints(),
+                $questionAnswer->readMaximumPoints(),
                 $questionAnswer->getAnswerHtml()
             );
+
+            $questionAnswer->readFeedback();
+
             $form->fillForm(
                 $questionAnswer->getActiveId(),
                 $questionAnswer->getPass(),
-                (float) $questionAnswer->getReachedPoints(),
+                $questionAnswer->readReachedPoints(),
                 $questionAnswer->getQuestionId(),
-                $questionAnswer->getTestRefId()
+                $questionAnswer->getTestRefId(),
+                $questionAnswer->getFeedback()
             );
 
             $tpl->setCurrentBlock("questionAnswer");
@@ -227,56 +231,52 @@ class TstManualScoringQuestion
             ilUtil::sendFailure($this->plugin->txt("nothingReceivedInPost"), true);
             $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
         }
+
+        $post = array_filter($post, function ($key) {
+            return !in_array($key, ["myCounter"]);
+        }, ARRAY_FILTER_USE_KEY);
+
+        /**
+         * @var QuestionAnswer[] $questionAnswers
+         */
+        $questionAnswers = [];
+
+        foreach ($post as $answerData) {
+            $questionAnswer = new QuestionAnswer();
+            $questionAnswer->loadFromPostArray($answerData);
+            array_push($questionAnswers, $questionAnswer);
+        }
+
         $testRefId = -1;
-        foreach ($post as $item) {
-            if (!isset($item["testRefId"]) || !is_numeric($item["testRefId"])) {
-                ilUtil::sendFailure($this->plugin->txt("missing_testRefId"), true);
-                $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+
+        foreach ($questionAnswers as $questionAnswer) {
+            if (!$questionAnswer->checkValid()) {
+                if ($questionAnswer->getTestRefId()) {
+                    $this->sendInvalidForm($questionAnswer->getTestRefId());
+                } else {
+                    ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+
+                    $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+                }
             }
-            $testRefId = (int) $item["testRefId"];
+            $testRefId = $questionAnswer->getTestRefId();
 
-            if (!isset($item["activeId"], $item["questionId"], $item["pass"], $item["pointsForAnswer"])) {
-                $this->sendInvalidForm($testRefId);
-            }
-
-            $testRefId = $item["testRefId"];
-            $activeId = $item["activeId"];
-            $questionId = $item["questionId"];
-            $pointsForAnswer = $item["pointsForAnswer"];
-            $pass = $item["pass"];
-
-            if (!is_numeric($testRefId) || !is_numeric($activeId) || !is_numeric($questionId) || !is_numeric($pointsForAnswer) || !is_numeric($pass)) {
-                $this->sendInvalidForm($testRefId);
-            }
-            $testRefId = (int) $testRefId;
-            $activeId = (int) $activeId;
-            $questionId = (int) $questionId;
-            $pass = (int) $pass;
-            $questionIsObligatory = ilObjTest::isQuestionObligatory($questionId);
-            $pointsForAnswer = (float) $pointsForAnswer;
-            $currentPoints = (float) assQuestion::_getReachedPoints($activeId, $questionId, $pass);
-            $maximumPoints = (float) assQuestion::_getMaximumPoints($questionId);
-
-            $test = new ilObjTest($testRefId, true);
+            $test = new ilObjTest($questionAnswer->getTestRefId(), true);
             $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
             if (!$testAccess->checkScoreParticipantsAccess()) {
                 ilObjTestGUI::accessViolationRedirect();
             }
 
-            if ($pointsForAnswer > $maximumPoints) {
-                $this->sendInvalidForm($testRefId);
+            if ($questionAnswer->getPoints() > $questionAnswer->readMaximumPoints()) {
+                $this->sendInvalidForm($questionAnswer->getTestRefId());
             }
 
-            if ($pointsForAnswer !== $currentPoints) {
-                assQuestion::_setReachedPoints(
-                    $activeId,
-                    $questionId,
-                    $pointsForAnswer,
-                    $maximumPoints,
-                    $pass,
-                    1,
-                    $questionIsObligatory
-                );
+            if ($questionAnswer->getPoints() !== $questionAnswer->readReachedPoints()) {
+                $questionAnswer->writePoints();
+            }
+            if ($questionAnswer->getFeedback() != $questionAnswer->readFeedback()) {
+                //Todo:
+                $tt = "";
             }
         }
 
