@@ -25,7 +25,7 @@
     border: solid black 1px;
     margin: 1rem 0;
     padding: 1rem;
-
+    overflow-x: auto;
 }
 
 .tmsq-scoring-panel-header {
