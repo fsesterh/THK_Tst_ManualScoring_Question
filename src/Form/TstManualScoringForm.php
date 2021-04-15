@@ -10,7 +10,8 @@ use ilNonEditableValueGUI;
 use ilLanguage;
 use ilNumberInputGUI;
 use ilHiddenInputGUI;
-use assQuestion;
+use ilFormPropertyGUI;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Class ManualScoringForm
@@ -18,53 +19,57 @@ use assQuestion;
  */
 class TstManualScoringForm extends ilPropertyFormGUI
 {
+    protected RequestInterface $request;
+    protected int $activeId;
     protected ilTstManualScoringQuestionPlugin $plugin;
 
     public function __construct(
         ilLanguage $lng,
-        int $testRefId,
-        int $questionId,
-        int $pass,
         int $activeId,
-        string $answerHtml
+        int $maximumPoints,
+        string $answerText = ""
     ) {
+        global $DIC;
+        $this->request = $DIC->http()->request();
         $this->lng = $lng;
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
+        $this->activeId = $activeId;
 
-        $maximumPoints = (int) assQuestion::_getMaximumPoints($questionId);
-        $reachedPoints = (int) assQuestion::_getReachedPoints(
-            (int) $activeId,
-            $questionId,
-            $pass
-        );
+        $testRefIdHiddenInput = new ilHiddenInputGUI("{$activeId}[testRefId]");
+        $testRefIdHiddenInput->setRequired(true);
+        //$testRefIdHiddenInput->setValue($questionAnswer->getTestRefId());
 
-        $testRefIdHiddenInput = new ilHiddenInputGUI("testRefId");
-        $testRefIdHiddenInput->setValue($testRefId);
+        $passHiddenInput = new ilHiddenInputGUI("{$activeId}[pass]");
+        //$passHiddenInput->setValue($questionAnswer->getPass());
+        $passHiddenInput->setRequired(true);
 
-        $passHiddenInput = new ilHiddenInputGUI("pass");
-        $passHiddenInput->setValue($pass);
+        $questionIdHiddenInput = new ilHiddenInputGUI("{$activeId}[questionId]");
+        //$questionIdHiddenInput->setValue($questionAnswer->getQuestionId());
+        $questionIdHiddenInput->setRequired(true);
 
-        $questionIdHiddenInput = new ilHiddenInputGUI("questionId");
-        $questionIdHiddenInput->setValue($questionId);
-
-        $activeIdHiddenInput = new ilHiddenInputGUI("participants[{$activeId}][activeId]");
+        $activeIdHiddenInput = new ilHiddenInputGUI("{$activeId}[activeId]");
         $activeIdHiddenInput->setValue($activeId);
+        $activeIdHiddenInput->setRequired(true);
 
         $pointsForAnswerInput = new ilNumberInputGUI(
             $this->lng->txt("tst_change_points_for_question"),
-            "participants[{$activeId}][pointsForAnswer]"
+            "{$activeId}[pointsForAnswer]"
         );
-        $pointsForAnswerInput->setMaxValue($maximumPoints);
-        $pointsForAnswerInput->setValue((int) $reachedPoints);
+        $pointsForAnswerInput->setMinValue(0.00);
+        $pointsForAnswerInput->setMaxValue((float) $maximumPoints);
+        $pointsForAnswerInput->allowDecimals(true);
+        $pointsForAnswerInput->setRequired(true);
+        $pointsForAnswerInput->setDecimals(2);
 
         $userSolutionHtmlAreaInput = new ilHtmlAreaInput($this->plugin->txt("userSolutionForQuestion"));
-        $userSolutionHtmlAreaInput->setValue($answerHtml);
+        $userSolutionHtmlAreaInput->setValue($answerText);
         $userSolutionHtmlAreaInput->setEditable(false);
         $userSolutionHtmlAreaInput->setHtmlClass("tmsq-html-area-input");
 
         $maximumPointsNonEditInput = new ilNonEditableValueGUI(
             $this->lng->txt("tst_manscoring_input_max_points_for_question")
         );
+        $maximumPointsNonEditInput->setRequired(true);
         $maximumPointsNonEditInput->setValue($maximumPoints);
 
         $this->addItem($testRefIdHiddenInput);
@@ -74,5 +79,24 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($userSolutionHtmlAreaInput);
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);
+    }
+
+    /**
+     * Fills the form values
+     * @param int   $activeId
+     * @param int   $pass
+     * @param float $pointsForAnswer
+     * @param int   $questionId
+     * @param int   $testRefId
+     */
+    public function fillForm(int $activeId, int $pass, float $pointsForAnswer, int $questionId, int $testRefId)
+    {
+        $this->setValuesByArray([
+            "{$activeId}[testRefId]" => $testRefId,
+            "{$activeId}[pass]" => $pass,
+            "{$activeId}[questionId]" => $questionId,
+            "{$activeId}[activeId]" => $activeId,
+            "{$activeId}[pointsForAnswer]" => $pointsForAnswer,
+        ], true);
     }
 }
