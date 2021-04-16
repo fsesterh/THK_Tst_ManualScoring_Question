@@ -28,6 +28,9 @@ use ilAccessHandler;
 use ilObjUser;
 use TstManualScoringQuestion\Model\QuestionAnswer;
 use Exception;
+use TstManualScoringQuestion\Model\Question;
+use TstManualScoringQuestion\Model\Answer;
+use ilTestParticipant;
 
 /**
  * Class TstManualScoringQuestion
@@ -154,51 +157,57 @@ class TstManualScoringQuestion
             ) . "&ref_id={$refId}"
         );
 
-        $question = $allQuestions[$selectedQuestionId];
+        $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
+        $question = new Question($questionId);
+        $question
+            ->setTestRefId($refId)
+            ->setPass($selectedPass);
 
         /**
-         * @var QuestionAnswer[] $questionAnswers
+         * @var Answer[] $answers
          */
-        $questionAnswers = [];
+        $answers = [];
 
+        /**
+         * @var ilTestParticipant[] $participants
+         */
+        $participants = [];
         foreach ($test->getActiveParticipantList() as $participant) {
+            array_push($participants, $participant);
+        }
+
+        usort($participants, fn ($a, $b) => $a->getActiveId() >= $b->getActiveId());
+
+
+        foreach ($participants as $participant) {
             if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
                 continue;
             }
-            $questionId = (int) $question["question_id"];
-            $activeId = (int) $participant->getActiveId();
-
-            $questionAnswer = new QuestionAnswer();
-
-            $questionAnswer
-                ->setTestRefId($refId)
+            $answer = new Answer($question);
+            $answer
+                ->setActiveId((int) $participant->getActiveId())
                 ->setParticipant($participant)
-                ->setQuestionId($questionId)
-                ->setPass($selectedPass)
-                ->setActiveId($activeId)
                 ->setAnswerHtml($this->getAnswerDetail(
                     $test,
-                    $activeId,
+                    $answer->getActiveId(),
                     $selectedPass,
                     $questionId,
                     $testAccess
                 ))
-                ->setFeedback($questionAnswer->readFeedback())
-                ->setPoints($questionAnswer->readReachedPoints());
-            array_push($questionAnswers, $questionAnswer);
+                ->setFeedback($answer->readFeedback())
+                ->setPoints($answer->readReachedPoints());
+            array_push($answers, $answer);
         }
+        $question->setAnswers($answers);
 
-        foreach ($questionAnswers as $questionAnswer) {
+
+        foreach ($question->getAnswers() as $answer) {
             $form = new TstManualScoringForm(
                 $this->lng,
-                $questionAnswer->getActiveId(),
-                $questionAnswer->readMaximumPoints(),
-                $questionAnswer->getAnswerHtml()
+                $answer
             );
 
-            $questionAnswer->readFeedback();
-
-            $form->fillForm($questionAnswer);
+            $form->fillForm($answer);
 
             $tpl->setCurrentBlock("questionAnswer");
             $tpl->setVariable(
@@ -206,12 +215,17 @@ class TstManualScoringQuestion
                 sprintf(
                     "%s %s %s (%s)",
                     $this->lng->txt("answer_of"),
-                    $questionAnswer->getParticipant()->getFirstname(),
-                    $questionAnswer->getParticipant()->getLastname(),
-                    $questionAnswer->getParticipant()->getLogin(),
+                    $answer->getParticipant()->getFirstname(),
+                    $answer->getParticipant()->getLastname(),
+                    $answer->getParticipant()->getLogin(),
                 )
             );
-            $tpl->setVariable("MANUAL_SCORING_FORM", $form->getHTML());
+
+            $formHtml = $form->getHTML();
+            $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
+            $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+
+            $tpl->setVariable("MANUAL_SCORING_FORM", $formHtml);
             $tpl->parseCurrentBlock("questionAnswer");
         }
         return $tpl->get();

@@ -12,8 +12,8 @@ use ilNumberInputGUI;
 use ilHiddenInputGUI;
 use Psr\Http\Message\RequestInterface;
 use ilTextAreaInputGUI;
-use TstManualScoringQuestion\Model\QuestionAnswer;
 use Exception;
+use TstManualScoringQuestion\Model\Answer;
 
 /**
  * Class ManualScoringForm
@@ -22,46 +22,46 @@ use Exception;
 class TstManualScoringForm extends ilPropertyFormGUI
 {
     protected RequestInterface $request;
-    protected int $activeId;
     protected ilTstManualScoringQuestionPlugin $plugin;
 
     public function __construct(
         ilLanguage $lng,
-        int $activeId,
-        float $maximumPoints,
-        string $answerText = ""
+        Answer $answer
     ) {
         global $DIC;
         $this->request = $DIC->http()->request();
         $this->lng = $lng;
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
-        $this->activeId = $activeId;
 
-        $testRefIdHiddenInput = new ilHiddenInputGUI("{$activeId}[testRefId]");
+        $question = $answer->getQuestion();
+        $questionId = $question->getId();
+        $activeId = $answer->getActiveId();
+
+        $testRefIdHiddenInput = new ilHiddenInputGUI("{$questionId}[testRefId]");
         $testRefIdHiddenInput->setRequired(true);
 
-        $passHiddenInput = new ilHiddenInputGUI("{$activeId}[pass]");
+        $passHiddenInput = new ilHiddenInputGUI("{$questionId}[pass]");
         $passHiddenInput->setRequired(true);
 
-        $questionIdHiddenInput = new ilHiddenInputGUI("{$activeId}[questionId]");
+        $questionIdHiddenInput = new ilHiddenInputGUI("{$questionId}[questionId]");
         $questionIdHiddenInput->setRequired(true);
 
-        $activeIdHiddenInput = new ilHiddenInputGUI("{$activeId}[activeId]");
+        $activeIdHiddenInput = new ilHiddenInputGUI("{$questionId}[answers][{$activeId}][activeId]");
         $activeIdHiddenInput->setValue($activeId);
         $activeIdHiddenInput->setRequired(true);
 
         $pointsForAnswerInput = new ilNumberInputGUI(
             $this->lng->txt("tst_change_points_for_question"),
-            "{$activeId}[pointsForAnswer]"
+            "{$questionId}[answers][{$activeId}][points]"
         );
         $pointsForAnswerInput->setMinValue(0.00);
-        $pointsForAnswerInput->setMaxValue($maximumPoints);
+        $pointsForAnswerInput->setMaxValue($question->getMaximumPoints());
         $pointsForAnswerInput->allowDecimals(true);
         $pointsForAnswerInput->setRequired(true);
         $pointsForAnswerInput->setDecimals(2);
 
         $userSolutionHtmlAreaInput = new ilHtmlAreaInput($this->plugin->txt("userSolutionForQuestion"));
-        $userSolutionHtmlAreaInput->setValue($answerText);
+        $userSolutionHtmlAreaInput->setValue($answer->getAnswerHtml());
         $userSolutionHtmlAreaInput->setEditable(false);
         $userSolutionHtmlAreaInput->setHtmlClass("tmsq-html-area-input");
 
@@ -69,11 +69,11 @@ class TstManualScoringForm extends ilPropertyFormGUI
             $this->lng->txt("tst_manscoring_input_max_points_for_question")
         );
         $maximumPointsNonEditInput->setRequired(true);
-        $maximumPointsNonEditInput->setValue($maximumPoints);
+        $maximumPointsNonEditInput->setValue($question->getMaximumPoints());
 
         $manualFeedPackAreaInput = new ilTextAreaInputGUI(
             $this->lng->txt('set_manual_feedback'),
-            "{$activeId}[feedback]"
+            "{$questionId}[answers][{$activeId}][feedback]"
         );
         $manualFeedPackAreaInput->setUseRTE(true);
         $manualFeedPackAreaInput->setRteTagSet('standard');
@@ -92,23 +92,26 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
     /**
      * Fills the form values
-     * @param QuestionAnswer $questionAnswer
+     * @param Answer $answer
      * @throws Exception
      */
-    public function fillForm(QuestionAnswer $questionAnswer)
+    public function fillForm(Answer $answer)
     {
-        if (!$questionAnswer->checkValid()) {
+        if (!$answer->checkValid(true)) {
             throw new Exception("Field not set in QuestionAnswer object");
         }
-        $activeId = $questionAnswer->getActiveId();
+
+        $question = $answer->getQuestion();
+        $questionId = $question->getId();
+        $activeId = $answer->getActiveId();
 
         $this->setValuesByArray([
-            "{$activeId}[testRefId]" => $questionAnswer->getTestRefId(),
-            "{$activeId}[pass]" => $questionAnswer->getPass(),
-            "{$activeId}[questionId]" => $questionAnswer->getQuestionId(),
-            "{$activeId}[activeId]" => $activeId,
-            "{$activeId}[pointsForAnswer]" => $questionAnswer->getPoints(),
-            "{$activeId}[feedback]" => $questionAnswer->getFeedback()
+            "{$questionId}[testRefId]" => $question->getTestRefId(),
+            "{$questionId}[pass]" => $question->getPass(),
+            "{$questionId}[questionId]" => $questionId,
+            "{$questionId}[answers][{$activeId}][activeId]" => $activeId,
+            "{$questionId}[answers][{$activeId}][points]" => $answer->getPoints(),
+            "{$questionId}[answers][{$activeId}][feedback]" => $answer->getFeedback()
         ], true);
     }
 }
