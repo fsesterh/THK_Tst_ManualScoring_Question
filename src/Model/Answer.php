@@ -37,8 +37,11 @@ class Answer
      */
     public function readFeedback() : string
     {
-        $manualFeedback = ilObjTest::getSingleManualFeedback($this->activeId, $this->question->getId(),
-            $this->question->getPass());
+        $manualFeedback = ilObjTest::getSingleManualFeedback(
+            $this->activeId,
+            $this->question->getId(),
+            $this->question->getPass()
+        );
         if ($manualFeedback) {
             return $manualFeedback["feedback"];
         }
@@ -47,19 +50,24 @@ class Answer
 
     /**
      * Writes the feedback to ilias
+     * Returns true on success
+     * @param ilObjTest $test
+     * @param bool      $finalized
+     * @return bool
      */
-    public function writeFeedback()
+    public function writeFeedback(ilObjTest $test, bool $finalized = false) : bool
     {
-        if ($this->getFeedback() !== "") {
-        }
+        return $test->saveManualFeedback($this->activeId, $this->question->getId(), $this->question->getPass(), $this->feedback, $finalized);
     }
 
     /**
      * Writes the points to ilias
+     * Returns true on success
+     * @return bool
      */
-    public function writePoints()
+    public function writePoints() : bool
     {
-        assQuestion::_setReachedPoints(
+        return assQuestion::_setReachedPoints(
             $this->activeId,
             $this->question->getId(),
             $this->points,
@@ -81,6 +89,29 @@ class Answer
             return $answerFieldsValid && $questionFieldsValid;
         }
         return $answerFieldsValid;
+    }
+
+    /**
+     * @param array $answerData
+     */
+    public function loadFromPost(array $answerData)
+    {
+        $points = $answerData["points"];
+        $feedback = $answerData["feedback"];
+        $activeId = $answerData["activeId"];
+
+        if (is_numeric($points)) {
+            $this->setPoints((float) $points);
+        }
+
+        if (is_string($feedback)) {
+            $this->setFeedback($feedback);
+        }
+
+        if (is_numeric($activeId)) {
+            $this->setActiveId((int) $activeId);
+        }
+        return $this;
     }
 
     /**

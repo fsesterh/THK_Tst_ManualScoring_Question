@@ -178,7 +178,6 @@ class TstManualScoringQuestion
 
         usort($participants, fn ($a, $b) => $a->getActiveId() >= $b->getActiveId());
 
-
         foreach ($participants as $participant) {
             if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
                 continue;
@@ -199,7 +198,6 @@ class TstManualScoringQuestion
             array_push($answers, $answer);
         }
         $question->setAnswers($answers);
-
 
         foreach ($question->getAnswers() as $answer) {
             $form = new TstManualScoringForm(
@@ -251,43 +249,57 @@ class TstManualScoringQuestion
          */
         $questionAnswers = [];
 
-        foreach ($post as $answerData) {
-            $questionAnswer = new QuestionAnswer();
-            $questionAnswer->loadFromPostArray($answerData);
-            array_push($questionAnswers, $questionAnswer);
+        /**
+         * @var Question[] $questions
+         */
+        $questions = [];
+
+        foreach ($post as $questionData) {
+            $question = new Question();
+            $question->loadFromPost($questionData);
+            array_push($questions, $question);
         }
 
         $testRefId = -1;
 
-        foreach ($questionAnswers as $questionAnswer) {
-            if (!$questionAnswer->checkValid()) {
-                if ($questionAnswer->getTestRefId()) {
-                    $this->sendInvalidForm($questionAnswer->getTestRefId());
-                } else {
-                    ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+        foreach ($questions as $question) {
+            $testRefId = $question->getTestRefId();
+            foreach ($question->getAnswers() as $answer) {
+                if (!$answer->checkValid(true)) {
+                    if ($testRefId) {
+                        $this->sendInvalidForm($testRefId);
+                    } else {
+                        ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+                        $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+                    }
+                }
 
-                    $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+                $test = new ilObjTest($testRefId, true);
+                $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+                if (!$testAccess->checkScoreParticipantsAccess()) {
+                    ilObjTestGUI::accessViolationRedirect();
+                }
+
+                if ($answer->getPoints() > $question->getMaximumPoints()) {
+                    $this->sendInvalidForm($question->getTestRefId());
+                }
+
+                if ($answer->getPoints() !== $answer->readReachedPoints()) {
+                    if(!$answer->writePoints()) {
+                        ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
+                        $this->redirectToManualScoringTab($question->getTestRefId());
+                    }
+                }
+
+                if ($answer->getFeedback() != $answer->readFeedback()) {
+                    if (!$answer->writeFeedback($test)) {
+                        ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
+                        $this->redirectToManualScoringTab($question->getTestRefId());
+                    }
                 }
             }
-            $testRefId = $questionAnswer->getTestRefId();
-
-            $test = new ilObjTest($questionAnswer->getTestRefId(), true);
-            $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
-            if (!$testAccess->checkScoreParticipantsAccess()) {
-                ilObjTestGUI::accessViolationRedirect();
-            }
-
-            if ($questionAnswer->getPoints() > $questionAnswer->readMaximumPoints()) {
-                $this->sendInvalidForm($questionAnswer->getTestRefId());
-            }
-
-            if ($questionAnswer->getPoints() !== $questionAnswer->readReachedPoints()) {
-                $questionAnswer->writePoints();
-            }
-            if ($questionAnswer->getFeedback() != $questionAnswer->readFeedback()) {
-                //Todo:
-            }
         }
+
 
         if ($testRefId == -1) {
             ilUtil::sendFailure($this->plugin->txt("unknownError"), true);

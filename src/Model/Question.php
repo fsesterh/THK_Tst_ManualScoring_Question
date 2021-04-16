@@ -24,11 +24,13 @@ class Question
     protected int $maximumPoints;
     protected bool $isObligatory;
 
-    public function __construct(int $id)
+    public function __construct(int $id = null)
     {
-        $this->id = $id;
-        $this->setMaximumPoints($this->readMaximumPoints());
-        $this->setIsObligatory($this->readIsObligatory());
+        if ($id !== null) {
+            $this->id = $id;
+            $this->setMaximumPoints($this->readMaximumPoints());
+            $this->setIsObligatory($this->readIsObligatory());
+        }
     }
 
     public function readMaximumPoints() : float
@@ -39,6 +41,47 @@ class Question
     public function readIsObligatory() : bool
     {
         return ilObjTest::isQuestionObligatory($this->id);
+    }
+
+    public function loadFromPost($questionData) : ?Question
+    {
+        $answersData = $questionData["answers"];
+        $testRefId = $questionData["testRefId"];
+        $pass = $questionData["pass"];
+        $questionId = $questionData["questionId"];
+
+        if (is_numeric($testRefId)) {
+            $this->setTestRefId((int) $testRefId);
+        }
+
+        if (is_numeric($pass)) {
+            $this->setPass((int) $pass);
+        }
+
+        if (is_numeric($questionId)) {
+            $this->setId((int) $questionId);
+        }
+
+        if (is_numeric($this->getId())) {
+            $this->setMaximumPoints($this->readMaximumPoints());
+            $this->setIsObligatory($this->readIsObligatory());
+        }
+
+        /**
+         * @var Answer[] $answers
+         */
+        $answers = [];
+
+        if (isset($answersData) && is_array($answersData)) {
+            foreach ($answersData as $answerData) {
+                $answer = new Answer($this);
+                $answer->loadFromPost($answerData);
+                array_push($answers, $answer);
+            }
+        }
+        $this->setAnswers($answers);
+
+        return $this;
     }
 
     /**
