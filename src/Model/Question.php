@@ -17,12 +17,27 @@ class Question
     /**
      * @var Answer[]
      */
-    protected array $answers = [];
-    protected int $id;
-    protected int $pass;
-    protected int $testRefId;
-    protected int $maximumPoints;
-    protected bool $isObligatory;
+    protected $answers = [];
+    /**
+     * @var int
+     */
+    protected $id;
+    /**
+     * @var int
+     */
+    protected $pass;
+    /**
+     * @var int
+     */
+    protected $testRefId;
+    /**
+     * @var int
+     */
+    protected $maximumPoints;
+    /**
+     * @var bool
+     */
+    protected $isObligatory;
 
     public function __construct(int $id = null)
     {

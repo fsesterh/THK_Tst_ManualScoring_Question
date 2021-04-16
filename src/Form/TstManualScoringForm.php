@@ -14,6 +14,7 @@ use Psr\Http\Message\RequestInterface;
 use ilTextAreaInputGUI;
 use Exception;
 use TstManualScoringQuestion\Model\Answer;
+use ilCheckboxInputGUI;
 
 /**
  * Class ManualScoringForm
@@ -21,8 +22,14 @@ use TstManualScoringQuestion\Model\Answer;
  */
 class TstManualScoringForm extends ilPropertyFormGUI
 {
-    protected RequestInterface $request;
-    protected ilTstManualScoringQuestionPlugin $plugin;
+    /**
+     * @var RequestInterface
+     */
+    protected $request;
+    /**
+     * @var ilTstManualScoringQuestionPlugin
+     */
+    protected $plugin;
 
     public function __construct(
         ilLanguage $lng,
@@ -78,6 +85,11 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $manualFeedPackAreaInput->setUseRTE(true);
         $manualFeedPackAreaInput->setRteTagSet('standard');
 
+        $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
+            $lng->txt("finalized_evaluation"),
+            "{$questionId}[answers][{$activeId}][scoringCompleted]"
+        );
+
         $this->addItem($testRefIdHiddenInput);
         $this->addItem($passHiddenInput);
         $this->addItem($questionIdHiddenInput);
@@ -86,6 +98,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);
         $this->addItem($manualFeedPackAreaInput);
+        $this->addItem($scoringCompletedCheckboxInput);
 
         parent::__construct();
     }
@@ -111,7 +124,8 @@ class TstManualScoringForm extends ilPropertyFormGUI
             "{$questionId}[questionId]" => $questionId,
             "{$questionId}[answers][{$activeId}][activeId]" => $activeId,
             "{$questionId}[answers][{$activeId}][points]" => $answer->getPoints(),
-            "{$questionId}[answers][{$activeId}][feedback]" => $answer->getFeedback()
+            "{$questionId}[answers][{$activeId}][feedback]" => $answer->getFeedback(),
+            "{$questionId}[answers][{$activeId}][scoringCompleted]" => $answer->isScoringCompleted()
         ], true);
     }
 }

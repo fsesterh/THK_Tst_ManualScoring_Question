@@ -18,7 +18,10 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     /** @var string */
     const PNAME = "TstManualScoringQuestion";
 
-    private static ?ilTstManualScoringQuestionPlugin $instance = null;
+    /**
+     * @var ilTstManualScoringQuestionPlugin|null
+     */
+    private static $instance = null;
 
     /**
      * @inheritdoc

@@ -15,10 +15,22 @@ use ilGlobalPageTemplate;
  */
 class ilHtmlAreaInput extends ilFormPropertyGUI
 {
-    private bool $editable = true;
-    protected string $htmlClass = "html-area-input";
-    protected string $value = "";
-    protected ilGlobalPageTemplate $mainTpl;
+    /**
+     * @var bool
+     */
+    private $editable = true;
+    /**
+     * @var string
+     */
+    protected $htmlClass = "html-area-input";
+    /**
+     * @var string
+     */
+    protected $value = "";
+    /**
+     * @var ilGlobalPageTemplate
+     */
+    protected $mainTpl;
 
     /**
      * ilRichTextInput constructor.
@@ -49,7 +61,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     public function setValueByArray(array $post)
     {
         $value = $post[$this->getPostVar()];
-        $this->setValue($value ? $value : "");
+        $this->setValue($value ?: "");
     }
 
     public function setValue(string $value)
@@ -91,7 +103,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      */
     public function setHtmlClass(string $htmlClass)
     {
-        $this->htmlClass = $htmlClass;;
+        $this->htmlClass = $htmlClass;
     }
 
     public function setEditable(bool $editable)

@@ -26,7 +26,6 @@ use Psr\Http\Message\RequestInterface;
 use TstManualScoringQuestion\Form\TstManualScoringForm;
 use ilAccessHandler;
 use ilObjUser;
-use TstManualScoringQuestion\Model\QuestionAnswer;
 use Exception;
 use TstManualScoringQuestion\Model\Question;
 use TstManualScoringQuestion\Model\Answer;
@@ -39,16 +38,46 @@ use ilTestParticipant;
  */
 class TstManualScoringQuestion
 {
-    protected ilObjUser $user;
-    protected ilAccessHandler $access;
-    protected RequestInterface $request;
-    protected ilToolbarGUI $toolbar;
-    protected UIServices $ui;
-    protected ilCtrl $ctrl;
-    protected ilGlobalPageTemplate $mainTpl;
-    protected ilTstManualScoringQuestionPlugin $plugin;
-    protected ilLanguage $lng;
-    protected Container $dic;
+    /**
+     * @var ilObjUser
+     */
+    protected $user;
+    /**
+     * @var ilAccessHandler
+     */
+    protected $access;
+    /**
+     * @var RequestInterface
+     */
+    protected $request;
+    /**
+     * @var ilToolbarGUI
+     */
+    protected $toolbar;
+    /**
+     * @var UIServices
+     */
+    protected $ui;
+    /**
+     * @var ilCtrl
+     */
+    protected $ctrl;
+    /**
+     * @var ilGlobalPageTemplate
+     */
+    protected $mainTpl;
+    /**
+     * @var ilTstManualScoringQuestionPlugin
+     */
+    protected $plugin;
+    /**
+     * @var ilLanguage
+     */
+    protected $lng;
+    /**
+     * @var Container
+     */
+    protected $dic;
 
     public function __construct(Container $dic = null)
     {
@@ -78,7 +107,7 @@ class TstManualScoringQuestion
     public function performCommand(string $cmd, array $query)
     {
         if (!isset($query["ref_id"])) {
-            ilUtil::sendFailure($this->plugin->txt("noRefIdPassedInQuery"), true);
+            ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
             $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
         }
         if (!method_exists($this, $cmd)) {
@@ -176,7 +205,9 @@ class TstManualScoringQuestion
             array_push($participants, $participant);
         }
 
-        usort($participants, fn ($a, $b) => $a->getActiveId() >= $b->getActiveId());
+        usort($participants, function ($a, $b) {
+            return $a->getActiveId() >= $b->getActiveId();
+        });
 
         foreach ($participants as $participant) {
             if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
@@ -194,7 +225,8 @@ class TstManualScoringQuestion
                     $testAccess
                 ))
                 ->setFeedback($answer->readFeedback())
-                ->setPoints($answer->readReachedPoints());
+                ->setPoints($answer->readReachedPoints())
+                ->setScoringCompleted($answer->readScoringCompleted());
             array_push($answers, $answer);
         }
         $question->setAnswers($answers);
@@ -215,7 +247,7 @@ class TstManualScoringQuestion
                     $this->lng->txt("answer_of"),
                     $answer->getParticipant()->getFirstname(),
                     $answer->getParticipant()->getLastname(),
-                    $answer->getParticipant()->getLogin(),
+                    $answer->getParticipant()->getLogin()
                 )
             );
 
@@ -243,11 +275,6 @@ class TstManualScoringQuestion
         $post = array_filter($post, function ($key) {
             return !in_array($key, ["myCounter"]);
         }, ARRAY_FILTER_USE_KEY);
-
-        /**
-         * @var QuestionAnswer[] $questionAnswers
-         */
-        $questionAnswers = [];
 
         /**
          * @var Question[] $questions
@@ -284,18 +311,15 @@ class TstManualScoringQuestion
                     $this->sendInvalidForm($question->getTestRefId());
                 }
 
-                if ($answer->getPoints() !== $answer->readReachedPoints()) {
-                    if(!$answer->writePoints()) {
-                        ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
-                        $this->redirectToManualScoringTab($question->getTestRefId());
-                    }
+                if (!$answer->writePoints()) {
+                    ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
+                    $this->redirectToManualScoringTab($question->getTestRefId());
                 }
 
-                if ($answer->getFeedback() != $answer->readFeedback()) {
-                    if (!$answer->writeFeedback($test)) {
-                        ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
-                        $this->redirectToManualScoringTab($question->getTestRefId());
-                    }
+
+                if (!$answer->writeFeedback()) {
+                    ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
+                    $this->redirectToManualScoringTab($question->getTestRefId());
                 }
             }
         }
@@ -392,11 +416,11 @@ class TstManualScoringQuestion
         //Filter buttons
         $applyFilterButton = ilSubmitButton::getInstance();
 
-        $applyFilterButton->setCaption($this->lng->txt("apply_filter"));
+        $applyFilterButton->setCaption($this->lng->txt("apply_filter"), false);
         $applyFilterButton->setCommand('applyFilter');
 
         $resetFilterButton = ilSubmitButton::getInstance();
-        $resetFilterButton->setCaption($this->lng->txt("reset_filter"));
+        $resetFilterButton->setCaption($this->lng->txt("reset_filter"), false);
         $resetFilterButton->setCommand('resetFilter');
 
         $filterAction = $this->ctrl->getLinkTargetByClass(

@@ -17,14 +17,26 @@ require_once __DIR__ . '/../vendor/autoload.php';
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
-    protected ilLanguage $lng;
-    protected TstManualScoringQuestion $tstManualScoringQuestion;
     /**
-     * @var RequestInterface|ServerRequestInterface
+     * @var ilLanguage
+     */
+    protected $lng;
+    /**
+     * @var TstManualScoringQuestion
+     */
+    protected $tstManualScoringQuestion;
+    /**
+     * @var RequestInterface
      */
     protected $request;
-    protected ilTstManualScoringQuestionPlugin $plugin;
-    protected Container $dic;
+    /**
+     * @var ilTstManualScoringQuestionPlugin
+     */
+    protected $plugin;
+    /**
+     * @var Container
+     */
+    protected $dic;
 
     /**
      * ilTstManualScoringQuestionUIHookGUI constructor.
