@@ -37,22 +37,22 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         $this->activeId = $activeId;
 
-        $testRefIdHiddenInput = new ilHiddenInputGUI("$activeId[testRefId]");
+        $testRefIdHiddenInput = new ilHiddenInputGUI("{$activeId}[testRefId]");
         $testRefIdHiddenInput->setRequired(true);
 
-        $passHiddenInput = new ilHiddenInputGUI("$activeId[pass]");
+        $passHiddenInput = new ilHiddenInputGUI("{$activeId}[pass]");
         $passHiddenInput->setRequired(true);
 
-        $questionIdHiddenInput = new ilHiddenInputGUI("$activeId[questionId]");
+        $questionIdHiddenInput = new ilHiddenInputGUI("{$activeId}[questionId]");
         $questionIdHiddenInput->setRequired(true);
 
-        $activeIdHiddenInput = new ilHiddenInputGUI("$activeId[activeId]");
+        $activeIdHiddenInput = new ilHiddenInputGUI("{$activeId}[activeId]");
         $activeIdHiddenInput->setValue($activeId);
         $activeIdHiddenInput->setRequired(true);
 
         $pointsForAnswerInput = new ilNumberInputGUI(
             $this->lng->txt("tst_change_points_for_question"),
-            "$activeId[pointsForAnswer]"
+            "{$activeId}[pointsForAnswer]"
         );
         $pointsForAnswerInput->setMinValue(0.00);
         $pointsForAnswerInput->setMaxValue($maximumPoints);
@@ -73,7 +73,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
         $manualFeedPackAreaInput = new ilTextAreaInputGUI(
             $this->lng->txt('set_manual_feedback'),
-            "$activeId[feedback]"
+            "{$activeId}[feedback]"
         );
         $manualFeedPackAreaInput->setUseRTE(true);
         $manualFeedPackAreaInput->setRteTagSet('standard');
@@ -103,12 +103,12 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $activeId = $questionAnswer->getActiveId();
 
         $this->setValuesByArray([
-            "$activeId[testRefId]" => $questionAnswer->getTestRefId(),
-            "$activeId[pass]" => $questionAnswer->getPass(),
-            "$activeId[questionId]" => $questionAnswer->getQuestionId(),
-            "$activeId[activeId]" => $activeId,
-            "$activeId[pointsForAnswer]" => $questionAnswer->getPoints(),
-            "$activeId[feedback]" => $questionAnswer->getFeedback()
+            "{$activeId}[testRefId]" => $questionAnswer->getTestRefId(),
+            "{$activeId}[pass]" => $questionAnswer->getPass(),
+            "{$activeId}[questionId]" => $questionAnswer->getQuestionId(),
+            "{$activeId}[activeId]" => $activeId,
+            "{$activeId}[pointsForAnswer]" => $questionAnswer->getPoints(),
+            "{$activeId}[feedback]" => $questionAnswer->getFeedback()
         ], true);
     }
 }

@@ -119,7 +119,7 @@ class TstManualScoringQuestion
         $questionOptions = [];
         $pointsTranslated = $this->lng->txt("points");
         foreach ($allQuestions as $questionID => $data) {
-            $questionOptions[$questionID] = $data["title"] . " ({$data['points']} $pointsTranslated) [ID: $questionID]";
+            $questionOptions[$questionID] = $data["title"] . " ({$data['points']} {$pointsTranslated}) [ID: {$questionID}]";
         }
 
         $passOptions = [];
@@ -151,7 +151,7 @@ class TstManualScoringQuestion
             $this->ctrl->getLinkTargetByClass(
                 [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
                 "saveManualScoring"
-            ) . "&ref_id=$refId"
+            ) . "&ref_id={$refId}"
         );
 
         $question = $allQuestions[$selectedQuestionId];
@@ -183,7 +183,8 @@ class TstManualScoringQuestion
                     $questionId,
                     $testAccess
                 ))
-                ->setFeedback($questionAnswer->readFeedback());
+                ->setFeedback($questionAnswer->readFeedback())
+                ->setPoints($questionAnswer->readReachedPoints());
             array_push($questionAnswers, $questionAnswer);
         }
 
@@ -377,7 +378,7 @@ class TstManualScoringQuestion
             "handleFilter",
             "",
             true
-        ) . "&ref_id=$testRefId";
+        ) . "&ref_id={$testRefId}";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
