@@ -131,21 +131,6 @@ class QuestionAnswer
         return $this;
     }
 
-    public function readReachedPoints() : float
-    {
-        return assQuestion::_getReachedPoints($this->activeId, $this->questionId, $this->pass);
-    }
-
-    public function readMaximumPoints() : float
-    {
-        return assQuestion::_getMaximumPoints($this->questionId);
-    }
-
-    public function readIsObligatory() : bool
-    {
-        return ilObjTest::isQuestionObligatory($this->questionId);
-    }
-
     /**
      * @return float
      */
@@ -164,21 +149,6 @@ class QuestionAnswer
         return $this;
     }
 
-
-
-    public function writePoints()
-    {
-        assQuestion::_setReachedPoints(
-            $this->activeId,
-            $this->questionId,
-            $this->points,
-            $this->getMaximumPoints(),
-            $this->pass,
-            1,
-            $this->getIsObligatory()
-        );
-    }
-
     /**
      * @param string $feedback
      * @return QuestionAnswer
@@ -194,10 +164,38 @@ class QuestionAnswer
      */
     public function getFeedback() : string
     {
-        if($this->feedback !== "") {
-            return $this->feedback;
-        }
-        return "";
+        return $this->feedback;
+    }
+
+    public function readReachedPoints() : float
+    {
+        return assQuestion::_getReachedPoints($this->activeId, $this->questionId, $this->pass);
+    }
+
+    public function readMaximumPoints() : float
+    {
+        return assQuestion::_getMaximumPoints($this->questionId);
+    }
+
+    public function readIsObligatory() : bool
+    {
+        return ilObjTest::isQuestionObligatory($this->questionId);
+    }
+
+    /**
+     * Writes the points to ilias
+     */
+    public function writePoints()
+    {
+        assQuestion::_setReachedPoints(
+            $this->activeId,
+            $this->questionId,
+            $this->points,
+            $this->readMaximumPoints(),
+            $this->pass,
+            1,
+            $this->readIsObligatory()
+        );
     }
 
     /**
@@ -206,17 +204,11 @@ class QuestionAnswer
      */
     public function readFeedback() : string
     {
-        if($this->feedback !== "") {
-            return $this->feedback;
-        }
-
         $manualFeedback = ilObjTest::getSingleManualFeedback($this->activeId, $this->questionId, $this->pass);
         if ($manualFeedback) {
-            $this->setFeedback($manualFeedback["feedback"]);
             return $manualFeedback["feedback"];
         }
-        $this->setFeedback("");
-        return $this->getFeedback();
+        return "";
     }
 
     /**
@@ -266,7 +258,7 @@ class QuestionAnswer
      * Returns if all required fields are set (not null
      * @return bool
      */
-    public function checkValid()
+    public function checkValid() : bool
     {
         return isset($this->testRefId, $this->activeId, $this->questionId, $this->pass, $this->points);
     }

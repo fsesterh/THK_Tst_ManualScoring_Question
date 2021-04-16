@@ -24,10 +24,10 @@ use ilSelectInputGUI;
 use ilSubmitButton;
 use Psr\Http\Message\RequestInterface;
 use TstManualScoringQuestion\Form\TstManualScoringForm;
-use assQuestion;
 use ilAccessHandler;
 use ilObjUser;
 use TstManualScoringQuestion\Model\QuestionAnswer;
+use Exception;
 
 /**
  * Class TstManualScoringQuestion
@@ -103,6 +103,7 @@ class TstManualScoringQuestion
      * @param int    $refId
      * @return string
      * @throws ilTemplateException
+     * @throws Exception
      */
     public function modify(string $html, int $refId) : string
     {
@@ -118,7 +119,7 @@ class TstManualScoringQuestion
         $questionOptions = [];
         $pointsTranslated = $this->lng->txt("points");
         foreach ($allQuestions as $questionID => $data) {
-            $questionOptions[$questionID] = $data["title"] . " ({$data['points']} {$pointsTranslated}) [ID: {$questionID}]";
+            $questionOptions[$questionID] = $data["title"] . " ({$data['points']} $pointsTranslated) [ID: $questionID]";
         }
 
         $passOptions = [];
@@ -137,7 +138,7 @@ class TstManualScoringQuestion
             "PANEL_HEADER_TEXT",
             sprintf(
                 $this->lng->txt("manscoring_results_pass"),
-                ((int) $selectedPass + 1)
+                ($selectedPass + 1)
             ) . " | " . sprintf(
                 $this->lng->txt("tst_manscoring_question_section_header"),
                 $questionOptions[$selectedQuestionId]
@@ -150,7 +151,7 @@ class TstManualScoringQuestion
             $this->ctrl->getLinkTargetByClass(
                 [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
                 "saveManualScoring"
-            ) . "&ref_id={$refId}"
+            ) . "&ref_id=$refId"
         );
 
         $question = $allQuestions[$selectedQuestionId];
@@ -170,7 +171,7 @@ class TstManualScoringQuestion
             $questionAnswer = new QuestionAnswer();
 
             $questionAnswer
-                ->setTestRefId((int) $refId)
+                ->setTestRefId($refId)
                 ->setParticipant($participant)
                 ->setQuestionId($questionId)
                 ->setPass($selectedPass)
@@ -181,11 +182,12 @@ class TstManualScoringQuestion
                     $selectedPass,
                     $questionId,
                     $testAccess
-                ));
+                ))
+                ->setFeedback($questionAnswer->readFeedback());
             array_push($questionAnswers, $questionAnswer);
         }
 
-        foreach ($questionAnswers as $index => $questionAnswer) {
+        foreach ($questionAnswers as $questionAnswer) {
             $form = new TstManualScoringForm(
                 $this->lng,
                 $questionAnswer->getActiveId(),
@@ -195,14 +197,7 @@ class TstManualScoringQuestion
 
             $questionAnswer->readFeedback();
 
-            $form->fillForm(
-                $questionAnswer->getActiveId(),
-                $questionAnswer->getPass(),
-                $questionAnswer->readReachedPoints(),
-                $questionAnswer->getQuestionId(),
-                $questionAnswer->getTestRefId(),
-                $questionAnswer->getFeedback()
-            );
+            $form->fillForm($questionAnswer);
 
             $tpl->setCurrentBlock("questionAnswer");
             $tpl->setVariable(
@@ -276,7 +271,6 @@ class TstManualScoringQuestion
             }
             if ($questionAnswer->getFeedback() != $questionAnswer->readFeedback()) {
                 //Todo:
-                $tt = "";
             }
         }
 
@@ -383,7 +377,7 @@ class TstManualScoringQuestion
             "handleFilter",
             "",
             true
-        ) . "&ref_id={$testRefId}";
+        ) . "&ref_id=$testRefId";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
