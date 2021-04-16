@@ -3,6 +3,8 @@
 
 namespace TstManualScoringQuestion;
 
+const PAGINATION_ANSWERS_PER_PAGE = 1;
+
 use ILIAS\DI\Container;
 use ilGlobalPageTemplate;
 use ilTstManualScoringQuestionPlugin;
@@ -166,6 +168,7 @@ class TstManualScoringQuestion
 
         $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
+
         $tpl->setVariable(
             "PANEL_HEADER_TEXT",
             sprintf(
@@ -229,7 +232,19 @@ class TstManualScoringQuestion
                 ->setScoringCompleted($answer->readScoringCompleted());
             array_push($answers, $answer);
         }
-        $question->setAnswers($answers);
+
+        //Pagination
+        $numberOfAnswers = count($answers);
+        $paginationData = $this->setupPagination(PAGINATION_ANSWERS_PER_PAGE, $numberOfAnswers);
+        $paginationCurrentPage = (int) $paginationData["currentPage"];
+        $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
+
+        $paginatedAnswers = [];
+        for ($i = $paginationCurrentPage; $i < PAGINATION_ANSWERS_PER_PAGE + $paginationCurrentPage; $i++) {
+            array_push($paginatedAnswers, $answers[$i]);
+        }
+        $question->setAnswers($paginatedAnswers);
+        //\Pagination
 
         foreach ($question->getAnswers() as $answer) {
             $form = new TstManualScoringForm(
@@ -258,6 +273,7 @@ class TstManualScoringQuestion
             $tpl->setVariable("MANUAL_SCORING_FORM", $formHtml);
             $tpl->parseCurrentBlock("questionAnswer");
         }
+
         return $tpl->get();
     }
 
@@ -316,14 +332,12 @@ class TstManualScoringQuestion
                     $this->redirectToManualScoringTab($question->getTestRefId());
                 }
 
-
                 if (!$answer->writeFeedback()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId());
                 }
             }
         }
-
 
         if ($testRefId == -1) {
             ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
@@ -385,6 +399,49 @@ class TstManualScoringQuestion
     }
 
     /**
+     * Creates the pagination html string
+     * Returns an array with the 'html' and 'currentPage' fields
+     * @param int $elementsPerPage
+     * @param int $totalNumberOfElements
+     * @return array
+     */
+    protected function setupPagination(int $elementsPerPage, int $totalNumberOfElements) : array
+    {
+        $factory = $this->dic->ui()->factory();
+        $renderer = $this->dic->ui()->renderer();
+        $url = $this->request->getRequestTarget();
+
+        $parameterName = 'page';
+        $query = $this->request->getQueryParams();
+        if (isset($query[$parameterName])) {
+            $currentPage = (int) $query[$parameterName];
+        } else {
+            $currentPage = 0;
+        }
+
+        $pagination = $factory->viewControl()->pagination()
+                              ->withTargetURL($url, $parameterName)
+                              ->withTotalEntries($totalNumberOfElements)
+                              ->withPageSize($elementsPerPage)
+                              ->withCurrentPage($currentPage);
+
+        $start = $pagination->getOffset();
+        $stop = $start + $pagination->getPageLength();
+        $result = "entries $start to $stop";
+
+        $html = '<div class="tmsq-pagination">' .
+            $renderer->render($pagination)
+            . '<hr class="tmsq-pagination-separator">'
+            . $result
+            . '</div>';
+
+        return [
+            "html" => $html,
+            "currentPage" => $currentPage
+        ];
+    }
+
+    /**
      * Setups the filter toolbar
      * @param int   $testRefId
      * @param array $questionOptions
@@ -424,11 +481,11 @@ class TstManualScoringQuestion
         $resetFilterButton->setCommand('resetFilter');
 
         $filterAction = $this->ctrl->getLinkTargetByClass(
-            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-            "handleFilter",
-            "",
-            true
-        ) . "&ref_id={$testRefId}";
+                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+                "handleFilter",
+                "",
+                true
+            ) . "&ref_id={$testRefId}";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);

@@ -1,9 +1,12 @@
-.tmsq-scoring-container .tmsq-scoring-panel-container {
+.tmsq-scoring-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .tmsq-scoring-panel-container {
+    display: flex;
+    flex-direction: column;
     padding-top: 1rem;
     background: white;
 }
@@ -37,4 +40,20 @@
 
 .tmsq-scoring-question-header {
     font-size: 1.8rem;
+}
+
+.tmsq-pagination {
+    padding-bottom: 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tmsq-pagination-separator {
+    width: 100%;
+    margin: 0.5rem;
+}
+
+.il-viewcontrol-pagination {
+    align-self: center;
 }
