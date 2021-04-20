@@ -31,6 +31,7 @@ use TstManualScoringQuestion\Model\Question;
 use TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
 use ilSetting;
+use ilObjAssessmentFolder;
 
 /**
  * Class TstManualScoringQuestion
@@ -157,7 +158,10 @@ class TstManualScoringQuestion
             ilObjTestGUI::accessViolationRedirect();
         }
 
-        $allQuestions = $test->getAllQuestions();
+        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoring();
+        $allQuestions = array_filter($test->getAllQuestions(), function ($question) use ($allowedQuestionTypes) {
+            return in_array($question["question_type_fi"], $allowedQuestionTypes);
+        });
 
         $questionOptions = [];
         $pointsTranslated = $this->lng->txt("points");
@@ -256,37 +260,38 @@ class TstManualScoringQuestion
                     "saveManualScoring"
                 ) . "&ref_id={$refId}"
             );
+
+            foreach ($question->getAnswers() as $answer) {
+                $form = new TstManualScoringForm(
+                    $this->lng,
+                    $answer
+                );
+
+                $form->fillForm($answer);
+
+                $tpl->setCurrentBlock("answer");
+                $tpl->setVariable(
+                    "QUESTION_HEADER_TEXT",
+                    sprintf(
+                        "%s %s %s (%s)",
+                        $this->lng->txt("answer_of"),
+                        $answer->getParticipant()->getFirstname(),
+                        $answer->getParticipant()->getLastname(),
+                        $answer->getParticipant()->getLogin()
+                    )
+                );
+
+                $formHtml = $form->getHTML();
+                $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
+                $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+
+                $tpl->setVariable("ANSWER_FORM", $formHtml);
+                $tpl->parseCurrentBlock("answer");
+            }
+
             $tpl->parseCurrentBlock("question");
         } else {
             $tpl->setVariable("NO_DATA", $this->plugin->txt("noData"));
-        }
-
-        foreach ($question->getAnswers() as $answer) {
-            $form = new TstManualScoringForm(
-                $this->lng,
-                $answer
-            );
-
-            $form->fillForm($answer);
-
-            $tpl->setCurrentBlock("answer");
-            $tpl->setVariable(
-                "QUESTION_HEADER_TEXT",
-                sprintf(
-                    "%s %s %s (%s)",
-                    $this->lng->txt("answer_of"),
-                    $answer->getParticipant()->getFirstname(),
-                    $answer->getParticipant()->getLastname(),
-                    $answer->getParticipant()->getLogin()
-                )
-            );
-
-            $formHtml = $form->getHTML();
-            $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
-            $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
-
-            $tpl->setVariable("ANSWER_FORM", $formHtml);
-            $tpl->parseCurrentBlock("answer");
         }
 
         return $tpl->get();
