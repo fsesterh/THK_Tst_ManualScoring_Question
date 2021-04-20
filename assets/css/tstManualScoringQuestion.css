@@ -4,6 +4,10 @@
     align-items: center;
 }
 
+.tmsq-scoring-answer-form {
+    width: 100%;
+}
+
 .tmsq-scoring-panel-container {
     display: flex;
     flex-direction: column;
