@@ -105,8 +105,9 @@ class Answer
             $this->activeId,
             $this->question->getId(),
             $this->question->getPass(),
-            $this->feedback,
-            $this->isScoringCompleted()
+            $this->readScoringCompleted() ? $this->readFeedback() : $this->feedback,
+            $this->isScoringCompleted(),
+            true
         );
     }
 
@@ -133,7 +134,17 @@ class Answer
      */
     public function checkValid(bool $checkQuestionObject = false) : bool
     {
-        $answerFieldsValid = isset($this->activeId, $this->points, $this->feedback, $this->scoringCompleted);
+        $answerFieldsValid = isset($this->activeId, $this->scoringCompleted);
+
+        $pointsFieldValid = isset($this->points);
+        $feedbackFieldValid = isset($this->feedback);
+        if($this->readScoringCompleted()) {
+            $pointsFieldValid = true;
+            $feedbackFieldValid = true;
+        }
+
+        $answerFieldsValid = $answerFieldsValid && $pointsFieldValid && $feedbackFieldValid;
+
         if ($checkQuestionObject) {
             $questionFieldsValid = $this->question->checkValid();
             return $answerFieldsValid && $questionFieldsValid;
@@ -321,9 +332,10 @@ class Answer
             if (ilObjAssessmentFolder::_enabledAssessmentLogging()) {
                 $this->logManualFeedback($active_id, $question_id, $feedback);
             }
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -391,7 +403,7 @@ class Answer
             $finalized_time = $feedback_old['finalized_tstamp'];
         }
 
-        if ($finalized === true || $feedback_old['finalized_evaluation'] == 1) {
+        if ($finalized === true) {
             $update_default['finalized_evaluation'] = ['integer', 1];
             $update_default['finalized_by_usr_id'] = ['integer', $user];
             $update_default['finalized_tstamp'] = ['integer', $finalized_time];

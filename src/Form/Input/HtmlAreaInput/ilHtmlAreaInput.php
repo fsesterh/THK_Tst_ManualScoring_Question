@@ -18,7 +18,11 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * @var bool
      */
-    private $editable = true;
+    protected $disabled = false;
+    /**
+     * @var bool
+     */
+    protected $editable = true;
     /**
      * @var string
      */
@@ -82,6 +86,8 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         $tpl->setVariable("POST_VAR", $this->getPostVar());
         $tpl->setVariable("HTML_CLASS", $this->htmlClass);
         $tpl->setVariable("EDITABLE", $this->editable ? "true" : "false");
+        $tpl->setVariable("DISABLED", $this->disabled ? "cursor: not-allowed; background-color: #eeeeee;" : "");
+
 
         $a_tpl->setCurrentBlock('prop_generic');
         $a_tpl->setVariable('PROP_GENERIC', $tpl->get());
@@ -108,6 +114,20 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
 
     public function setEditable(bool $editable)
     {
-        $this->editable = $editable;
+        if (!$this->disabled) {
+            $this->editable = $editable;
+        }
     }
+
+    /**
+     * @param bool $a_disabled
+     */
+    public function setDisabled($a_disabled)
+    {
+        $this->disabled = $a_disabled;
+        if ($a_disabled) {
+            $this->editable = false;
+        }
+    }
+
 }

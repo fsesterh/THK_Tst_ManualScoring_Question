@@ -356,11 +356,11 @@ class TstManualScoringQuestion
                     ilObjTestGUI::accessViolationRedirect();
                 }
 
-                if ($answer->getPoints() > $question->getMaximumPoints()) {
+                if (!$answer->readScoringCompleted() && $answer->getPoints() > $question->getMaximumPoints()) {
                     $this->sendInvalidForm($question->getTestRefId());
                 }
 
-                if (!$answer->writePoints()) {
+                if (!$answer->readScoringCompleted() && !$answer->writePoints()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId());
                 }
@@ -539,11 +539,11 @@ class TstManualScoringQuestion
         $resetFilterButton->setCommand('resetFilter');
 
         $filterAction = $this->ctrl->getLinkTargetByClass(
-                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-                "handleFilter",
-                "",
-                true
-            ) . "&ref_id={$testRefId}";
+            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+            "handleFilter",
+            "",
+            true
+        ) . "&ref_id={$testRefId}";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);

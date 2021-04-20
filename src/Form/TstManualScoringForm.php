@@ -61,6 +61,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
             $this->lng->txt("tst_change_points_for_question"),
             "{$questionId}[answers][{$activeId}][points]"
         );
+        $pointsForAnswerInput->setDisabled($answer->isScoringCompleted());
         $pointsForAnswerInput->setMinValue(0.00);
         $pointsForAnswerInput->setMaxValue($question->getMaximumPoints());
         $pointsForAnswerInput->allowDecimals(true);
@@ -83,8 +84,18 @@ class TstManualScoringForm extends ilPropertyFormGUI
             $this->lng->txt('set_manual_feedback'),
             "{$questionId}[answers][{$activeId}][feedback]"
         );
-        $manualFeedPackAreaInput->setUseRTE(true);
-        $manualFeedPackAreaInput->setRteTagSet('standard');
+
+        if($answer->isScoringCompleted()) {
+            $manualFeedPackAreaInput = new ilHtmlAreaInput($this->lng->txt('set_manual_feedback'),
+                "{$questionId}[answers][{$activeId}][feedback]");
+            $manualFeedPackAreaInput->setDisabled(true);
+            $manualFeedPackAreaInput->setHtmlClass("tmsq-html-area-input");
+        } else {
+            $manualFeedPackAreaInput->setUseRTE(true);
+            $manualFeedPackAreaInput->setRteTagSet('standard');
+        }
+
+
 
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
             $lng->txt("finalized_evaluation"),
