@@ -102,7 +102,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $query = $request->getQueryParams();
         $cmd = $query["cmd"];
         if (!isset($cmd)) {
-            ilUtil::sendFailure($this->plugin->txt("cmdNotFound"), true);
+            ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
             $ctrl->redirectByClass(ilDashboardGUI::class, "show");
         }
 

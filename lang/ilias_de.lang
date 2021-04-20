@@ -1,15 +1,24 @@
-noRefIdPassedInQuery#:#Es wurde keine ref id als query parameter übergeben
-cmdNotFound#:#Kommando wurde nicht gefunden
-manualScoringSaved#:#Manuelle Bewertung wurde gespeichert
-filterWasApplied#:#Filter wurde angewendet
-filterWasReset#:#Filter wurde zurückgesetzt
-userSolutionForQuestion#:#Benutzerlösung für Frage
-scoreSavingNotPossibleNoParticipantsReceived#:#Speichern der Bewertung nicht möglich. Keine Teilnehmer erhalten
-pointsExceedMaximumPossible#:#Punkte überschreiten die maximal möglichen
+config#:#Konfiguration
+save#:#Speichern
+config_saved#:#Konfiguration gespeichert
+cmdNotSupported#:#Kommando wird nicht unterstützt
+noEntries#:#Keine Einträge vorhanden
+nothingReceivedInPost#:#POST ist leer oder nicht definiert
+unknownError#:#Unbekannter Fehler. Es könnten informationen fehlen
 
-missing_testRefId#:#Die ref id für den Test fehlt
-missing_pass#:#Der Durchlauf für den Test fehlt
-missing_questionId#:#Die Id der Frage fehlt
+missing_get_parameter_cmd#:#Der GET parameter 'cmd' fehlt
+missing_get_parameter_refId#:#Der GET parameter 'ref_id' fehlt
 
-scoreSavingNotPossible_missing_pointsForAnswer#:#Speichern der Bewertung nicht möglich. Punktzahl für Antwort fehlt
-scoreSavingNotPossible_missing_activeId#:#Speichern der Bewertung nicht möglich. ActiveId des Teilnehmers fehlt
+saving_manualScoring#:#Manuelle Bewertung wurde gespeichert
+saving_points_failed#:#Speichern der Punkte für eine Antwort schlug fehl
+saving_feedback_failed#:#Speichern des Feedbacks für eine Antwort schlug fehlt
+
+filter_missing_question#:#Keine Frage im Filter definiert
+filter_missing_pass#:#Kein Durchlauf im Filter definiert
+filter_missing_scoringCompleted#:#Es fehlt die Filteroption für Scoring completed
+filter_applied#:#Filter wurde angewendet
+filter_reset#:#Filter wurde zurückgesetzt
+filter_invalid_command#:#Nicht unterstütztes Filter Kommando
+
+answersPerPage#:#Antworten pro Seite
+userSolution#:#Lösung des Benutzers

@@ -123,7 +123,7 @@ class TstManualScoringQuestion
             $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
         }
         if (!method_exists($this, $cmd)) {
-            ilUtil::sendFailure($this->plugin->txt("cmdNotFound"), true);
+            ilUtil::sendFailure($this->plugin->txt("cmdNotSupported"), true);
             $this->redirectToManualScoringTab((int) $query["ref_id"]);
         }
 
@@ -304,7 +304,7 @@ class TstManualScoringQuestion
 
             $tpl->parseCurrentBlock("question");
         } else {
-            $tpl->setVariable("NO_DATA", $this->plugin->txt("noData"));
+            $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
         }
 
         return $tpl->get();
@@ -376,7 +376,7 @@ class TstManualScoringQuestion
             ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
             $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
         } else {
-            ilUtil::sendSuccess($this->plugin->txt("manualScoringSaved"), true);
+            ilUtil::sendSuccess($this->plugin->txt("saving_manualScoring"), true);
             $this->redirectToManualScoringTab($testRefId);
         }
     }
@@ -405,15 +405,15 @@ class TstManualScoringQuestion
         switch ($filterCommand) {
             case "applyFilter":
                 if (!isset($post["question"])) {
-                    ilUtil::sendFailure($this->plugin->txt("questionMissingInHandleFilter"), true);
+                    ilUtil::sendFailure($this->plugin->txt("filter_missing_question"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
                 if (!isset($post["pass"])) {
-                    ilUtil::sendFailure($this->plugin->txt("passMissingInHandleFilter"), true);
+                    ilUtil::sendFailure($this->plugin->txt("filter_missing_pass"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
                 if (!isset($post["scoringCompleted"])) {
-                    ilUtil::sendFailure($this->plugin->txt("scoringQuestionMissingInHandleFilter"), true);
+                    ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
 
@@ -425,7 +425,7 @@ class TstManualScoringQuestion
                 $selectPassInput->writeToSession();
                 $selectScoringCompletedInput->writeToSession();
 
-                ilUtil::sendSuccess($this->plugin->txt("filterWasApplied"), true);
+                ilUtil::sendSuccess($this->plugin->txt("filter_applied"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
                 break;
             case "resetFilter":
@@ -433,11 +433,11 @@ class TstManualScoringQuestion
                 $selectPassInput->clearFromSession();
                 $selectScoringCompletedInput->clearFromSession();
 
-                ilUtil::sendSuccess($this->plugin->txt("filterWasReset"), true);
+                ilUtil::sendSuccess($this->plugin->txt("filter_reset"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
                 break;
             default:
-                ilUtil::sendFailure($this->plugin->txt("invalidFilterCommand"), true);
+                ilUtil::sendFailure($this->plugin->txt("filter_invalid_command"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
                 break;
         }

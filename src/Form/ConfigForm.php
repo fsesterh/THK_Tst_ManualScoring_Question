@@ -34,7 +34,7 @@ class ConfigForm extends ilPropertyFormGUI
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         parent::__construct();
 
-        $this->setTitle($this->plugin->txt("tstManualScoringQuestion_config"));
+        $this->setTitle($this->plugin->getPluginName() . " " . $this->plugin->txt("config"));
 
         $this->setting = new ilSetting(ilTstManualScoringQuestionPlugin::class);
 
