@@ -1,6 +1,12 @@
 
 <div class="tmsq-scoring-container">
     {PAGINATION_HTML}
+    <!-- BEGIN noData -->
+    <div class="tmsq-no-data">
+        {NO_DATA}
+    </div>
+    <!-- END noData -->
+    <!-- BEGIN question -->
     <form method="post" action="{FORM_ACTION}">
         <div class="tmsq-scoring-panel-container panel-body">
             <div class="tmsq-scoring-panel">
@@ -8,15 +14,16 @@
                     {PANEL_HEADER_TEXT}
                     <button class="btn btn-default" type="submit">{SUBMIT_BUTTON_TEXT}</button>
                 </span>
-                <!-- BEGIN questionAnswer -->
+                <!-- BEGIN answer -->
                 <div class="tmsq-scoring-question-panel">
                     <span class="tmsq-scoring-question-header">{QUESTION_HEADER_TEXT}</span>
                     <div class="tmsq-manual-scoring-form">
-                        {MANUAL_SCORING_FORM}
+                        {ANSWER_FORM}
                     </div>
                 </div>
-                <!-- END questionAnswer -->
+                <!-- END answer -->
             </div>
         </div>
     </form>
+    <!-- END question -->
 </div>

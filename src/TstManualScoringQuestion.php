@@ -178,26 +178,6 @@ class TstManualScoringQuestion
         $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
-        $tpl->setVariable(
-            "PANEL_HEADER_TEXT",
-            sprintf(
-                $this->lng->txt("manscoring_results_pass"),
-                ($selectedPass + 1)
-            ) . " | " . sprintf(
-                $this->lng->txt("tst_manscoring_question_section_header"),
-                $questionOptions[$selectedQuestionId]
-            )
-        );
-
-        $tpl->setVariable("SUBMIT_BUTTON_TEXT", $this->lng->txt("save"));
-        $tpl->setVariable(
-            "FORM_ACTION",
-            $this->ctrl->getLinkTargetByClass(
-                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-                "saveManualScoring"
-            ) . "&ref_id={$refId}"
-        );
-
         $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
         $question = new Question($questionId);
         $question
@@ -217,6 +197,7 @@ class TstManualScoringQuestion
             array_push($participants, $participant);
         }
 
+        //Sort by active_id
         usort($participants, function ($a, $b) {
             return $a->getActiveId() >= $b->getActiveId();
         });
@@ -253,7 +234,32 @@ class TstManualScoringQuestion
             array_push($paginatedAnswers, $answers[$i]);
         }
         $question->setAnswers($paginatedAnswers);
-        //\Pagination
+
+        if (count($question->getAnswers()) > 0) {
+            $tpl->setCurrentBlock("question");
+            $tpl->setVariable(
+                "PANEL_HEADER_TEXT",
+                sprintf(
+                    $this->lng->txt("manscoring_results_pass"),
+                    ($selectedPass + 1)
+                ) . " | " . sprintf(
+                    $this->lng->txt("tst_manscoring_question_section_header"),
+                    $questionOptions[$selectedQuestionId]
+                )
+            );
+
+            $tpl->setVariable("SUBMIT_BUTTON_TEXT", $this->lng->txt("save"));
+            $tpl->setVariable(
+                "FORM_ACTION",
+                $this->ctrl->getLinkTargetByClass(
+                    [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+                    "saveManualScoring"
+                ) . "&ref_id={$refId}"
+            );
+            $tpl->parseCurrentBlock("question");
+        } else {
+            $tpl->setVariable("NO_DATA", $this->plugin->txt("noData"));
+        }
 
         foreach ($question->getAnswers() as $answer) {
             $form = new TstManualScoringForm(
@@ -263,7 +269,7 @@ class TstManualScoringQuestion
 
             $form->fillForm($answer);
 
-            $tpl->setCurrentBlock("questionAnswer");
+            $tpl->setCurrentBlock("answer");
             $tpl->setVariable(
                 "QUESTION_HEADER_TEXT",
                 sprintf(
@@ -279,8 +285,8 @@ class TstManualScoringQuestion
             $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
             $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
 
-            $tpl->setVariable("MANUAL_SCORING_FORM", $formHtml);
-            $tpl->parseCurrentBlock("questionAnswer");
+            $tpl->setVariable("ANSWER_FORM", $formHtml);
+            $tpl->parseCurrentBlock("answer");
         }
 
         return $tpl->get();
@@ -490,11 +496,11 @@ class TstManualScoringQuestion
         $resetFilterButton->setCommand('resetFilter');
 
         $filterAction = $this->ctrl->getLinkTargetByClass(
-            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-            "handleFilter",
-            "",
-            true
-        ) . "&ref_id={$testRefId}";
+                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+                "handleFilter",
+                "",
+                true
+            ) . "&ref_id={$testRefId}";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
