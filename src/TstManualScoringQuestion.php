@@ -3,8 +3,6 @@
 
 namespace TstManualScoringQuestion;
 
-const PAGINATION_ANSWERS_PER_PAGE = 1;
-
 use ILIAS\DI\Container;
 use ilGlobalPageTemplate;
 use ilTstManualScoringQuestionPlugin;
@@ -32,6 +30,7 @@ use Exception;
 use TstManualScoringQuestion\Model\Question;
 use TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
+use ilSetting;
 
 /**
  * Class TstManualScoringQuestion
@@ -40,6 +39,14 @@ use ilTestParticipant;
  */
 class TstManualScoringQuestion
 {
+    /**
+     * @var int
+     */
+    protected $answersPerPage;
+    /**
+     * @var ilSetting
+     */
+    protected $setting;
     /**
      * @var ilObjUser
      */
@@ -90,6 +97,7 @@ class TstManualScoringQuestion
             $this->dic = $dic;
         }
 
+        $this->setting = new ilSetting(ilTstManualScoringQuestionPlugin::class);
         $this->mainTpl = $dic->ui()->mainTemplate();
         $this->toolbar = $dic->toolbar();
         $this->lng = $dic->language();
@@ -100,6 +108,7 @@ class TstManualScoringQuestion
         $this->request = $dic->http()->request();
         $this->access = $dic->access();
         $this->user = $dic->user();
+        $this->answersPerPage = (int) $this->setting->get("answersPerPage", 10);
     }
 
     /**
@@ -235,12 +244,12 @@ class TstManualScoringQuestion
 
         //Pagination
         $numberOfAnswers = count($answers);
-        $paginationData = $this->setupPagination(PAGINATION_ANSWERS_PER_PAGE, $numberOfAnswers);
+        $paginationData = $this->setupPagination($this->answersPerPage, $numberOfAnswers);
         $paginationCurrentPage = (int) $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
         $paginatedAnswers = [];
-        for ($i = $paginationCurrentPage; $i < PAGINATION_ANSWERS_PER_PAGE + $paginationCurrentPage; $i++) {
+        for ($i = $paginationCurrentPage; $i < $numberOfAnswers + $paginationCurrentPage; $i++) {
             array_push($paginatedAnswers, $answers[$i]);
         }
         $question->setAnswers($paginatedAnswers);
@@ -481,11 +490,11 @@ class TstManualScoringQuestion
         $resetFilterButton->setCommand('resetFilter');
 
         $filterAction = $this->ctrl->getLinkTargetByClass(
-                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-                "handleFilter",
-                "",
-                true
-            ) . "&ref_id={$testRefId}";
+            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+            "handleFilter",
+            "",
+            true
+        ) . "&ref_id={$testRefId}";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
