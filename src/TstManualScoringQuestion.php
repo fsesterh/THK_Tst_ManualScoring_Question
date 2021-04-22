@@ -414,7 +414,7 @@ class TstManualScoringQuestion
         $selectPassInput->setParent($this->plugin);
 
         $selectScoringCompletedInput = new ilSelectInputGUI(
-            $this->plugin->txt("finalized_evaluation"),
+            $this->lng->txt("finalized_evaluation"),
             "scoringCompleted"
         );
         $selectScoringCompletedInput->setParent($this->plugin);
@@ -527,7 +527,7 @@ class TstManualScoringQuestion
         $selectPassInput->readFromSession();
 
         $selectScoringCompletedInput = new ilSelectInputGUI(
-            $this->plugin->txt("finalized_evaluation"),
+            $this->lng->txt("finalized_evaluation"),
             "scoringCompleted"
         );
 
@@ -535,8 +535,8 @@ class TstManualScoringQuestion
             $selectScoringCompletedInput->setParent($this->plugin);
             $selectScoringCompletedInput->setOptions([
                 self::ALL_USERS => $this->lng->txt('all_users'),
-                self::ONLY_FINALIZED => $this->plugin->txt('evaluated_users'),
-                self::EXCEPT_FINALIZED => $this->plugin->txt('not_evaluated_users'),
+                self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
+                self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
             ]);
             $selectScoringCompletedInput->readFromSession();
         }
