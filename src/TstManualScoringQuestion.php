@@ -247,6 +247,9 @@ class TstManualScoringQuestion
             array_push($paginatedAnswers, $answers[$i]);
         }
 
+        var_dump($this->plugin->isIlias6());
+        exit;
+
         $finalAnswerArr = array_filter($paginatedAnswers, function (Answer $answer) use ($selectedScoringCompleted) {
             switch ($selectedScoringCompleted) {
                 case self::ONLY_FINALIZED:

@@ -99,4 +99,8 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         exit;
     }
 
+    public function isIlias6() : bool {
+        return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">");
+    }
+
 }
