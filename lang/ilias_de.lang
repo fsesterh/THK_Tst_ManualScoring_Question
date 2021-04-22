@@ -18,9 +18,12 @@ saving_feedback_failed#:#Speichern des Feedbacks für eine Antwort schlug fehlt
 filter_missing_question#:#Keine Frage im Filter definiert
 filter_missing_pass#:#Kein Durchlauf im Filter definiert
 filter_missing_scoringCompleted#:#Es fehlt die Filteroption für Scoring completed
+filter_missing_answersPerPage#:#Keine Antworten pro Seite im Filter definiert
 filter_applied#:#Filter wurde angewendet
 filter_reset#:#Filter wurde zurückgesetzt
 filter_invalid_command#:#Nicht unterstütztes Filter Kommando
 
 answersPerPage#:#Antworten pro Seite
 userSolution#:#Lösung des Benutzers
+
+answersFromTo#:#Antworten %s bis %s

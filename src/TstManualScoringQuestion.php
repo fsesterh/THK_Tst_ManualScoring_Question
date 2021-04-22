@@ -28,7 +28,6 @@ use Exception;
 use TstManualScoringQuestion\Model\Question;
 use TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
-use ilSetting;
 use ilObjAssessmentFolder;
 
 /**
@@ -42,14 +41,6 @@ class TstManualScoringQuestion
     public const ONLY_FINALIZED = 1;
     public const EXCEPT_FINALIZED = 2;
 
-    /**
-     * @var int
-     */
-    protected $answersPerPage;
-    /**
-     * @var ilSetting
-     */
-    protected $setting;
     /**
      * @var ilObjUser
      */
@@ -100,7 +91,6 @@ class TstManualScoringQuestion
             $this->dic = $dic;
         }
 
-        $this->setting = new ilSetting(ilTstManualScoringQuestionPlugin::class);
         $this->mainTpl = $dic->ui()->mainTemplate();
         $this->toolbar = $dic->toolbar();
         $this->lng = $dic->language();
@@ -111,7 +101,6 @@ class TstManualScoringQuestion
         $this->request = $dic->http()->request();
         $this->access = $dic->access();
         $this->user = $dic->user();
-        $this->answersPerPage = (int) $this->setting->get("answersPerPage", 10);
     }
 
     /**
@@ -188,6 +177,7 @@ class TstManualScoringQuestion
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
         $selectedScoringCompleted = $selectedFilters["selectedScoringCompleted"];
+        $selectedAnswersPerPage = $selectedFilters["selectedAnswersPerPage"];
 
         $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
         $question = new Question($questionId);
@@ -236,17 +226,15 @@ class TstManualScoringQuestion
 
         //Pagination
         $numberOfAnswers = count($answers);
-        $paginationData = $this->setupPagination($this->answersPerPage, $numberOfAnswers);
-        $paginationCurrentPage = (int) $paginationData["currentPage"];
+        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswers);
+
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
-        $paginatedAnswers = [];
-        for ($i = $paginationCurrentPage; $i < $numberOfAnswers + $paginationCurrentPage; $i++) {
-            array_push($paginatedAnswers, $answers[$i]);
-        }
+        $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
 
         if ($this->plugin->isIlias6()) {
-            $finalAnswerArr = array_filter($paginatedAnswers,
+            $finalAnswerArr = array_filter(
+                $paginatedAnswers,
                 function (Answer $answer) use ($selectedScoringCompleted) {
                     switch ($selectedScoringCompleted) {
                         case self::ONLY_FINALIZED:
@@ -256,7 +244,8 @@ class TstManualScoringQuestion
                         default:
                             return true;
                     }
-                });
+                }
+            );
         } else {
             $finalAnswerArr = $paginatedAnswers;
         }
@@ -413,6 +402,9 @@ class TstManualScoringQuestion
         $selectPassInput = new ilSelectInputGUI($this->lng->txt("pass"), "pass");
         $selectPassInput->setParent($this->plugin);
 
+        $selectAnswersPerPageInput = new ilSelectInputGUI($this->plugin->txt("answersPerPage"), "answersPerPage");
+        $selectAnswersPerPageInput->setParent($this->plugin);
+
         $selectScoringCompletedInput = new ilSelectInputGUI(
             $this->lng->txt("finalized_evaluation"),
             "scoringCompleted"
@@ -429,6 +421,12 @@ class TstManualScoringQuestion
                     ilUtil::sendFailure($this->plugin->txt("filter_missing_pass"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
+
+                if (!isset($post["answersPerPage"])) {
+                    ilUtil::sendFailure($this->plugin->txt("filter_missing_answersPerPage"), true);
+                    $this->redirectToManualScoringTab($query["ref_id"]);
+                }
+
                 if ($this->plugin->isIlias6()) {
                     if (!isset($post["scoringCompleted"])) {
                         ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
@@ -440,9 +438,11 @@ class TstManualScoringQuestion
 
                 $selectQuestionInput->setValue($post["question"]);
                 $selectPassInput->setValue($post["pass"]);
+                $selectAnswersPerPageInput->setValue($post["answersPerPage"]);
 
                 $selectQuestionInput->writeToSession();
                 $selectPassInput->writeToSession();
+                $selectAnswersPerPageInput->writeToSession();
 
                 ilUtil::sendSuccess($this->plugin->txt("filter_applied"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
@@ -451,6 +451,7 @@ class TstManualScoringQuestion
                 $selectQuestionInput->clearFromSession();
                 $selectPassInput->clearFromSession();
                 $selectScoringCompletedInput->clearFromSession();
+                $selectAnswersPerPageInput->clearFromSession();
 
                 ilUtil::sendSuccess($this->plugin->txt("filter_reset"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
@@ -492,17 +493,22 @@ class TstManualScoringQuestion
 
         $start = $pagination->getOffset();
         $stop = $start + $pagination->getPageLength();
-        $result = "entries $start to $stop";
+
+        $translation = "";
+        if (($totalNumberOfElements) > 1) {
+            $translation = sprintf($this->plugin->txt("answersFromTo"), $start + 1, $stop);
+        }
 
         $html = '<div class="tmsq-pagination">' .
             $renderer->render($pagination)
             . '<hr class="tmsq-pagination-separator">'
-            . $result
+            . $translation
             . '</div>';
 
         return [
             "html" => $html,
-            "currentPage" => $currentPage
+            "start" => $start,
+            "stop" => $stop
         ];
     }
 
@@ -515,6 +521,19 @@ class TstManualScoringQuestion
      */
     protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions) : array
     {
+        $answersPerPageOptions = [
+            1 => "1",
+            2 => "2",
+            3 => "3",
+            4 => "4",
+            5 => "5",
+            6 => "6",
+            7 => "7",
+            8 => "8",
+            9 => "9",
+            10 => "10",
+        ];
+
         //Filter options
         $selectQuestionInput = new ilSelectInputGUI($this->lng->txt("question"), "question");
         $selectQuestionInput->setParent($this->plugin);
@@ -525,6 +544,15 @@ class TstManualScoringQuestion
         $selectPassInput->setParent($this->plugin);
         $selectPassInput->setOptions($passOptions);
         $selectPassInput->readFromSession();
+
+        $selectAnswersPerPageInput = new ilSelectInputGUI($this->plugin->txt("answersPerPage"), "answersPerPage");
+        $selectAnswersPerPageInput->setParent($this->plugin);
+        $selectAnswersPerPageInput->setOptions($answersPerPageOptions);
+        $selectAnswersPerPageInput->readFromSession();
+
+        if ($selectAnswersPerPageInput->getValue() == null) {
+            $selectAnswersPerPageInput->setValue(10);
+        }
 
         $selectScoringCompletedInput = new ilSelectInputGUI(
             $this->lng->txt("finalized_evaluation"),
@@ -550,6 +578,10 @@ class TstManualScoringQuestion
             $selectQuestionInput->setValue((string) array_key_first($questionOptions));
         }
 
+        if (!in_array((int) $selectAnswersPerPageInput->getValue(), $answersPerPageOptions)) {
+            $selectAnswersPerPageInput->setValue(10);
+        }
+
         //Filter buttons
         $applyFilterButton = ilSubmitButton::getInstance();
 
@@ -570,6 +602,7 @@ class TstManualScoringQuestion
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
         $this->toolbar->addInputItem($selectPassInput, true);
+        $this->toolbar->addInputItem($selectAnswersPerPageInput, true);
 
         if ($this->plugin->isIlias6()) {
             $this->toolbar->addInputItem($selectScoringCompletedInput, true);
@@ -581,6 +614,7 @@ class TstManualScoringQuestion
         $returnArr = [
             "selectedQuestionId" => (int) $selectQuestionInput->getValue(),
             "selectedPass" => (int) $selectPassInput->getValue(),
+            "selectedAnswersPerPage" => (int) $selectAnswersPerPageInput->getValue(),
         ];
 
         if ($this->plugin->isIlias6()) {
