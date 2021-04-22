@@ -113,7 +113,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($maximumPointsNonEditInput);
         $this->addItem($manualFeedPackAreaInput);
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $this->addItem($scoringCompletedCheckboxInput);
         }
 

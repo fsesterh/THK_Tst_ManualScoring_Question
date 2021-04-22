@@ -232,7 +232,7 @@ class TstManualScoringQuestion
 
         $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $finalAnswerArr = array_filter(
                 $paginatedAnswers,
                 function (Answer $answer) use ($selectedScoringCompleted) {
@@ -428,7 +428,7 @@ class TstManualScoringQuestion
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
 
-                if ($this->plugin->isIlias6()) {
+                if ($this->plugin->isAtLeastIlias6()) {
                     if (!isset($post["scoringCompleted"])) {
                         ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
                         $this->redirectToManualScoringTab($query["ref_id"]);
@@ -560,7 +560,7 @@ class TstManualScoringQuestion
             "scoringCompleted"
         );
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $selectScoringCompletedInput->setParent($this->plugin);
             $selectScoringCompletedInput->setOptions([
                 self::ALL_USERS => $this->lng->txt('all_users'),
@@ -605,7 +605,7 @@ class TstManualScoringQuestion
         $this->toolbar->addInputItem($selectPassInput, true);
         $this->toolbar->addInputItem($selectAnswersPerPageInput, true);
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $this->toolbar->addInputItem($selectScoringCompletedInput, true);
         }
 
@@ -618,7 +618,7 @@ class TstManualScoringQuestion
             "selectedAnswersPerPage" => (int) $selectAnswersPerPageInput->getValue(),
         ];
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $returnArr["selectedScoringCompleted"] = (int) $selectScoringCompletedInput->getValue();
         }
 
