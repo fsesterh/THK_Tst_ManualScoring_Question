@@ -6,6 +6,11 @@ noEntries#:#Keine Einträge vorhanden
 nothingReceivedInPost#:#POST ist leer oder nicht definiert
 unknownError#:#Unbekannter Fehler. Es könnten informationen fehlen
 
+answer_of#:#Antwort von
+finalized_evaluation#:#Endgültig bewertet
+evaluated_users#:#Bewertete Benutzer
+not_evaluated_users#:#Noch nicht bewertete Benutzer
+
 missing_get_parameter_cmd#:#Der GET parameter 'cmd' fehlt
 missing_get_parameter_refId#:#Der GET parameter 'ref_id' fehlt
 

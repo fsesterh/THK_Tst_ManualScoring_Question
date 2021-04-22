@@ -5,7 +5,6 @@ declare(strict_types=1);
 
 use ILIAS\DI\Container;
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use TstManualScoringQuestion\TstManualScoringQuestion;
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -63,19 +62,21 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $html = $a_par["html"];
         $tplId = $a_par["tpl_id"];
 
-        if (!$html || $tplId !== "Services/Table/tpl.table2.html" || $a_part !== "template_get" || !str_contains($html, $this->lng->txt("tst_man_scoring_by_qst"))) {
+        if (!$html || $tplId !== "Services/Table/tpl.table2.html" || $a_part !== "template_get" || !str_contains($html,
+                $this->lng->txt("tst_man_scoring_by_qst"))) {
             return $this->uiHookResponse();
         }
 
         $query = $this->request->getQueryParams();
         if (($query["cmd"] !== "post" && $query["fallbackCmd"] !== "showManScoringByQuestionParticipantsTable") &&
-        $query["cmd"] !== "showManScoringByQuestionParticipantsTable") {
+            $query["cmd"] !== "showManScoringByQuestionParticipantsTable") {
             return $this->uiHookResponse();
         }
 
         $this->tstManualScoringQuestion = new TstManualScoringQuestion($this->dic);
 
-        return $this->uiHookResponse(self::REPLACE, $this->tstManualScoringQuestion->modify($html, (int) $query["ref_id"]));
+        return $this->uiHookResponse(self::REPLACE,
+            $this->tstManualScoringQuestion->modify($html, (int) $query["ref_id"]));
     }
 
     /**
@@ -103,7 +104,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $cmd = $query["cmd"];
         if (!isset($cmd)) {
             ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
-            $ctrl->redirectByClass(ilDashboardGUI::class, "show");
+            $ctrl->redirectToURL("ilias.php");
         }
 
         if ($user->isAnonymous()) {

@@ -98,7 +98,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
 
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
-            $lng->txt("finalized_evaluation"),
+            $this->plugin->txt("finalized_evaluation"),
             "{$questionId}[answers][{$activeId}][scoringCompleted]"
         );
 

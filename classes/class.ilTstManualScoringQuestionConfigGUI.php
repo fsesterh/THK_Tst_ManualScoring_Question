@@ -14,11 +14,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 class ilTstManualScoringQuestionConfigGUI extends ilPluginConfigGUI
 {
     /**
-     * @var ilTstManualScoringQuestionConfigGUI|ilStructurePresentationPlugin
+     * @var ilTstManualScoringQuestionConfigGUI
      */
     protected $plugin;
     /**
-     * @var ilGlobalPageTemplate
+     * @var ilTemplate
      */
     protected $tpl;
     /**

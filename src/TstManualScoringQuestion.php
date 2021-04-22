@@ -40,6 +40,10 @@ use ilObjAssessmentFolder;
  */
 class TstManualScoringQuestion
 {
+    public const ALL_USERS = 0;
+    public const ONLY_FINALIZED = 1;
+    public const EXCEPT_FINALIZED = 2;
+
     /**
      * @var int
      */
@@ -73,7 +77,7 @@ class TstManualScoringQuestion
      */
     protected $ctrl;
     /**
-     * @var ilGlobalPageTemplate
+     * @var ilTemplate
      */
     protected $mainTpl;
     /**
@@ -120,7 +124,7 @@ class TstManualScoringQuestion
     {
         if (!isset($query["ref_id"])) {
             ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
-            $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+            $this->plugin->redirectToHome();
         }
         if (!method_exists($this, $cmd)) {
             ilUtil::sendFailure($this->plugin->txt("cmdNotSupported"), true);
@@ -158,10 +162,17 @@ class TstManualScoringQuestion
             ilObjTestGUI::accessViolationRedirect();
         }
 
+        $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
+        $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
+
         $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoring();
         $allQuestions = array_filter($test->getAllQuestions(), function ($question) use ($allowedQuestionTypes) {
             return in_array($question["question_type_fi"], $allowedQuestionTypes);
         });
+
+        if (count($allQuestions) == 0) {
+            return $this->showNoEntries($tpl);
+        }
 
         $questionOptions = [];
         $pointsTranslated = $this->lng->txt("points");
@@ -179,9 +190,6 @@ class TstManualScoringQuestion
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
         $selectedScoringCompleted = $selectedFilters["selectedScoringCompleted"];
-
-        $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
-        $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
         $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
         $question = new Question($questionId);
@@ -241,9 +249,9 @@ class TstManualScoringQuestion
 
         $finalAnswerArr = array_filter($paginatedAnswers, function (Answer $answer) use ($selectedScoringCompleted) {
             switch ($selectedScoringCompleted) {
-                case ilTestScoringByQuestionsGUI::ONLY_FINALIZED:
+                case self::ONLY_FINALIZED:
                     return $answer->isScoringCompleted();
-                case ilTestScoringByQuestionsGUI::EXCEPT_FINALIZED:
+                case self::EXCEPT_FINALIZED:
                     return !$answer->isScoringCompleted();
                 default:
                     return true;
@@ -287,7 +295,7 @@ class TstManualScoringQuestion
                     "QUESTION_HEADER_TEXT",
                     sprintf(
                         "%s %s %s (%s)",
-                        $this->lng->txt("answer_of"),
+                        $this->plugin->txt("answer_of"),
                         $answer->getParticipant()->getFirstname(),
                         $answer->getParticipant()->getLastname(),
                         $answer->getParticipant()->getLogin()
@@ -304,9 +312,15 @@ class TstManualScoringQuestion
 
             $tpl->parseCurrentBlock("question");
         } else {
-            $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
+            return $this->showNoEntries($tpl);
         }
 
+        return $tpl->get();
+    }
+
+    protected function showNoEntries($tpl) : string
+    {
+        $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
         return $tpl->get();
     }
 
@@ -318,7 +332,7 @@ class TstManualScoringQuestion
     {
         if (!isset($post) || count($post) == 0) {
             ilUtil::sendFailure($this->plugin->txt("nothingReceivedInPost"), true);
-            $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+            $this->plugin->redirectToHome();
         }
 
         $post = array_filter($post, function ($key) {
@@ -346,7 +360,7 @@ class TstManualScoringQuestion
                         $this->sendInvalidForm($testRefId);
                     } else {
                         ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
-                        $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+                        $this->plugin->redirectToHome();
                     }
                 }
 
@@ -374,7 +388,7 @@ class TstManualScoringQuestion
 
         if ($testRefId == -1) {
             ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
-            $this->ctrl->redirectByClass(ilDashboardGUI::class, "show");
+            $this->plugin->redirectToHome();
         } else {
             ilUtil::sendSuccess($this->plugin->txt("saving_manualScoring"), true);
             $this->redirectToManualScoringTab($testRefId);
@@ -397,7 +411,7 @@ class TstManualScoringQuestion
         $selectPassInput->setParent($this->plugin);
 
         $selectScoringCompletedInput = new ilSelectInputGUI(
-            $this->lng->txt("finalized_evaluation"),
+            $this->plugin->txt("finalized_evaluation"),
             "scoringCompleted"
         );
         $selectScoringCompletedInput->setParent($this->plugin);
@@ -508,14 +522,14 @@ class TstManualScoringQuestion
         $selectPassInput->readFromSession();
 
         $selectScoringCompletedInput = new ilSelectInputGUI(
-            $this->lng->txt("finalized_evaluation"),
+            $this->plugin->txt("finalized_evaluation"),
             "scoringCompleted"
         );
         $selectScoringCompletedInput->setParent($this->plugin);
         $selectScoringCompletedInput->setOptions([
-            0 => $this->lng->txt('all_users'),
-            ilTestScoringByQuestionsGUI::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
-            ilTestScoringByQuestionsGUI::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
+            self::ALL_USERS => $this->lng->txt('all_users'),
+            self::ONLY_FINALIZED => $this->plugin->txt('evaluated_users'),
+            self::EXCEPT_FINALIZED => $this->plugin->txt('not_evaluated_users'),
         ]);
         $selectScoringCompletedInput->readFromSession();
 
@@ -539,11 +553,11 @@ class TstManualScoringQuestion
         $resetFilterButton->setCommand('resetFilter');
 
         $filterAction = $this->ctrl->getLinkTargetByClass(
-            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-            "handleFilter",
-            "",
-            true
-        ) . "&ref_id={$testRefId}";
+                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+                "handleFilter",
+                "",
+                true
+            ) . "&ref_id={$testRefId}";
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);

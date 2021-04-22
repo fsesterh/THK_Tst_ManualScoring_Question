@@ -9,6 +9,7 @@ use ilObjTest;
 use ilRTE;
 use ilObjAssessmentFolder;
 use ilObjTestAccess;
+use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class Answer
@@ -57,7 +58,7 @@ class Answer
      */
     public function readScoringCompleted() : bool
     {
-        $manualFeedback = ilObjTest::getSingleManualFeedback(
+        $manualFeedback = $this->getSingleManualFeedback(
             $this->activeId,
             $this->question->getId(),
             $this->question->getPass()
@@ -83,7 +84,7 @@ class Answer
      */
     public function readFeedback() : string
     {
-        $manualFeedback = ilObjTest::getSingleManualFeedback(
+        $manualFeedback = $this->getSingleManualFeedback(
             $this->activeId,
             $this->question->getId(),
             $this->question->getPass()
@@ -317,7 +318,7 @@ class Answer
     ) : bool {
         global $DIC;
 
-        $feedback_old = ilObjTest::getSingleManualFeedback($active_id, $question_id, $pass);
+        $feedback_old = $this->getSingleManualFeedback($active_id, $question_id, $pass);
 
         $finalized_record = (int) $feedback_old['finalized_evaluation'];
         if ($finalized_record === 0 || ($is_single_feedback && $finalized_record === 1)) {
@@ -410,5 +411,38 @@ class Answer
         }
 
         $ilDB->insert('tst_manual_fb', $update_default);
+    }
+
+    /**
+     * Required as ilias 5.4 does not have this function for retrieving the manual feedback
+     * Retrieves the manual feedback for a question in a test
+     *
+     * @param integer $active_id Active ID of the user
+     * @param integer $question_id Question ID
+     * @param integer $pass Pass number
+     * @return array The feedback text
+     * @access public
+     */
+    protected function getSingleManualFeedback(int $active_id, int $question_id, int $pass) : array
+    {
+        global $DIC;
+
+        $ilDB = $DIC->database();
+        $row = array();
+        $result = $ilDB->queryF(
+            "SELECT * FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+            array('integer', 'integer', 'integer'),
+            array($active_id, $question_id, $pass)
+        );
+
+        if ($result->numRows() === 1) {
+            $row = $ilDB->fetchAssoc($result);
+            $row['feedback'] = ilRTE::_replaceMediaObjectImageSrc($row['feedback'], 1);
+        } else {
+            $DIC->logger()->root()->warning("WARNING: Multiple feedback entries on tst_manual_fb for " .
+                "active_fi = $active_id , question_fi = $question_id and pass = $pass");
+        }
+
+        return $row;
     }
 }

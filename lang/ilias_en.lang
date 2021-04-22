@@ -6,6 +6,11 @@ noEntries#:#No entries available
 nothingReceivedInPost#:#POST is empty or not defined
 unknownError#:#Unknown error. Information could be empty
 
+answer_of#:#Answer of
+finalized_evaluation#:#Scoring completed
+evaluated_users#:#Evaluated Users
+not_evaluated_users#:#Not Yet Evaluated User
+
 missing_get_parameter_cmd#:#The GET parameter 'cmd' is missing
 missing_get_parameter_refId#:#The GET parameter 'ref_id' is missing
 

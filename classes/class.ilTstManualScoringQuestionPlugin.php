@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
+use ILIAS\DI\Container;
+
 /**
  * Class ilTstManualScoringQuestionPlugin
  * @author  Marvin Beym <mbeym@databay.de>
@@ -17,6 +19,23 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     const SLOT_ID = "uihk";
     /** @var string */
     const PNAME = "TstManualScoringQuestion";
+    /**
+     * @var Container
+     */
+    protected $dic;
+    /**
+     * @var ilCtrl
+     */
+    protected $ctrl;
+
+    public function __construct()
+    {
+        global $DIC;
+        $this->dic = $DIC;
+        $this->ctrl = $this->dic->ctrl();
+
+        parent::__construct();
+    }
 
     /**
      * @var ilTstManualScoringQuestionPlugin|null
@@ -67,6 +86,17 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         }
 
         return self::$instance;
+    }
+
+    public function redirectToHome() {
+        if(class_exists("ilPersonalDesktopGUI", true)) {
+            //Ilias 5.x
+            $this->ctrl->redirectByClass("ilPersonalDesktopGUI");
+        } else if(class_exists("ilDashboardGUI", true)) {
+            //Ilias 6.x
+            $this->ctrl->redirectByClass("ilDashboardGUI", "show");
+        }
+        exit;
     }
 
 }
