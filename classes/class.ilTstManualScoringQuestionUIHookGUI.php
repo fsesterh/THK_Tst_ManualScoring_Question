@@ -62,8 +62,10 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $html = $a_par["html"];
         $tplId = $a_par["tpl_id"];
 
-        if (!$html || $tplId !== "Services/Table/tpl.table2.html" || $a_part !== "template_get" || !str_contains($html,
-                $this->lng->txt("tst_man_scoring_by_qst"))) {
+        if (!$html || $tplId !== "Services/Table/tpl.table2.html" || $a_part !== "template_get" || !str_contains(
+            $html,
+            $this->lng->txt("tst_man_scoring_by_qst")
+        )) {
             return $this->uiHookResponse();
         }
 
@@ -75,8 +77,10 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
         $this->tstManualScoringQuestion = new TstManualScoringQuestion($this->dic);
 
-        return $this->uiHookResponse(self::REPLACE,
-            $this->tstManualScoringQuestion->modify($html, (int) $query["ref_id"]));
+        return $this->uiHookResponse(
+            self::REPLACE,
+            $this->tstManualScoringQuestion->modify($html, (int) $query["ref_id"])
+        );
     }
 
     /**

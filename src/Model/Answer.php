@@ -9,7 +9,6 @@ use ilObjTest;
 use ilRTE;
 use ilObjAssessmentFolder;
 use ilObjTestAccess;
-use Doctrine\Common\Annotations\Annotation\Required;
 
 /**
  * Class Answer
@@ -139,7 +138,7 @@ class Answer
 
         $pointsFieldValid = isset($this->points);
         $feedbackFieldValid = isset($this->feedback);
-        if($this->readScoringCompleted()) {
+        if ($this->readScoringCompleted()) {
             $pointsFieldValid = true;
             $feedbackFieldValid = true;
         }
@@ -416,10 +415,9 @@ class Answer
     /**
      * Required as ilias 5.4 does not have this function for retrieving the manual feedback
      * Retrieves the manual feedback for a question in a test
-     *
-     * @param integer $active_id Active ID of the user
+     * @param integer $active_id   Active ID of the user
      * @param integer $question_id Question ID
-     * @param integer $pass Pass number
+     * @param integer $pass        Pass number
      * @return array The feedback text
      * @access public
      */

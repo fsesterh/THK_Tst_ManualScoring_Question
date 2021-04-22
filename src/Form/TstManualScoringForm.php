@@ -85,9 +85,11 @@ class TstManualScoringForm extends ilPropertyFormGUI
             "{$questionId}[answers][{$activeId}][feedback]"
         );
 
-        if($answer->isScoringCompleted()) {
-            $manualFeedPackAreaInput = new ilHtmlAreaInput($this->lng->txt('set_manual_feedback'),
-                "{$questionId}[answers][{$activeId}][feedback]");
+        if ($answer->isScoringCompleted()) {
+            $manualFeedPackAreaInput = new ilHtmlAreaInput(
+                $this->lng->txt('set_manual_feedback'),
+                "{$questionId}[answers][{$activeId}][feedback]"
+            );
             $manualFeedPackAreaInput->setDisabled(true);
             $manualFeedPackAreaInput->setHtmlClass("tmsq-html-area-input");
         } else {
@@ -98,7 +100,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
 
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
-            $this->plugin->txt("finalized_evaluation"),
+            $this->lng->txt("finalized_evaluation"),
             "{$questionId}[answers][{$activeId}][scoringCompleted]"
         );
 
@@ -110,7 +112,10 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);
         $this->addItem($manualFeedPackAreaInput);
-        $this->addItem($scoringCompletedCheckboxInput);
+
+        if ($this->plugin->isIlias6()) {
+            $this->addItem($scoringCompletedCheckboxInput);
+        }
 
         parent::__construct();
     }
