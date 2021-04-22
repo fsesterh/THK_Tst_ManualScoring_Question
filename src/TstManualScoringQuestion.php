@@ -106,6 +106,7 @@ class TstManualScoringQuestion
     /**
      * @param string   $cmd
      * @param string[] $query
+     * @throws Exception
      */
     public function performCommand(string $cmd, array $query)
     {
@@ -127,8 +128,7 @@ class TstManualScoringQuestion
                 $this->$cmd($this->request->getParsedBody());
                 break;
             default:
-                $this->$cmd();
-                break;
+                throw new Exception(sprintf("Unsupported action: '%s'", $cmd));
         }
     }
 
@@ -232,7 +232,7 @@ class TstManualScoringQuestion
 
         $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $finalAnswerArr = array_filter(
                 $paginatedAnswers,
                 function (Answer $answer) use ($selectedScoringCompleted) {
@@ -346,20 +346,21 @@ class TstManualScoringQuestion
 
         foreach ($questions as $question) {
             $testRefId = $question->getTestRefId();
+            $test = new ilObjTest($testRefId, true);
+            $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+
+            if (!$testRefId) {
+                ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+                $this->plugin->redirectToHome();
+            }
+
+            if (!$testAccess->checkScoreParticipantsAccess()) {
+                ilObjTestGUI::accessViolationRedirect();
+            }
+
             foreach ($question->getAnswers() as $answer) {
                 if (!$answer->checkValid(true)) {
-                    if ($testRefId) {
-                        $this->sendInvalidForm($testRefId);
-                    } else {
-                        ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
-                        $this->plugin->redirectToHome();
-                    }
-                }
-
-                $test = new ilObjTest($testRefId, true);
-                $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
-                if (!$testAccess->checkScoreParticipantsAccess()) {
-                    ilObjTestGUI::accessViolationRedirect();
+                    $this->sendInvalidForm($testRefId);
                 }
 
                 if (!$answer->readScoringCompleted() && $answer->getPoints() > $question->getMaximumPoints()) {
@@ -427,7 +428,7 @@ class TstManualScoringQuestion
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
 
-                if ($this->plugin->isIlias6()) {
+                if ($this->plugin->isAtLeastIlias6()) {
                     if (!isset($post["scoringCompleted"])) {
                         ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
                         $this->redirectToManualScoringTab($query["ref_id"]);
@@ -559,7 +560,7 @@ class TstManualScoringQuestion
             "scoringCompleted"
         );
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $selectScoringCompletedInput->setParent($this->plugin);
             $selectScoringCompletedInput->setOptions([
                 self::ALL_USERS => $this->lng->txt('all_users'),
@@ -604,7 +605,7 @@ class TstManualScoringQuestion
         $this->toolbar->addInputItem($selectPassInput, true);
         $this->toolbar->addInputItem($selectAnswersPerPageInput, true);
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $this->toolbar->addInputItem($selectScoringCompletedInput, true);
         }
 
@@ -617,7 +618,7 @@ class TstManualScoringQuestion
             "selectedAnswersPerPage" => (int) $selectAnswersPerPageInput->getValue(),
         ];
 
-        if ($this->plugin->isIlias6()) {
+        if ($this->plugin->isAtLeastIlias6()) {
             $returnArr["selectedScoringCompleted"] = (int) $selectScoringCompletedInput->getValue();
         }
 
