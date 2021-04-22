@@ -19,7 +19,14 @@ Also adds pagination to the **Manual Scoring** tab.
 ## Installation
 
 1. Clone this repository to **Customizing/global/plugins/Services/UIComponent/UserInterfaceHook**
-2. Enter the plugin folder **TstManualScoringQuestion** and execute this command: **composer install**
+2. Install the Composer dependencies  
+   ```bash
+   cd Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
+   composer install --no-dev
+   ```
+   Developers **MUST** omit the `--no-dev` argument.
+
+
 3. Login to ILIAS with an administrator account (e.g. root)
 4. Select **Plugins** in **Extending ILIAS** inside the **Administration** main menu.
 5. Search for the **TstManualScoringQuestion** plugin in the list of plugin and choose **Install** from the **Actions** drop down.
