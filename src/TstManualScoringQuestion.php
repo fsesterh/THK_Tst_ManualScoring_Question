@@ -247,19 +247,21 @@ class TstManualScoringQuestion
             array_push($paginatedAnswers, $answers[$i]);
         }
 
-        var_dump($this->plugin->isIlias6());
-        exit;
+        if($this->plugin->isIlias6()) {
+            $finalAnswerArr = array_filter($paginatedAnswers, function (Answer $answer) use ($selectedScoringCompleted) {
+                switch ($selectedScoringCompleted) {
+                    case self::ONLY_FINALIZED:
+                        return $answer->isScoringCompleted();
+                    case self::EXCEPT_FINALIZED:
+                        return !$answer->isScoringCompleted();
+                    default:
+                        return true;
+                }
+            });
+        } else {
+            $finalAnswerArr = $paginatedAnswers;
+        }
 
-        $finalAnswerArr = array_filter($paginatedAnswers, function (Answer $answer) use ($selectedScoringCompleted) {
-            switch ($selectedScoringCompleted) {
-                case self::ONLY_FINALIZED:
-                    return $answer->isScoringCompleted();
-                case self::EXCEPT_FINALIZED:
-                    return !$answer->isScoringCompleted();
-                default:
-                    return true;
-            }
-        });
 
         $question->setAnswers($finalAnswerArr);
 
@@ -429,18 +431,21 @@ class TstManualScoringQuestion
                     ilUtil::sendFailure($this->plugin->txt("filter_missing_pass"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
-                if (!isset($post["scoringCompleted"])) {
-                    ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
-                    $this->redirectToManualScoringTab($query["ref_id"]);
+                if($this->plugin->isIlias6()) {
+                    if (!isset($post["scoringCompleted"])) {
+                        ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
+                        $this->redirectToManualScoringTab($query["ref_id"]);
+                    }
+                    $selectScoringCompletedInput->setValue($post["scoringCompleted"]);
+                    $selectScoringCompletedInput->writeToSession();
                 }
 
                 $selectQuestionInput->setValue($post["question"]);
                 $selectPassInput->setValue($post["pass"]);
-                $selectScoringCompletedInput->setValue($post["scoringCompleted"]);
+
 
                 $selectQuestionInput->writeToSession();
                 $selectPassInput->writeToSession();
-                $selectScoringCompletedInput->writeToSession();
 
                 ilUtil::sendSuccess($this->plugin->txt("filter_applied"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
@@ -528,13 +533,18 @@ class TstManualScoringQuestion
             $this->plugin->txt("finalized_evaluation"),
             "scoringCompleted"
         );
-        $selectScoringCompletedInput->setParent($this->plugin);
-        $selectScoringCompletedInput->setOptions([
-            self::ALL_USERS => $this->lng->txt('all_users'),
-            self::ONLY_FINALIZED => $this->plugin->txt('evaluated_users'),
-            self::EXCEPT_FINALIZED => $this->plugin->txt('not_evaluated_users'),
-        ]);
-        $selectScoringCompletedInput->readFromSession();
+
+        if($this->plugin->isIlias6()) {
+            $selectScoringCompletedInput->setParent($this->plugin);
+            $selectScoringCompletedInput->setOptions([
+                self::ALL_USERS => $this->lng->txt('all_users'),
+                self::ONLY_FINALIZED => $this->plugin->txt('evaluated_users'),
+                self::EXCEPT_FINALIZED => $this->plugin->txt('not_evaluated_users'),
+            ]);
+            $selectScoringCompletedInput->readFromSession();
+        }
+
+
 
         //Prevent invalid values
         if (!in_array((int) $selectPassInput->getValue(), array_keys($passOptions))) {
@@ -565,15 +575,24 @@ class TstManualScoringQuestion
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
         $this->toolbar->addInputItem($selectPassInput, true);
-        $this->toolbar->addInputItem($selectScoringCompletedInput, true);
+
+        if($this->plugin->isIlias6()) {
+            $this->toolbar->addInputItem($selectScoringCompletedInput, true);
+        }
+
         $this->toolbar->addButtonInstance($applyFilterButton);
         $this->toolbar->addButtonInstance($resetFilterButton);
 
-        return [
+        $returnArr = [
             "selectedQuestionId" => (int) $selectQuestionInput->getValue(),
             "selectedPass" => (int) $selectPassInput->getValue(),
-            "selectedScoringCompleted" => (int) $selectScoringCompletedInput->getValue()
         ];
+
+        if($this->plugin->isIlias6()) {
+            $returnArr["selectedScoringCompleted"] = (int) $selectScoringCompletedInput->getValue();
+        }
+
+        return $returnArr;
     }
 
     /**
