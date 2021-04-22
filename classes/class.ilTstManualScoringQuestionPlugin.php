@@ -88,19 +88,17 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         return self::$instance;
     }
 
-    public function redirectToHome() {
-        if(class_exists("ilPersonalDesktopGUI", true)) {
-            //Ilias 5.x
-            $this->ctrl->redirectByClass("ilPersonalDesktopGUI");
-        } else if(class_exists("ilDashboardGUI", true)) {
-            //Ilias 6.x
+    public function redirectToHome()
+    {
+        if ($this->isIlias6()) {
             $this->ctrl->redirectByClass("ilDashboardGUI", "show");
+        } else {
+            $this->ctrl->redirectByClass("ilPersonalDesktopGUI");
         }
-        exit;
     }
 
-    public function isIlias6() : bool {
+    public function isIlias6() : bool
+    {
         return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">");
     }
-
 }
