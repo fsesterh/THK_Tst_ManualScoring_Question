@@ -106,6 +106,7 @@ class TstManualScoringQuestion
     /**
      * @param string   $cmd
      * @param string[] $query
+     * @throws Exception
      */
     public function performCommand(string $cmd, array $query)
     {
@@ -127,8 +128,7 @@ class TstManualScoringQuestion
                 $this->$cmd($this->request->getParsedBody());
                 break;
             default:
-                $this->$cmd();
-                break;
+                throw new Exception(sprintf("Unsupported action: '%s'", $cmd));
         }
     }
 
@@ -346,20 +346,21 @@ class TstManualScoringQuestion
 
         foreach ($questions as $question) {
             $testRefId = $question->getTestRefId();
+            $test = new ilObjTest($testRefId, true);
+            $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+
+            if (!$testRefId) {
+                ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+                $this->plugin->redirectToHome();
+            }
+
+            if (!$testAccess->checkScoreParticipantsAccess()) {
+                ilObjTestGUI::accessViolationRedirect();
+            }
+
             foreach ($question->getAnswers() as $answer) {
                 if (!$answer->checkValid(true)) {
-                    if ($testRefId) {
-                        $this->sendInvalidForm($testRefId);
-                    } else {
-                        ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
-                        $this->plugin->redirectToHome();
-                    }
-                }
-
-                $test = new ilObjTest($testRefId, true);
-                $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
-                if (!$testAccess->checkScoreParticipantsAccess()) {
-                    ilObjTestGUI::accessViolationRedirect();
+                    $this->sendInvalidForm($testRefId);
                 }
 
                 if (!$answer->readScoringCompleted() && $answer->getPoints() > $question->getMaximumPoints()) {
