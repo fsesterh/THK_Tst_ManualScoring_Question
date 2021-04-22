@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
-namespace TstManualScoringQuestion;
+namespace ILIAS\Plugin\TstManualScoringQuestion;
 
 use ILIAS\DI\Container;
 use ilTstManualScoringQuestionPlugin;
@@ -21,12 +21,12 @@ use ilToolbarGUI;
 use ilSelectInputGUI;
 use ilSubmitButton;
 use Psr\Http\Message\RequestInterface;
-use TstManualScoringQuestion\Form\TstManualScoringForm;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ilAccessHandler;
 use ilObjUser;
 use Exception;
-use TstManualScoringQuestion\Model\Question;
-use TstManualScoringQuestion\Model\Answer;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
 use ilObjAssessmentFolder;
 

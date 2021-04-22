@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
-namespace TstManualScoringQuestion\Form\Input\HtmlAreaInput;
+namespace ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput;
 
 use ilFormPropertyGUI;
 use ilTemplateException;

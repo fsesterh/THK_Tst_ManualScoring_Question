@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 use ILIAS\DI\Container;
 use Psr\Http\Message\RequestInterface;
-use TstManualScoringQuestion\TstManualScoringQuestion;
+use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
