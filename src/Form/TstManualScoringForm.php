@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
-namespace TstManualScoringQuestion\Form;
+namespace ILIAS\Plugin\TstManualScoringQuestion\Form;
 
 use ilPropertyFormGUI;
 use ilTstManualScoringQuestionPlugin;
-use TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
 use ilNonEditableValueGUI;
 use ilLanguage;
 use ilNumberInputGUI;
@@ -13,7 +13,7 @@ use ilHiddenInputGUI;
 use Psr\Http\Message\RequestInterface;
 use ilTextAreaInputGUI;
 use Exception;
-use TstManualScoringQuestion\Model\Answer;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilCheckboxInputGUI;
 
 /**

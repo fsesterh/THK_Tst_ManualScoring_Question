@@ -1,7 +1,7 @@
 <?php
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
-namespace TstManualScoringQuestion\Model;
+namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use ilTestParticipant;
 use assQuestion;
