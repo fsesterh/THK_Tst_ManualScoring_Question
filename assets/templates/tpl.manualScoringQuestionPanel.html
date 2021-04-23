@@ -1,23 +1,31 @@
 <div class="tmsq-scoring-container">
-    <div>{FILTER}</div>
-    <form method="post" action="{FORM_ACTION}">
+    {PAGINATION_HTML}
+    <!-- BEGIN noEntries -->
+    <div class="tmsq-no-entries">
+        {NO_ENTRIES}
+    </div>
+    <!-- END noEntries -->
+    <!-- BEGIN question -->
+    <form method="post" class="tmsq-scoring-answer-form" action="{FORM_ACTION}">
         <div class="tmsq-scoring-panel-container panel-body">
             <div class="tmsq-scoring-panel">
                 <span class="tmsq-scoring-panel-header">
                     {PANEL_HEADER_TEXT}
                     <button class="btn btn-default" type="submit">{SUBMIT_BUTTON_TEXT}</button>
                 </span>
-                <!-- BEGIN test -->
+                <!-- BEGIN answer -->
                 <div class="tmsq-scoring-question-panel">
                     <span class="tmsq-scoring-question-header">{QUESTION_HEADER_TEXT}</span>
-                    <div class="tmsq-scoring-panel-answer-container">
-                        {ANSWER}
+                    <div class="tmsq-manual-scoring-form">
+                        {ANSWER_FORM}
                     </div>
                 </div>
-                <!-- END test -->
+                <!-- END answer -->
+                <span class="tmsq-scoring-panel-footer">
+                    <button class="btn btn-default" type="submit">{SUBMIT_BUTTON_TEXT}</button>
+                </span>
             </div>
-
         </div>
-
     </form>
+    <!-- END question -->
 </div>

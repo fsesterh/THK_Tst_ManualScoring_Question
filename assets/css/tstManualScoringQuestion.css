@@ -1,9 +1,16 @@
-.tmsq-scoring-container .tmsq-scoring-panel-container {
+.tmsq-scoring-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
+}
+
+.tmsq-scoring-answer-form {
+    width: 100%;
 }
 
 .tmsq-scoring-panel-container {
+    display: flex;
+    flex-direction: column;
     padding-top: 1rem;
     background: white;
 }
@@ -15,19 +22,46 @@
 
 .tmsq-scoring-question-panel {
     background: #f0f0f0;
-    padding-top: 2rem;
 }
 
-.tmsq-scoring-panel-answer-container {
+.tmsq-manual-scoring-form {
     background: white;
+}
+
+.tmsq-html-area-input {
+    border: solid black 1px;
+    margin: 1rem 0;
+    padding: 1rem;
+    overflow-x: auto;
 }
 
 .tmsq-scoring-panel-header {
     font-size: 1.8rem;
     display: flex;
+    padding-bottom: 2rem;
     justify-content: space-between;
+}
+.tmsq-scoring-panel-footer {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .tmsq-scoring-question-header {
     font-size: 1.8rem;
+}
+
+.tmsq-pagination {
+    padding-bottom: 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tmsq-pagination-separator {
+    width: 100%;
+    margin: 0.5rem;
+}
+
+.il-viewcontrol-pagination {
+    align-self: center;
 }
