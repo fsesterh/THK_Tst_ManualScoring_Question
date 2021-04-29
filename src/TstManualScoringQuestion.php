@@ -227,7 +227,7 @@ class TstManualScoringQuestion
         //Pagination
         $numberOfAnswers = count($answers);
         $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswers);
-
+        $currentPage = $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
         $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
@@ -278,7 +278,7 @@ class TstManualScoringQuestion
                 $this->ctrl->getFormActionByClass(
                     [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
                     "saveManualScoring"
-                )
+                ) . "&page={$currentPage}"
             );
 
             foreach ($question->getAnswers() as $answer) {
@@ -334,6 +334,13 @@ class TstManualScoringQuestion
             $this->plugin->redirectToHome();
         }
 
+        $query = $this->request->getQueryParams();
+        if(isset($query["page"])) {
+            $currentPage = (int) $query["page"];
+        } else {
+            $currentPage = -1;
+        }
+
         $post = array_filter($post, function ($key) {
             return !in_array($key, ["myCounter", "cmd"]);
         }, ARRAY_FILTER_USE_KEY);
@@ -376,12 +383,12 @@ class TstManualScoringQuestion
 
                 if (!$answer->readScoringCompleted() && !$answer->writePoints()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
-                    $this->redirectToManualScoringTab($question->getTestRefId());
+                    $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
 
                 if (!$answer->writeFeedback()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
-                    $this->redirectToManualScoringTab($question->getTestRefId());
+                    $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
             }
         }
@@ -391,7 +398,7 @@ class TstManualScoringQuestion
             $this->plugin->redirectToHome();
         } else {
             ilUtil::sendSuccess($this->plugin->txt("saving_manualScoring"), true);
-            $this->redirectToManualScoringTab($testRefId);
+            $this->redirectToManualScoringTab($testRefId, $currentPage);
         }
     }
 
@@ -517,6 +524,7 @@ class TstManualScoringQuestion
         return [
             "html" => $html,
             "start" => $start,
+            "currentPage" => $currentPage,
             "stop" => $stop
         ];
     }
@@ -664,9 +672,15 @@ class TstManualScoringQuestion
      * Redirects the user to the manual scoring by question sub tab
      * @param int|string $refId
      */
-    protected function redirectToManualScoringTab($refId)
+    protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
     {
+
         $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
+
+        if($pageNumber >= 0) {
+            $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "page", $pageNumber);
+        }
+
         $this->ctrl->redirectByClass(
             [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
             "showManScoringByQuestionParticipantsTable"
