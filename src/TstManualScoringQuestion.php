@@ -227,7 +227,7 @@ class TstManualScoringQuestion
         //Pagination
         $numberOfAnswers = count($answers);
         $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswers);
-
+        $currentPage = $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
         $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
@@ -273,6 +273,8 @@ class TstManualScoringQuestion
                 'ref_id',
                 $test->getRefId()
             );
+
+            $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "page", $currentPage);
             $tpl->setVariable(
                 "FORM_ACTION",
                 $this->ctrl->getFormActionByClass(
@@ -334,6 +336,13 @@ class TstManualScoringQuestion
             $this->plugin->redirectToHome();
         }
 
+        $query = $this->request->getQueryParams();
+        if (isset($query["page"])) {
+            $currentPage = (int) $query["page"];
+        } else {
+            $currentPage = -1;
+        }
+
         $post = array_filter($post, function ($key) {
             return !in_array($key, ["myCounter", "cmd"]);
         }, ARRAY_FILTER_USE_KEY);
@@ -376,12 +385,12 @@ class TstManualScoringQuestion
 
                 if (!$answer->readScoringCompleted() && !$answer->writePoints()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
-                    $this->redirectToManualScoringTab($question->getTestRefId());
+                    $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
 
                 if (!$answer->writeFeedback()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
-                    $this->redirectToManualScoringTab($question->getTestRefId());
+                    $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
             }
         }
@@ -391,15 +400,15 @@ class TstManualScoringQuestion
             $this->plugin->redirectToHome();
         } else {
             ilUtil::sendSuccess($this->plugin->txt("saving_manualScoring"), true);
-            $this->redirectToManualScoringTab($testRefId);
+            $this->redirectToManualScoringTab($testRefId, $currentPage);
         }
     }
 
     /**
      * Handles the filtering command
      * @param string $cmd
-     * @param array $query
-     * @param array $post
+     * @param array  $query
+     * @param array  $post
      */
     protected function handleFilter(string $cmd, array $query, array $post)
     {
@@ -497,8 +506,17 @@ class TstManualScoringQuestion
         $pagination = $factory->viewControl()->pagination()
                               ->withTargetURL($url, $parameterName)
                               ->withTotalEntries($totalNumberOfElements)
-                              ->withPageSize($elementsPerPage)
-                              ->withCurrentPage($currentPage);
+                              ->withPageSize($elementsPerPage);
+
+        $maxPage = $pagination->getNumberOfPages() - 1;
+        if ($currentPage >= $maxPage) {
+            $currentPage = $maxPage;
+        }
+        if ($currentPage <= 0) {
+            $currentPage = 0;
+        }
+
+        $pagination = $pagination->withCurrentPage($currentPage);
 
         $start = $pagination->getOffset();
         $stop = $start + $pagination->getPageLength();
@@ -517,6 +535,7 @@ class TstManualScoringQuestion
         return [
             "html" => $html,
             "start" => $start,
+            "currentPage" => $currentPage,
             "stop" => $stop
         ];
     }
@@ -664,9 +683,15 @@ class TstManualScoringQuestion
      * Redirects the user to the manual scoring by question sub tab
      * @param int|string $refId
      */
-    protected function redirectToManualScoringTab($refId)
+    protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
     {
+
         $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
+
+        if ($pageNumber >= 0) {
+            $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "page", $pageNumber);
+        }
+
         $this->ctrl->redirectByClass(
             [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
             "showManScoringByQuestionParticipantsTable"
