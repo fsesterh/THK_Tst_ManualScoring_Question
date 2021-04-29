@@ -335,7 +335,7 @@ class TstManualScoringQuestion
         }
 
         $query = $this->request->getQueryParams();
-        if(isset($query["page"])) {
+        if (isset($query["page"])) {
             $currentPage = (int) $query["page"];
         } else {
             $currentPage = -1;
@@ -405,8 +405,8 @@ class TstManualScoringQuestion
     /**
      * Handles the filtering command
      * @param string $cmd
-     * @param array $query
-     * @param array $post
+     * @param array  $query
+     * @param array  $post
      */
     protected function handleFilter(string $cmd, array $query, array $post)
     {
@@ -504,8 +504,17 @@ class TstManualScoringQuestion
         $pagination = $factory->viewControl()->pagination()
                               ->withTargetURL($url, $parameterName)
                               ->withTotalEntries($totalNumberOfElements)
-                              ->withPageSize($elementsPerPage)
-                              ->withCurrentPage($currentPage);
+                              ->withPageSize($elementsPerPage);
+
+        $maxPage = $pagination->getNumberOfPages() - 1;
+        if ($currentPage >= $maxPage) {
+            $currentPage = $maxPage;
+        }
+        if ($currentPage <= 0) {
+            $currentPage = 0;
+        }
+
+        $pagination = $pagination->withCurrentPage($currentPage);
 
         $start = $pagination->getOffset();
         $stop = $start + $pagination->getPageLength();
@@ -677,7 +686,7 @@ class TstManualScoringQuestion
 
         $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
 
-        if($pageNumber >= 0) {
+        if ($pageNumber >= 0) {
             $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "page", $pageNumber);
         }
 
