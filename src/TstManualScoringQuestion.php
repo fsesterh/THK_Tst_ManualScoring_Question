@@ -114,21 +114,21 @@ class TstManualScoringQuestion
             ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
             $this->plugin->redirectToHome();
         }
-        if (!method_exists($this, $cmd)) {
-            ilUtil::sendFailure($this->plugin->txt("cmdNotSupported"), true);
-            $this->redirectToManualScoringTab((int) $query["ref_id"]);
-        }
 
-        switch ($cmd) {
-            case "handleFilter":
+        switch (true) {
+            case ($cmd === "applyFilter"):
+            case ($cmd === "resetFilter"):
                 $post = $this->request->getParsedBody();
-                $this->$cmd($query, $post);
+                $this->handleFilter($cmd, $query, $post);
                 break;
-            case "saveManualScoring":
+
+            case method_exists($this, $cmd):
                 $this->$cmd($this->request->getParsedBody());
                 break;
+
             default:
-                throw new Exception(sprintf("Unsupported action: '%s'", $cmd));
+                ilUtil::sendFailure($this->plugin->txt("cmdNotSupported"), true);
+                $this->redirectToManualScoringTab((int) $query["ref_id"]);
         }
     }
 
@@ -172,7 +172,7 @@ class TstManualScoringQuestion
             $passOptions[$i] = (string) ($i + 1);
         }
 
-        $selectedFilters = $this->setupFilter($refId, $questionOptions, $passOptions);
+        $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $passOptions);
 
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
@@ -182,7 +182,7 @@ class TstManualScoringQuestion
         $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
         $question = new Question($questionId);
         $question
-            ->setTestRefId($refId)
+            ->setTestRefId($test->getRefId())
             ->setPass($selectedPass);
 
         /**
@@ -266,12 +266,19 @@ class TstManualScoringQuestion
             );
 
             $tpl->setVariable("SUBMIT_BUTTON_TEXT", $this->lng->txt("save"));
+            $tpl->setVariable("SUBMIT_CMD", 'saveManualScoring');
+
+            $this->ctrl->setParameterByClass(
+                ilTstManualScoringQuestionUIHookGUI::class,
+                'ref_id',
+                $test->getRefId()
+            );
             $tpl->setVariable(
                 "FORM_ACTION",
-                $this->ctrl->getLinkTargetByClass(
+                $this->ctrl->getFormActionByClass(
                     [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
                     "saveManualScoring"
-                ) . "&ref_id={$refId}"
+                )
             );
 
             foreach ($question->getAnswers() as $answer) {
@@ -328,7 +335,7 @@ class TstManualScoringQuestion
         }
 
         $post = array_filter($post, function ($key) {
-            return !in_array($key, ["myCounter"]);
+            return !in_array($key, ["myCounter", "cmd"]);
         }, ARRAY_FILTER_USE_KEY);
 
         /**
@@ -336,7 +343,7 @@ class TstManualScoringQuestion
          */
         $questions = [];
 
-        foreach ($post as $questionData) {
+        foreach ($post as $key => $questionData) {
             $question = new Question();
             $question->loadFromPost($questionData);
             array_push($questions, $question);
@@ -390,12 +397,13 @@ class TstManualScoringQuestion
 
     /**
      * Handles the filtering command
+     * @param string $cmd
      * @param array $query
      * @param array $post
      */
-    protected function handleFilter(array $query, array $post)
+    protected function handleFilter(string $cmd, array $query, array $post)
     {
-        $filterCommand = array_key_first($post["cmd"]);
+        $filterCommand = $cmd;
 
         $selectQuestionInput = new ilSelectInputGUI($this->lng->txt("question"), "question");
         $selectQuestionInput->setParent($this->plugin);
@@ -522,18 +530,8 @@ class TstManualScoringQuestion
      */
     protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions) : array
     {
-        $answersPerPageOptions = [
-            1 => "1",
-            2 => "2",
-            3 => "3",
-            4 => "4",
-            5 => "5",
-            6 => "6",
-            7 => "7",
-            8 => "8",
-            9 => "9",
-            10 => "10",
-        ];
+        $answersPerPageOptions = range(1, 10);
+        $answersPerPageOptions = array_combine($answersPerPageOptions, $answersPerPageOptions);
 
         //Filter options
         $selectQuestionInput = new ilSelectInputGUI($this->lng->txt("question"), "question");
@@ -593,12 +591,15 @@ class TstManualScoringQuestion
         $resetFilterButton->setCaption($this->lng->txt("reset_filter"), false);
         $resetFilterButton->setCommand('resetFilter');
 
-        $filterAction = $this->ctrl->getLinkTargetByClass(
-                [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-                "handleFilter",
-                "",
-                true
-            ) . "&ref_id={$testRefId}";
+        $this->ctrl->setParameterByClass(
+            ilTstManualScoringQuestionUIHookGUI::class,
+            'ref_id',
+            $testRefId
+        );
+        $filterAction = $this->ctrl->getFormActionByClass(
+            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+            "applyFilter"
+        );
 
         $this->toolbar->setFormAction($filterAction);
         $this->toolbar->addInputItem($selectQuestionInput, true);
