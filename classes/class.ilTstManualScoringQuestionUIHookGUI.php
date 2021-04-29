@@ -105,7 +105,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $user = $this->dic->user();
         $ctrl = $this->dic->ctrl();
         $query = $request->getQueryParams();
-        $cmd = $query["cmd"];
+        $cmd = $ctrl->getCmd();
         if (!isset($cmd)) {
             ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
             $ctrl->redirectToURL("ilias.php");
