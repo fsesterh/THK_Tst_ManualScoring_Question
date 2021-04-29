@@ -273,12 +273,14 @@ class TstManualScoringQuestion
                 'ref_id',
                 $test->getRefId()
             );
+
+            $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "page", $currentPage);
             $tpl->setVariable(
                 "FORM_ACTION",
                 $this->ctrl->getFormActionByClass(
                     [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
                     "saveManualScoring"
-                ) . "&page={$currentPage}"
+                )
             );
 
             foreach ($question->getAnswers() as $answer) {
