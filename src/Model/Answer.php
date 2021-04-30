@@ -352,7 +352,7 @@ class Answer
         $lng = $DIC->language();
         $username = ilObjTestAccess::_getParticipantData($active_id);
 
-        $test = new ilObjTest($this->question->getId(), true);
+        $test = new ilObjTest($this->question->getTestRefId(), true);
         $test->logAction(
             sprintf(
                 $lng->txtlng('assessment', 'log_manual_feedback', ilObjAssessmentFolder::_getLogLanguage()),
