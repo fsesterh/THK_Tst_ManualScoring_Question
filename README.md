@@ -1,6 +1,6 @@
 # UIHook Plugin - TstManualScoringQuestion
 
-* PHP: [![Minimum PHP Version](https://img.shields.io/badge/Minimum_PHP-7.3.x-blue.svg)](https://php.net/) [![Maximum PHP Version](https://img.shields.io/badge/Maximum_PHP-7.4.x-blue.svg)](https://php.net/)
+* PHP: [![Minimum PHP Version](https://img.shields.io/badge/Minimum_PHP-7.3.x-blue.svg)](https://php.net/) [![Maximum PHP Version](https://img.shields.io/badge/Maximum_PHP-8.0.x-blue.svg)](https://php.net/)
 
 * ILIAS: [![Minimum ILIAS Version](https://img.shields.io/badge/Minimum_ILIAS-5.4-orange.svg)](https://ilias.de/) [![Maximum ILIAS Version](https://img.shields.io/badge/Maximum_ILIAS-6.x-orange.svg)](https://ilias.de/)
 
