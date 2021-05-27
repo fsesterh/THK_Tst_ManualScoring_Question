@@ -29,6 +29,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
 use ilObjAssessmentFolder;
+use assTextQuestionGUI;
 use ilLogger;
 
 /**
@@ -705,9 +706,33 @@ class TstManualScoringQuestion
             ilObjTestGUI::accessViolationRedirect();
         }
 
+        $data = $test->getCompleteEvaluationData(false);
+        $participant = $data->getParticipant($activeId);
+
         $question_gui = $test->createQuestionGUI('', $questionId);
 
-        return $question_gui->getSolutionOutput(
+        $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'Modules/Test');
+
+        if ($question_gui->supportsIntermediateSolutionOutput() && $question_gui->hasIntermediateSolution($activeId,
+                $pass)) {
+            $question_gui->setUseIntermediateSolution(true);
+            $aresult_output = $question_gui->getSolutionOutput(
+                $activeId,
+                $pass,
+                false,
+                false,
+                true,
+                false,
+                false,
+                true
+            );
+            $question_gui->setUseIntermediateSolution(false);
+
+            $tmp_tpl->setVariable('TEXT_ASOLUTION_OUTPUT', $this->lng->txt('autosavecontent'));
+            $tmp_tpl->setVariable('ASOLUTION_OUTPUT', $aresult_output);
+        }
+
+        $result_output = $question_gui->getSolutionOutput(
             $activeId,
             $pass,
             false,
@@ -717,6 +742,12 @@ class TstManualScoringQuestion
             false,
             true
         );
+        $tmp_tpl->setVariable('TEXT_YOUR_SOLUTION',
+            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+        );
+        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
+
+        return $tmp_tpl->get();
     }
 
     /**
@@ -736,6 +767,25 @@ class TstManualScoringQuestion
             [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
             "showManScoringByQuestionParticipantsTable"
         );
+    }
+
+    /**
+     * Copied function from class.assTextQuestionGUI.php
+     * Used to get the answer text
+     * @param assTextQuestionGUI $questionGuiObj
+     * @param int                $active_id
+     * @param int                $pass
+     * @return mixed|string
+     */
+    protected function getUserAnswer(assTextQuestionGUI $questionGuiObj, int $active_id, int $pass)
+    {
+        $user_solution = "";
+        $solutions = $questionGuiObj->object->getSolutionValues($active_id, $pass,
+            !$questionGuiObj->getUseIntermediateSolution());
+        foreach ($solutions as $idx => $solution_value) {
+            $user_solution = $solution_value["value1"];
+        }
+        return $user_solution;
     }
 
     /**
