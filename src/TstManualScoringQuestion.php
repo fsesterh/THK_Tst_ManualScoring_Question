@@ -589,11 +589,15 @@ class TstManualScoringQuestion
 
         //Prevent invalid values
         if (!in_array((int) $selectPassInput->getValue(), array_keys($passOptions))) {
-            $selectPassInput->setValue((string) array_key_first($passOptions));
+            //alternative as array_key_first() is not available in php 7.2
+            reset($passOptions);
+            $selectPassInput->setValue((string) key($passOptions));
         }
 
         if (!in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions))) {
-            $selectQuestionInput->setValue((string) array_key_first($questionOptions));
+            //alternative as array_key_first() is not available in php 7.2
+            reset($questionOptions);
+            $selectQuestionInput->setValue((string) key($questionOptions));
         }
 
         if (!in_array((int) $selectAnswersPerPageInput->getValue(), $answersPerPageOptions)) {
