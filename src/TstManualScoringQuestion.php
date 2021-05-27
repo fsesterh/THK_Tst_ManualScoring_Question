@@ -670,9 +670,33 @@ class TstManualScoringQuestion
             ilObjTestGUI::accessViolationRedirect();
         }
 
+        $data = $test->getCompleteEvaluationData(false);
+        $participant = $data->getParticipant($activeId);
+
         $question_gui = $test->createQuestionGUI('', $questionId);
 
-        $userSolutionHtml = $question_gui->getSolutionOutput(
+        $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'Modules/Test');
+
+        if ($question_gui->supportsIntermediateSolutionOutput() && $question_gui->hasIntermediateSolution($activeId,
+                $pass)) {
+            $question_gui->setUseIntermediateSolution(true);
+            $aresult_output = $question_gui->getSolutionOutput(
+                $activeId,
+                $pass,
+                false,
+                false,
+                true,
+                false,
+                false,
+                true
+            );
+            $question_gui->setUseIntermediateSolution(false);
+
+            $tmp_tpl->setVariable('TEXT_ASOLUTION_OUTPUT', $this->lng->txt('autosavecontent'));
+            $tmp_tpl->setVariable('ASOLUTION_OUTPUT', $aresult_output);
+        }
+
+        $result_output = $question_gui->getSolutionOutput(
             $activeId,
             $pass,
             false,
@@ -682,16 +706,12 @@ class TstManualScoringQuestion
             false,
             true
         );
+        $tmp_tpl->setVariable('TEXT_YOUR_SOLUTION',
+            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+        );
+        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
 
-        if (method_exists($question_gui->object, "getLatestAutosaveContent")) {
-            $userAnswerText = $this->getUserAnswer($question_gui, $activeId, $pass);
-            $autoSavedAnswerText = $question_gui->object->getLatestAutosaveContent($activeId);
-
-            if (empty($userAnswerText) && !empty($autoSavedAnswerText)) {
-                $userSolutionHtml .= "<div class='tmsq-auto-save-container'><span class='tmsq-auto-save-label'>Auto saved content</span><div class='tmsq-auto-save-content-container'>$autoSavedAnswerText</div></div>";
-            }
-        }
-        return $userSolutionHtml;
+        return $tmp_tpl->get();
     }
 
     /**
