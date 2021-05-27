@@ -29,6 +29,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
 use ilObjAssessmentFolder;
+use assTextQuestionGUI;
 
 /**
  * Class TstManualScoringQuestion
@@ -671,7 +672,7 @@ class TstManualScoringQuestion
 
         $question_gui = $test->createQuestionGUI('', $questionId);
 
-        return $question_gui->getSolutionOutput(
+        $userSolutionHtml = $question_gui->getSolutionOutput(
             $activeId,
             $pass,
             false,
@@ -681,6 +682,16 @@ class TstManualScoringQuestion
             false,
             true
         );
+
+        if (method_exists($question_gui->object, "getLatestAutosaveContent")) {
+            $userAnswerText = $this->getUserAnswer($question_gui, $activeId, $pass);
+            $autoSavedAnswerText = $question_gui->object->getLatestAutosaveContent($activeId);
+
+            if (empty($userAnswerText) && !empty($autoSavedAnswerText)) {
+                $userSolutionHtml .= "<div class='tmsq-auto-save-container'><span class='tmsq-auto-save-label'>Auto saved content</span><div class='tmsq-auto-save-content-container'>$autoSavedAnswerText</div></div>";
+            }
+        }
+        return $userSolutionHtml;
     }
 
     /**
@@ -700,6 +711,25 @@ class TstManualScoringQuestion
             [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
             "showManScoringByQuestionParticipantsTable"
         );
+    }
+
+    /**
+     * Copied function from class.assTextQuestionGUI.php
+     * Used to get the answer text
+     * @param assTextQuestionGUI $questionGuiObj
+     * @param int                $active_id
+     * @param int                $pass
+     * @return mixed|string
+     */
+    protected function getUserAnswer(assTextQuestionGUI $questionGuiObj, int $active_id, int $pass)
+    {
+        $user_solution = "";
+        $solutions = $questionGuiObj->object->getSolutionValues($active_id, $pass,
+            !$questionGuiObj->getUseIntermediateSolution());
+        foreach ($solutions as $idx => $solution_value) {
+            $user_solution = $solution_value["value1"];
+        }
+        return $user_solution;
     }
 
     /**

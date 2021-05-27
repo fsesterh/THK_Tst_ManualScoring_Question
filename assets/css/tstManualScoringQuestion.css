@@ -65,3 +65,19 @@
 .il-viewcontrol-pagination {
     align-self: center;
 }
+
+.tmsq-auto-save-container {
+    margin-top: 1rem;
+    border: 1px solid black;
+    padding: 1rem;
+}
+
+.tmsq-auto-save-label {
+    font-size: 1.5rem;
+    font-weight: bolder;
+}
+
+.tmsq-auto-save-content-container {
+    border: 1px solid black;
+    padding: 1rem;
+}
