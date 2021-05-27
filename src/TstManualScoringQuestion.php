@@ -30,6 +30,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
 use ilObjAssessmentFolder;
 use assTextQuestionGUI;
+use ilLogger;
 
 /**
  * Class TstManualScoringQuestion
@@ -41,6 +42,11 @@ class TstManualScoringQuestion
     public const ALL_USERS = 0;
     public const ONLY_FINALIZED = 1;
     public const EXCEPT_FINALIZED = 2;
+
+    /**
+     * @var ilLogger
+     */
+    protected $logger;
 
     /**
      * @var ilObjUser
@@ -102,6 +108,7 @@ class TstManualScoringQuestion
         $this->request = $dic->http()->request();
         $this->access = $dic->access();
         $this->user = $dic->user();
+        $this->logger = $dic->logger()->root();
     }
 
     /**
@@ -154,9 +161,19 @@ class TstManualScoringQuestion
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
         $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoring();
+
+        $logMessage = "TMSQ : allowed question type ids: ";
+        foreach ($allowedQuestionTypes as $allowedQuestionType) {
+            $logMessage .= $allowedQuestionType . ", ";
+        }
+        $this->logger->debug($logMessage);
+
         $allQuestions = array_filter($test->getAllQuestions(), function ($question) use ($allowedQuestionTypes) {
             return in_array($question["question_type_fi"], $allowedQuestionTypes);
         });
+
+        $this->logger->debug("TMSQ : number of questions: " . count($test->getAllQuestions()));
+        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestions));
 
         if (count($allQuestions) == 0) {
             return $this->showNoEntries($tpl);
@@ -173,12 +190,16 @@ class TstManualScoringQuestion
             $passOptions[$i] = (string) ($i + 1);
         }
 
+        $this->logger->debug("TMSQ : max passes for test: {$test->getMaxPassOfTest()}");
+
         $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $passOptions);
 
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
         $selectedScoringCompleted = $selectedFilters["selectedScoringCompleted"];
         $selectedAnswersPerPage = $selectedFilters["selectedAnswersPerPage"];
+
+        $this->logger->debug("TMSQ : Selected filters: pass={$selectedPass} | scoringCompleted=$selectedScoringCompleted | answersPerPage={$selectedAnswersPerPage}");
 
         $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
         $question = new Question($questionId);
@@ -199,14 +220,21 @@ class TstManualScoringQuestion
             array_push($participants, $participant);
         }
 
+        $this->logger->debug("TMSQ : " . "number of participants: " . count($participants));
+
         //Sort by active_id
         usort($participants, function ($a, $b) {
             return $a->getActiveId() >= $b->getActiveId();
         });
 
+        $this->logger->debug("TMSQ : " . "number of participants after sorting by active_id: " . count($participants));
+
         foreach ($participants as $participant) {
             if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
+                $this->logger->debug("TMSQ : skipped participant with activeId {$participant->getActiveId()} | finished={$participant->isTestFinished()} | unfinishedPass={$participant->hasUnfinishedPasses()}");
+
                 continue;
+
             }
             $answer = new Answer($question);
             $answer
@@ -223,6 +251,7 @@ class TstManualScoringQuestion
                 ->setPoints($answer->readReachedPoints())
                 ->setScoringCompleted($answer->readScoringCompleted());
             array_push($answers, $answer);
+            $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
         }
 
         //Pagination
@@ -233,7 +262,10 @@ class TstManualScoringQuestion
 
         $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
 
+        $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswers} now " . count($paginatedAnswers));
+
         if ($this->plugin->isAtLeastIlias6()) {
+            $this->logger->debug("TMSQ : ilias 6 pagination filtering by user scoring state");
             $finalAnswerArr = array_filter(
                 $paginatedAnswers,
                 function (Answer $answer) use ($selectedScoringCompleted) {
@@ -248,8 +280,11 @@ class TstManualScoringQuestion
                 }
             );
         } else {
+            $this->logger->debug("TMSQ : ilias 54 pagination");
             $finalAnswerArr = $paginatedAnswers;
         }
+
+        $this->logger->debug("TMSQ : Final number of answers " . count($finalAnswerArr));
 
         $question->setAnswers($finalAnswerArr);
 
@@ -314,6 +349,7 @@ class TstManualScoringQuestion
 
             $tpl->parseCurrentBlock("question");
         } else {
+            $this->logger->debug("TMSQ : no answers available, show no entries message");
             return $this->showNoEntries($tpl);
         }
 
