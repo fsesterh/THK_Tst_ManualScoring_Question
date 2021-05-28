@@ -230,12 +230,18 @@ class TstManualScoringQuestion
         $this->logger->debug("TMSQ : " . "number of participants after sorting by active_id: " . count($participants));
 
         foreach ($participants as $participant) {
+            //Removed as customer wants to see ghost-passes like it's in the normal ilias version
+            //Ghost-passes are a bug!
+            //Ghost-passes can get created if a test has autosave enabled and the maximum passes are set to 1
+            /*
             if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
                 $this->logger->debug("TMSQ : skipped participant with activeId {$participant->getActiveId()} | finished={$participant->isTestFinished()} | unfinishedPass={$participant->hasUnfinishedPasses()}");
 
                 continue;
 
             }
+            */
+
             $answer = new Answer($question);
             $answer
                 ->setActiveId((int) $participant->getActiveId())
