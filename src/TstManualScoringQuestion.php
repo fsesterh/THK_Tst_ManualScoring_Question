@@ -387,7 +387,8 @@ class TstManualScoringQuestion
         }
 
         $post = array_filter($post, function ($key) {
-            return !in_array($key, ["myCounter", "cmd"]);
+            // @mbeym: Maybe we should exclude all NON NUMERIC keys here?
+            return !in_array($key, ["myCounter", "cmd", "order_elems"]);
         }, ARRAY_FILTER_USE_KEY);
 
         /**
