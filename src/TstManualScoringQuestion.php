@@ -386,17 +386,19 @@ class TstManualScoringQuestion
             $currentPage = -1;
         }
 
-        $post = array_filter($post, function ($key) {
-            // @mbeym: Maybe we should exclude all NON NUMERIC keys here?
-            return !in_array($key, ["myCounter", "cmd", "order_elems"]);
-        }, ARRAY_FILTER_USE_KEY);
+        if (!isset($post["tmsq"]) || !is_array($post["tmsq"])) {
+            ilUtil::sendFailure($this->plugin->txt("invalid_post_data"), true);
+            $this->plugin->redirectToHome();
+        }
+
+        $postData = $post["tmsq"];
 
         /**
          * @var Question[] $questions
          */
         $questions = [];
 
-        foreach ($post as $key => $questionData) {
+        foreach ($postData as $key => $questionData) {
             $question = new Question();
             $question->loadFromPost($questionData);
             array_push($questions, $question);

@@ -5,6 +5,7 @@ cmdNotSupported#:#Kommando wird nicht unterstützt
 noEntries#:#Keine Einträge vorhanden
 nothingReceivedInPost#:#POST ist leer oder nicht definiert
 unknownError#:#Unbekannter Fehler. Es könnten informationen fehlen
+invalid_post_data#:#Unerwarteten POST erhalten
 
 answer_of#:#Antwort von
 
