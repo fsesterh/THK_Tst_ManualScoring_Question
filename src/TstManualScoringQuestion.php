@@ -31,6 +31,7 @@ use ilTestParticipant;
 use ilObjAssessmentFolder;
 use assTextQuestionGUI;
 use ilLogger;
+use assQuestion;
 
 /**
  * Class TstManualScoringQuestion
@@ -160,29 +161,33 @@ class TstManualScoringQuestion
         $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
-        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoring();
+        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoringTypes();
 
-        $logMessage = "TMSQ : allowed question type ids: ";
+        $logMessage = "TMSQ : allowed question type: ";
         foreach ($allowedQuestionTypes as $allowedQuestionType) {
             $logMessage .= $allowedQuestionType . ", ";
         }
         $this->logger->debug($logMessage);
 
-        $allQuestions = array_filter($test->getAllQuestions(), function ($question) use ($allowedQuestionTypes) {
-            return in_array($question["question_type_fi"], $allowedQuestionTypes);
-        });
+        $allQuestionIds = array_filter($test->getQuestions(),
+            function ($questionId) use ($test, $allowedQuestionTypes) {
+                return in_array($test->getQuestionType($questionId), $allowedQuestionTypes);
+            });
 
         $this->logger->debug("TMSQ : number of questions: " . count($test->getAllQuestions()));
-        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestions));
+        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestionIds));
 
-        if (count($allQuestions) == 0) {
+        if (count($allQuestionIds) == 0) {
             return $this->showNoEntries($tpl);
         }
 
         $questionOptions = [];
         $pointsTranslated = $this->lng->txt("points");
-        foreach ($allQuestions as $questionID => $data) {
-            $questionOptions[$questionID] = $data["title"] . " ({$data['points']} {$pointsTranslated}) [ID: {$questionID}]";
+
+        foreach ($allQuestionIds as $questionId) {
+            $title = assQuestion::_getTitle($questionId);
+            $points = assQuestion::_getMaximumPoints($questionId);
+            $questionOptions[$questionId] = $title . " ({$points} {$pointsTranslated}) [ID: {$questionId}]";
         }
 
         $passOptions = [];
@@ -201,8 +206,7 @@ class TstManualScoringQuestion
 
         $this->logger->debug("TMSQ : Selected filters: pass={$selectedPass} | scoringCompleted=$selectedScoringCompleted | answersPerPage={$selectedAnswersPerPage}");
 
-        $questionId = (int) $allQuestions[$selectedQuestionId]["question_id"];
-        $question = new Question($questionId);
+        $question = new Question($selectedQuestionId);
         $question
             ->setTestRefId($test->getRefId())
             ->setPass($selectedPass);
@@ -250,7 +254,7 @@ class TstManualScoringQuestion
                     $test,
                     $answer->getActiveId(),
                     $selectedPass,
-                    $questionId,
+                    $selectedQuestionId,
                     $testAccess
                 ))
                 ->setFeedback($answer->readFeedback())
