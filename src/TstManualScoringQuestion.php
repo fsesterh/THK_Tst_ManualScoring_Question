@@ -788,28 +788,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Copied function from class.assTextQuestionGUI.php
-     * Used to get the answer text
-     * @param assTextQuestionGUI $questionGuiObj
-     * @param int                $active_id
-     * @param int                $pass
-     * @return mixed|string
-     */
-    protected function getUserAnswer(assTextQuestionGUI $questionGuiObj, int $active_id, int $pass)
-    {
-        $user_solution = "";
-        $solutions = $questionGuiObj->object->getSolutionValues(
-            $active_id,
-            $pass,
-            !$questionGuiObj->getUseIntermediateSolution()
-        );
-        foreach ($solutions as $id => $solution_value) {
-            $user_solution = $solution_value["value1"];
-        }
-        return $user_solution;
-    }
-
-    /**
      * Sends an invalid form message and redirects to the manual scoring tab of the test (refId)
      * @param $refId
      */
