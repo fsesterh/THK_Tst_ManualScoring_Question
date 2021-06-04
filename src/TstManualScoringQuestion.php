@@ -707,6 +707,7 @@ class TstManualScoringQuestion
      * @param int          $questionId
      * @param ilTestAccess $testAccess
      * @return string
+     * @throws ilTemplateException
      */
     protected function getAnswerDetail(
         ilObjTest $test,
@@ -802,7 +803,7 @@ class TstManualScoringQuestion
             $pass,
             !$questionGuiObj->getUseIntermediateSolution()
         );
-        foreach ($solutions as $idx => $solution_value) {
+        foreach ($solutions as $id => $solution_value) {
             $user_solution = $solution_value["value1"];
         }
         return $user_solution;
