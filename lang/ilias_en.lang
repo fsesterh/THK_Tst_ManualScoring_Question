@@ -5,6 +5,7 @@ cmdNotSupported#:#Command not supported
 noEntries#:#No entries available
 nothingReceivedInPost#:#POST is empty or not defined
 unknownError#:#Unknown error. Information could be empty
+invalid_post_data#:#Unexpected POST received
 
 answer_of#:#Answer of
 

@@ -386,17 +386,19 @@ class TstManualScoringQuestion
             $currentPage = -1;
         }
 
-        $post = array_filter($post, function ($key) {
-            // @mbeym: Maybe we should exclude all NON NUMERIC keys here?
-            return !in_array($key, ["myCounter", "cmd", "order_elems"]);
-        }, ARRAY_FILTER_USE_KEY);
+        if (!isset($post["tmsq"]) || !is_array($post["tmsq"])) {
+            ilUtil::sendFailure($this->plugin->txt("invalid_post_data"), true);
+            $this->plugin->redirectToHome();
+        }
+
+        $postData = $post["tmsq"];
 
         /**
          * @var Question[] $questions
          */
         $questions = [];
 
-        foreach ($post as $key => $questionData) {
+        foreach ($postData as $key => $questionData) {
             $question = new Question();
             $question->loadFromPost($questionData);
             array_push($questions, $question);
@@ -720,8 +722,12 @@ class TstManualScoringQuestion
 
         $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'Modules/Test');
 
-        if ($question_gui->supportsIntermediateSolutionOutput() && $question_gui->hasIntermediateSolution($activeId,
-                $pass)) {
+        if (
+            method_exists($question_gui, "supportsIntermediateSolutionOutput") &&
+            method_exists($question_gui, "hasIntermediateSolution") &&
+            method_exists($question_gui, "setUseIntermediateSolution") &&
+            $question_gui->supportsIntermediateSolutionOutput() &&
+            $question_gui->hasIntermediateSolution($activeId, $pass)) {
             $question_gui->setUseIntermediateSolution(true);
             $aresult_output = $question_gui->getSolutionOutput(
                 $activeId,
@@ -749,7 +755,8 @@ class TstManualScoringQuestion
             false,
             true
         );
-        $tmp_tpl->setVariable('TEXT_YOUR_SOLUTION',
+        $tmp_tpl->setVariable(
+            'TEXT_YOUR_SOLUTION',
             $this->lng->txt('answers_of') . ' ' . $participant->getName()
         );
         $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
@@ -763,7 +770,6 @@ class TstManualScoringQuestion
      */
     protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
     {
-
         $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
 
         if ($pageNumber >= 0) {
@@ -787,8 +793,11 @@ class TstManualScoringQuestion
     protected function getUserAnswer(assTextQuestionGUI $questionGuiObj, int $active_id, int $pass)
     {
         $user_solution = "";
-        $solutions = $questionGuiObj->object->getSolutionValues($active_id, $pass,
-            !$questionGuiObj->getUseIntermediateSolution());
+        $solutions = $questionGuiObj->object->getSolutionValues(
+            $active_id,
+            $pass,
+            !$questionGuiObj->getUseIntermediateSolution()
+        );
         foreach ($solutions as $idx => $solution_value) {
             $user_solution = $solution_value["value1"];
         }
