@@ -29,7 +29,6 @@ use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilTestParticipant;
 use ilObjAssessmentFolder;
-use assTextQuestionGUI;
 use ilLogger;
 use assQuestion;
 
@@ -370,6 +369,15 @@ class TstManualScoringQuestion
     {
         $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
         return $tpl->get();
+    }
+
+    /**
+     * Used to redirect the user to the correct tab and set the parameter tmsq_tab to true
+     */
+    protected function showManScoringTab()
+    {
+        $query = $this->request->getQueryParams();
+        $this->redirectToManualScoringTab($query["ref_id"]);
     }
 
     /**
@@ -776,6 +784,7 @@ class TstManualScoringQuestion
     protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
     {
         $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
+        $this->ctrl->setParameterByClass(ilObjTestGUI::class, "tmsq_tab", true);
 
         if ($pageNumber >= 0) {
             $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "page", $pageNumber);
