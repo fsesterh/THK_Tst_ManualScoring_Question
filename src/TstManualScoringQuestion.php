@@ -234,12 +234,8 @@ class TstManualScoringQuestion
 
                 $user = ilObjUser::_getUserData(array($participant->user_id));
                 $answersData[] = array(
-                    'pass_id' => $selectedPass,
                     'active_id' => $active_id,
-                    'qst_id' => $questionData['qid'],
                     'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $selectedPass),
-                    'maximum_points' => assQuestion::_getMaximumPoints($questionData['qid']),
-                    'participant' => $participant,
                     'lastname' => $user[0]['lastname'],
                     'firstname' => $user[0]['firstname'],
                     'login' => $participant->getLogin(),
@@ -267,7 +263,7 @@ class TstManualScoringQuestion
                     $testAccess
                 ))
                 ->setFeedback($answer->readFeedback())
-                ->setPoints($answer->readReachedPoints())
+                ->setPoints((float) $data["reached_points"])
                 ->setScoringCompleted($answer->readScoringCompleted());
             $question->addAnswer($answer);
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
