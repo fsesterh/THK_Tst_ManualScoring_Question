@@ -3,7 +3,6 @@
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
-use ilTestParticipant;
 use assQuestion;
 use ilObjTest;
 use ilRTE;
@@ -18,9 +17,17 @@ use ilObjTestAccess;
 class Answer
 {
     /**
-     * @var ilTestParticipant
+     * @var string
      */
-    protected $participant;
+    protected $firstName;
+    /**
+     * @var string
+     */
+    protected $lastName;
+    /**
+     * @var string
+     */
+    protected $login;
     /**
      * @var int
      */
@@ -177,24 +184,6 @@ class Answer
 
         $this->setScoringCompleted((bool) $scoringCompleted);
 
-        return $this;
-    }
-
-    /**
-     * @return ilTestParticipant
-     */
-    public function getParticipant() : ilTestParticipant
-    {
-        return $this->participant;
-    }
-
-    /**
-     * @param ilTestParticipant $participant
-     * @return Answer
-     */
-    public function setParticipant(ilTestParticipant $participant) : Answer
-    {
-        $this->participant = $participant;
         return $this;
     }
 
