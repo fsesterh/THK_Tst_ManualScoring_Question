@@ -102,6 +102,60 @@ class Answer
     }
 
     /**
+     * @return string
+     */
+    public function getFirstName() : string
+    {
+        return $this->firstName;
+    }
+
+    /**
+     * @param string $firstName
+     * @return Answer
+     */
+    public function setFirstName(string $firstName) : Answer
+    {
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLastName() : string
+    {
+        return $this->lastName;
+    }
+
+    /**
+     * @param string $lastName
+     * @return Answer
+     */
+    public function setLastName(string $lastName) : Answer
+    {
+        $this->lastName = $lastName;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogin() : string
+    {
+        return $this->login;
+    }
+
+    /**
+     * @param string $login
+     * @return Answer
+     */
+    public function setLogin(string $login) : Answer
+    {
+        $this->login = $login;
+        return $this;
+    }
+
+    /**
      * Writes the feedback to ilias
      * Returns true on success
      * @return bool
