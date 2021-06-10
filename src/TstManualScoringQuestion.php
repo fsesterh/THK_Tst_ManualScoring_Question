@@ -27,11 +27,12 @@ use ilObjUser;
 use Exception;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
-use ilTestParticipant;
 use ilObjAssessmentFolder;
-use assTextQuestionGUI;
 use ilLogger;
 use assQuestion;
+use ilTestParticipantData;
+use ilTestParticipantAccessFilter;
+use ilTestEvaluationUserData;
 
 /**
  * Class TstManualScoringQuestion
@@ -206,50 +207,58 @@ class TstManualScoringQuestion
 
         $this->logger->debug("TMSQ : Selected filters: pass={$selectedPass} | scoringCompleted=$selectedScoringCompleted | answersPerPage={$selectedAnswersPerPage}");
 
+        //Copied from class.ilTestScoringByQuestionsGUI.php
+        $data = $test->getCompleteEvaluationData(false);
+        $participants = $data->getParticipants();
+
+        $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
+        $participantData->setActiveIdsFilter(array_keys($data->getParticipants()));
+
+        $participantData->setParticipantAccessFilter(
+            ilTestParticipantAccessFilter::getScoreParticipantsUserFilter($refId)
+        );
+
+        $participantData->load($test->getTestId());
+
+        $answersData = [];
+
+        foreach ($participantData->getActiveIds() as $active_id) {
+
+            /** @var $participant ilTestEvaluationUserData */
+            $participant = $participants[$active_id];
+            $testResultData = $test->getTestResult($active_id, $selectedPass);
+            foreach ($testResultData as $questionData) {
+                if (!isset($questionData['qid']) || $questionData['qid'] != $selectedQuestionId) {
+                    continue;
+                }
+
+                $user = ilObjUser::_getUserData(array($participant->user_id));
+                $answersData[] = array(
+                    'pass_id' => $selectedPass,
+                    'active_id' => $active_id,
+                    'qst_id' => $questionData['qid'],
+                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $selectedPass),
+                    'maximum_points' => assQuestion::_getMaximumPoints($questionData['qid']),
+                    'participant' => $participant,
+                    'lastname' => $user[0]['lastname'],
+                    'firstname' => $user[0]['firstname'],
+                    'login' => $participant->getLogin(),
+                );
+            }
+        }
+
         $question = new Question($selectedQuestionId);
         $question
             ->setTestRefId($test->getRefId())
             ->setPass($selectedPass);
 
-        /**
-         * @var Answer[] $answers
-         */
-        $answers = [];
-
-        /**
-         * @var ilTestParticipant[] $participants
-         */
-        $participants = [];
-        foreach ($test->getActiveParticipantList() as $participant) {
-            array_push($participants, $participant);
-        }
-
-        $this->logger->debug("TMSQ : " . "number of participants: " . count($participants));
-
-        //Sort by active_id
-        usort($participants, function ($a, $b) {
-            return $a->getActiveId() >= $b->getActiveId();
-        });
-
-        $this->logger->debug("TMSQ : " . "number of participants after sorting by active_id: " . count($participants));
-
-        foreach ($participants as $participant) {
-            //Removed as customer wants to see ghost-passes like it's in the normal ilias version
-            //Ghost-passes are a bug!
-            //Ghost-passes can get created if a test has autosave enabled and the maximum passes are set to 1
-            /*
-            if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
-                $this->logger->debug("TMSQ : skipped participant with activeId {$participant->getActiveId()} | finished={$participant->isTestFinished()} | unfinishedPass={$participant->hasUnfinishedPasses()}");
-
-                continue;
-
-            }
-            */
-
+        foreach ($answersData as $data) {
             $answer = new Answer($question);
             $answer
-                ->setActiveId((int) $participant->getActiveId())
-                ->setParticipant($participant)
+                ->setActiveId((int) $data["active_id"])
+                ->setFirstname($data["firstname"])
+                ->setLastName($data["lastname"])
+                ->setLogin($data["login"])
                 ->setAnswerHtml($this->getAnswerDetail(
                     $test,
                     $answer->getActiveId(),
@@ -260,17 +269,17 @@ class TstManualScoringQuestion
                 ->setFeedback($answer->readFeedback())
                 ->setPoints($answer->readReachedPoints())
                 ->setScoringCompleted($answer->readScoringCompleted());
-            array_push($answers, $answer);
+            $question->addAnswer($answer);
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
         }
 
         //Pagination
-        $numberOfAnswers = count($answers);
+        $numberOfAnswers = count($question->getAnswers());
         $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswers);
         $currentPage = $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
-        $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
+        $paginatedAnswers = array_slice($question->getAnswers(), $paginationData["start"], $paginationData["stop"]);
 
         $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswers} now " . count($paginatedAnswers));
 
@@ -343,9 +352,9 @@ class TstManualScoringQuestion
                     sprintf(
                         "%s %s %s (%s)",
                         $this->plugin->txt("answer_of"),
-                        $answer->getParticipant()->getFirstname(),
-                        $answer->getParticipant()->getLastname(),
-                        $answer->getParticipant()->getLogin()
+                        $answer->getFirstname(),
+                        $answer->getLastname(),
+                        $answer->getLogin()
                     )
                 );
 
