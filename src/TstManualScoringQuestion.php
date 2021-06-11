@@ -293,7 +293,17 @@ class TstManualScoringQuestion
             ->setTestRefId($test->getRefId())
             ->setPass($selectedPass);
 
-        foreach ($this->getAnswerData($test, $selectedPass, $selectedQuestionId) as $answerData) {
+        //Pagination
+
+        $answersData = $this->getAnswerData($test, $selectedPass, $selectedQuestionId);
+        $numberOfAnswersData = count($answersData);
+        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);
+        $currentPage = $paginationData["currentPage"];
+        $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
+
+        $paginatedAnswersData = array_slice($answersData, $paginationData["start"], $paginationData["stop"]);
+
+        foreach ($paginatedAnswersData as $answerData) {
             $answer = new Answer($question);
             $answer
                 ->setActiveId((int) $answerData["active_id"])
@@ -314,20 +324,12 @@ class TstManualScoringQuestion
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
         }
 
-        //Pagination
-        $numberOfAnswers = count($question->getAnswers());
-        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswers);
-        $currentPage = $paginationData["currentPage"];
-        $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
-
-        $paginatedAnswers = array_slice($question->getAnswers(), $paginationData["start"], $paginationData["stop"]);
-
-        $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswers} now " . count($paginatedAnswers));
+        $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswersData} now " . count($question->getAnswers()));
 
         if ($this->plugin->isAtLeastIlias6()) {
             $this->logger->debug("TMSQ : ilias 6 pagination filtering by user scoring state");
-            $finalAnswerArr = array_filter(
-                $paginatedAnswers,
+            $question->setAnswers(array_filter(
+                $question->getAnswers(),
                 function (Answer $answer) use ($selectedScoringCompleted) {
                     switch ($selectedScoringCompleted) {
                         case self::ONLY_FINALIZED:
@@ -338,15 +340,12 @@ class TstManualScoringQuestion
                             return true;
                     }
                 }
-            );
+            ));
         } else {
             $this->logger->debug("TMSQ : ilias 54 pagination");
-            $finalAnswerArr = $paginatedAnswers;
         }
 
-        $this->logger->debug("TMSQ : Final number of answers " . count($finalAnswerArr));
-
-        $question->setAnswers($finalAnswerArr);
+        $this->logger->debug("TMSQ : Final number of answers " . count($question->getAnswers()));
 
         if (count($question->getAnswers()) > 0) {
             $tpl->setCurrentBlock("question");
