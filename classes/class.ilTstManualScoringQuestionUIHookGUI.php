@@ -63,9 +63,12 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
             $ref_id
         );
 
-        $this->dic->tabs()->addSubTab(self::TMSQ_TAB, $this->plugin->txt("tmsq_scoring"),
+        $this->dic->tabs()->addSubTab(
+            self::TMSQ_TAB,
+            $this->plugin->txt("tmsq_scoring"),
             $this->dic->ctrl()->getLinkTargetByClass(
-                [ilUIPluginRouterGUI::class, self::class], "showTmsqManualScoring"
+                [ilUIPluginRouterGUI::class, self::class],
+                "showTmsqManualScoring"
             )
         );
     }
@@ -74,7 +77,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     {
         parent::modifyGUI($a_comp, $a_part, $a_par);
         $query = $this->request->getQueryParams();
-        $t = ilObject::_lookupType($query["ref_id"]);
         if ($a_part !== "sub_tabs") {
             return;
         }
