@@ -478,11 +478,13 @@ class TstManualScoringQuestion
                     $this->sendInvalidForm($testRefId);
                 }
 
-                if (!$answer->readScoringCompleted() && $answer->getPoints() > $question->getMaximumPoints()) {
+                $scoringCompleted = $answer->readScoringCompleted();
+
+                if (!$scoringCompleted && $answer->getPoints() > $question->getMaximumPoints()) {
                     $this->sendInvalidForm($question->getTestRefId());
                 }
 
-                if (!$answer->readScoringCompleted() && !$answer->writePoints()) {
+                if (!$scoringCompleted && !$answer->writePoints()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
