@@ -186,7 +186,7 @@ class TstManualScoringQuestion
             }));
 
         //Convert to an array of integers
-        for ($i = 0; $i < count($allQuestionIds); $i++) {
+        for ($i = 0, $iMax = count($allQuestionIds); $i < $iMax; $i++) {
             $allQuestionIds[$i] = (int) $allQuestionIds[$i];
         }
 
