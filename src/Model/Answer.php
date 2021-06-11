@@ -61,7 +61,7 @@ class Answer
      */
     public function readScoringCompleted() : bool
     {
-        if(ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
+        if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
             $manualFeedback = $this->getSingleManualFeedback(
                 $this->activeId,
                 $this->question->getId(),
