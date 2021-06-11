@@ -62,15 +62,20 @@ class Answer
     public function readScoringCompleted() : bool
     {
         if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
-            $manualFeedback = $this->getSingleManualFeedback(
-                $this->activeId,
-                $this->question->getId(),
-                $this->question->getPass()
+            global $DIC;
+            $result = $DIC->database()->queryF(
+                "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+                ['integer', 'integer', 'integer'],
+                [$this->activeId, $this->question->getId(), $this->getQuestion()->getPass()]
             );
-            if (!$manualFeedback || !isset($manualFeedback["finalized_evaluation"])) {
-                return false;
+            if ($result->numRows()) {
+                $row = $DIC->database()->fetchAssoc($result);
+                if(!isset($row["finalized_evaluation"])) {
+                    return false;
+                }
+                return (bool) $row["finalized_evaluation"];
             }
-            return (bool) $manualFeedback["finalized_evaluation"];
+            return false;
         }
         return false;
     }
@@ -90,15 +95,7 @@ class Answer
      */
     public function readFeedback() : string
     {
-        $manualFeedback = $this->getSingleManualFeedback(
-            $this->activeId,
-            $this->question->getId(),
-            $this->question->getPass()
-        );
-        if ($manualFeedback) {
-            return $manualFeedback["feedback"];
-        }
-        return "";
+        return ilObjTest::getManualFeedback($this->activeId, $this->question->getId(), $this->question->getPass());
     }
 
     /**
