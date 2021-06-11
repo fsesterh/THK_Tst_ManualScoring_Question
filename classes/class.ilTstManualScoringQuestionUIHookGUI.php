@@ -16,6 +16,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
+    private const TMSQ_TAB = "tmsq_man_scoring";
     /**
      * @var ilLanguage
      */
@@ -51,36 +52,45 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     }
 
     /**
+     * Injects the sub tab for scoring by tmsq
+     * @param int $ref_id
+     */
+    protected function injectSubTab(int $ref_id)
+    {
+        $this->dic->ctrl()->setParameterByClass(
+            ilTstManualScoringQuestionUIHookGUI::class,
+            'ref_id',
+            $ref_id
+        );
+
+        $this->dic->tabs()->addSubTab(
+            self::TMSQ_TAB,
+            $this->plugin->txt("tmsq_scoring"),
+            $this->dic->ctrl()->getLinkTargetByClass(
+                [ilUIPluginRouterGUI::class, self::class],
+                "showTmsqManualScoring"
+            )
+        );
+    }
+
+    /**
+     * Modifies the manual scoring tab to add a sub tab for the scoring using the plugin
      * @param string $a_comp
      * @param string $a_part
      * @param array  $a_par
-     * @return array|string[]
-     * @throws Exception
      */
-    public function getHTML($a_comp, $a_part, $a_par = array()) : array
+    public function modifyGUI($a_comp, $a_part, $a_par = array())
     {
-        $html = $a_par["html"];
-        $tplId = $a_par["tpl_id"];
-
-        if (!$html || $tplId !== "Services/Table/tpl.table2.html" || $a_part !== "template_get" || !str_contains(
-            $html,
-            $this->lng->txt("tst_man_scoring_by_qst")
-        )) {
-            return $this->uiHookResponse();
-        }
-
+        parent::modifyGUI($a_comp, $a_part, $a_par);
         $query = $this->request->getQueryParams();
-        if (($query["cmd"] !== "post" && $query["fallbackCmd"] !== "showManScoringByQuestionParticipantsTable") &&
-            $query["cmd"] !== "showManScoringByQuestionParticipantsTable") {
-            return $this->uiHookResponse();
+        if ($a_part !== "sub_tabs") {
+            return;
         }
 
-        $this->tstManualScoringQuestion = new TstManualScoringQuestion($this->dic);
-
-        return $this->uiHookResponse(
-            self::REPLACE,
-            $this->tstManualScoringQuestion->modify($html, (int) $query["ref_id"])
-        );
+        if ($this->dic->tabs()->getActiveTab() !== "manscoring") {
+            return;
+        }
+        $this->injectSubTab((int) $query["ref_id"]);
     }
 
     /**
