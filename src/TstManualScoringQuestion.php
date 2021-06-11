@@ -396,7 +396,12 @@ class TstManualScoringQuestion
         }
 
         $this->mainTpl->setContent($this->modify($refId));
-        $this->mainTpl->show();
+
+        if ($this->plugin->isAtLeastIlias6()) {
+            $this->dic->ui()->mainTemplate()->printToStdOut();
+        } else {
+            $this->mainTpl->show();
+        }
     }
 
     /**
