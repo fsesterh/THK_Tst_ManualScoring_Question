@@ -8,6 +8,7 @@ use ilObjTest;
 use ilRTE;
 use ilObjAssessmentFolder;
 use ilObjTestAccess;
+use ilTstManualScoringQuestionPlugin;
 
 /**
  * Class Answer
@@ -60,15 +61,18 @@ class Answer
      */
     public function readScoringCompleted() : bool
     {
-        $manualFeedback = $this->getSingleManualFeedback(
-            $this->activeId,
-            $this->question->getId(),
-            $this->question->getPass()
-        );
-        if (!$manualFeedback || !isset($manualFeedback["finalized_evaluation"])) {
-            return false;
+        if(ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
+            $manualFeedback = $this->getSingleManualFeedback(
+                $this->activeId,
+                $this->question->getId(),
+                $this->question->getPass()
+            );
+            if (!$manualFeedback || !isset($manualFeedback["finalized_evaluation"])) {
+                return false;
+            }
+            return (bool) $manualFeedback["finalized_evaluation"];
         }
-        return (bool) $manualFeedback["finalized_evaluation"];
+        return false;
     }
 
     /**
