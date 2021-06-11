@@ -372,12 +372,22 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Used to redirect the user to the correct tab and set the parameter tmsq_tab to true
+     * Shows the tmsq manual scoring on a new page,
+     * preventing ilias from rendering the normal view first.
+     * @throws ilTemplateException
      */
-    protected function showManScoringTab()
+    protected function showTmsqManualScoring()
     {
+        if ($this->plugin->isAtLeastIlias6()) {
+            $this->mainTpl->loadStandardTemplate();
+        } else {
+            $this->mainTpl->getStandardTemplate();
+        }
+
         $query = $this->request->getQueryParams();
-        $this->redirectToManualScoringTab($query["ref_id"]);
+
+        $this->mainTpl->setContent($this->modify("", (int) $query["ref_id"]));
+        $this->mainTpl->show();
     }
 
     /**
@@ -763,7 +773,7 @@ class TstManualScoringQuestion
             $pass,
             false,
             false,
-            false,
+            true,
             $test->getShowSolutionFeedback(),
             false,
             true
@@ -784,7 +794,6 @@ class TstManualScoringQuestion
     protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
     {
         $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
-        $this->ctrl->setParameterByClass(ilObjTestGUI::class, "tmsq_tab", true);
 
         if ($pageNumber >= 0) {
             $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "page", $pageNumber);
