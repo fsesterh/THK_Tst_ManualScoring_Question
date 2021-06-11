@@ -19,11 +19,7 @@ class Answer
     /**
      * @var string
      */
-    protected $firstName;
-    /**
-     * @var string
-     */
-    protected $lastName;
+    protected $userName;
     /**
      * @var string
      */
@@ -104,36 +100,18 @@ class Answer
     /**
      * @return string
      */
-    public function getFirstName() : string
+    public function getUserName() : string
     {
-        return $this->firstName;
+        return $this->userName;
     }
 
     /**
-     * @param string $firstName
+     * @param string $userName
      * @return Answer
      */
-    public function setFirstName(string $firstName) : Answer
+    public function setUserName(string $userName) : Answer
     {
-        $this->firstName = $firstName;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLastName() : string
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * @param string $lastName
-     * @return Answer
-     */
-    public function setLastName(string $lastName) : Answer
-    {
-        $this->lastName = $lastName;
+        $this->userName = $userName;
         return $this;
     }
 

@@ -150,6 +150,7 @@ class TstManualScoringQuestion
                 $answersData[] = [
                     'active_id' => $active_id,
                     'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $pass),
+                    'participant' => $participant,
                     'lastname' => $user[0]['lastname'],
                     'firstname' => $user[0]['firstname'],
                     'login' => $participant->getLogin(),
@@ -194,7 +195,7 @@ class TstManualScoringQuestion
 
     /**
      * Generates an array of question options to be used for the select field
-     * @param int[]     $questionIds
+     * @param int[] $questionIds
      * @return array
      */
     protected function generateQuestionOptions(array $questionIds)
@@ -296,10 +297,10 @@ class TstManualScoringQuestion
             $answer = new Answer($question);
             $answer
                 ->setActiveId((int) $answerData["active_id"])
-                ->setFirstname($answerData["firstname"])
-                ->setLastName($answerData["lastname"])
+                ->setUserName($answerData["participant"]->getName())
                 ->setLogin($answerData["login"])
                 ->setAnswerHtml($this->getAnswerDetail(
+                    $answerData["participant"],
                     $test,
                     $answer->getActiveId(),
                     $selectedPass,
@@ -390,10 +391,9 @@ class TstManualScoringQuestion
                 $tpl->setVariable(
                     "QUESTION_HEADER_TEXT",
                     sprintf(
-                        "%s %s %s (%s)",
+                        "%s %s (%s)",
                         $this->plugin->txt("answer_of"),
-                        $answer->getFirstname(),
-                        $answer->getLastname(),
+                        $answer->getUserName(),
                         $answer->getLogin()
                     )
                 );
@@ -750,15 +750,17 @@ class TstManualScoringQuestion
 
     /**
      * Gets the answer detail html string to be displayed in the form
-     * @param ilObjTest    $test
-     * @param int          $activeId
-     * @param int          $pass
-     * @param int          $questionId
-     * @param ilTestAccess $testAccess
+     * @param ilTestEvaluationUserData $participant
+     * @param ilObjTest                $test
+     * @param int                      $activeId
+     * @param int                      $pass
+     * @param int                      $questionId
+     * @param ilTestAccess             $testAccess
      * @return string
      * @throws ilTemplateException
      */
     protected function getAnswerDetail(
+        ilTestEvaluationUserData $participant,
         ilObjTest $test,
         int $activeId,
         int $pass,
@@ -768,9 +770,6 @@ class TstManualScoringQuestion
         if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
             ilObjTestGUI::accessViolationRedirect();
         }
-
-        $data = $test->getCompleteEvaluationData(false);
-        $participant = $data->getParticipant($activeId);
 
         $question_gui = $test->createQuestionGUI('', $questionId);
 
