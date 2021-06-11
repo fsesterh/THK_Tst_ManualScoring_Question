@@ -183,12 +183,11 @@ class TstManualScoringQuestion
         }
 
         $questionOptions = [];
-        $pointsTranslated = $this->lng->txt("points");
 
         foreach ($allQuestionIds as $questionId) {
             $title = assQuestion::_getTitle($questionId);
             $points = assQuestion::_getMaximumPoints($questionId);
-            $questionOptions[$questionId] = $title . " ({$points} {$pointsTranslated}) [ID: {$questionId}]";
+            $questionOptions[$questionId] = $title . " ({$points} {$this->lng->txt("points")}) [ID: {$questionId}]";
         }
 
         $passOptions = [];
