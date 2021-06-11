@@ -99,6 +99,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
     public function isAtLeastIlias6() : bool
     {
-        return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">");
+        return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">=");
     }
 }

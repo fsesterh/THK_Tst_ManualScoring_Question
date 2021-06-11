@@ -30,6 +30,9 @@ use ilTestParticipant;
 use ilObjAssessmentFolder;
 use ilLogger;
 use assQuestion;
+use ilTestParticipantData;
+use ilTestParticipantAccessFilter;
+use ilTestEvaluationUserData;
 use ReflectionException;
 use ReflectionMethod;
 use ilTestScoringByQuestionsGUI;
@@ -114,6 +117,116 @@ class TstManualScoringQuestion
     }
 
     /**
+     * Returns an array of answer data
+     * Code for retrieving data copied from class.ilTestScoringByQuestionsGUI.php
+     * @param ilObjTest $test
+     * @param int       $pass
+     * @param int       $questionId
+     * @return array
+     */
+    protected function getAnswerData(ilObjTest $test, int $pass, int $questionId) : array
+    {
+        $answersData = [];
+        $data = $test->getCompleteEvaluationData(false);
+        $participants = $data->getParticipants();
+
+        $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
+        $participantData->setActiveIdsFilter(array_keys($data->getParticipants()));
+
+        $participantData->setParticipantAccessFilter(
+            ilTestParticipantAccessFilter::getScoreParticipantsUserFilter($test->getRefId())
+        );
+
+        $participantData->load($test->getTestId());
+
+        foreach ($participantData->getActiveIds() as $active_id) {
+
+            /** @var $participant ilTestEvaluationUserData */
+            $participant = $participants[$active_id];
+            $testResultData = $test->getTestResult($active_id, $pass);
+            foreach ($testResultData as $questionData) {
+                if (!isset($questionData['qid']) || $questionData['qid'] != $questionId) {
+                    continue;
+                }
+
+                $user = ilObjUser::_getUserData([$participant->user_id]);
+                $answersData[] = [
+                    'active_id' => $active_id,
+                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $pass),
+                    'participant' => $participant,
+                    'lastname' => $user[0]['lastname'],
+                    'firstname' => $user[0]['firstname'],
+                    'login' => $participant->getLogin(),
+                ];
+            }
+        }
+        return $answersData;
+    }
+
+    /**
+     * Gets all the question ids for the test as an array
+     * @param ilObjTest $test
+     * @return int[]
+     */
+    protected function getAllQuestionIds(ilObjTest $test) : array
+    {
+        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoringTypes();
+
+        //Log allowed question types
+        $logMessage = "TMSQ : allowed question type: ";
+        foreach ($allowedQuestionTypes as $allowedQuestionType) {
+            $logMessage .= $allowedQuestionType . ", ";
+        }
+        $this->logger->debug($logMessage);
+
+        //Collect question ids and filter
+        $allQuestionIds = array_values(array_filter($test->getQuestions(),
+            function ($questionId) use ($test, $allowedQuestionTypes) {
+                return in_array($test->getQuestionType($questionId), $allowedQuestionTypes);
+            }));
+
+        //Convert to an array of integers
+        for ($i = 0, $iMax = count($allQuestionIds); $i < $iMax; $i++) {
+            $allQuestionIds[$i] = (int) $allQuestionIds[$i];
+        }
+
+        //Log question ids
+        $this->logger->debug("TMSQ : number of questions: " . count($test->getQuestions()));
+        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestionIds));
+        return $allQuestionIds;
+    }
+
+    /**
+     * Generates an array of question options to be used for the select field
+     * @param int[] $questionIds
+     * @return array
+     */
+    protected function generateQuestionOptions(array $questionIds)
+    {
+        $questionOptions = [];
+        foreach ($questionIds as $questionId) {
+            $title = assQuestion::_getTitle($questionId);
+            $points = assQuestion::_getMaximumPoints($questionId);
+            $questionOptions[$questionId] = $title . " ({$points} {$this->lng->txt("points")}) [ID: {$questionId}]";
+        }
+        return $questionOptions;
+    }
+
+    /**
+     * Returns an array of pass options
+     * @param ilObjTest $test
+     * @return array
+     */
+    protected function generatePassOptions(ilObjTest $test) : array
+    {
+        $passOptions = [];
+        for ($i = 0; $i < $test->getMaxPassOfTest(); $i++) {
+            $passOptions[$i] = (string) ($i + 1);
+        }
+        return $passOptions;
+    }
+
+    /**
      * @param string   $cmd
      * @param string[] $query
      * @throws Exception
@@ -162,44 +275,15 @@ class TstManualScoringQuestion
         $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
-        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoringTypes();
-
-        $logMessage = "TMSQ : allowed question type: ";
-        foreach ($allowedQuestionTypes as $allowedQuestionType) {
-            $logMessage .= $allowedQuestionType . ", ";
-        }
-        $this->logger->debug($logMessage);
-
-        $allQuestionIds = array_filter($test->getQuestions(),
-            function ($questionId) use ($test, $allowedQuestionTypes) {
-                return in_array($test->getQuestionType($questionId), $allowedQuestionTypes);
-            });
-
-        $this->logger->debug("TMSQ : number of questions: " . count($test->getAllQuestions()));
-        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestionIds));
+        $allQuestionIds = $this->getAllQuestionIds($test);
 
         if (count($allQuestionIds) == 0) {
             return $this->showNoEntries($tpl);
         }
 
-        $questionOptions = [];
-        $pointsTranslated = $this->lng->txt("points");
+        $questionOptions = $this->generateQuestionOptions($allQuestionIds);
 
-        foreach ($allQuestionIds as $questionId) {
-            $title = assQuestion::_getTitle($questionId);
-            $points = assQuestion::_getMaximumPoints($questionId);
-            $questionOptions[$questionId] = $title . " ({$points} {$pointsTranslated}) [ID: {$questionId}]";
-        }
-
-        $passOptions = [];
-        for ($i = 0; $i < $test->getMaxPassOfTest(); $i++) {
-            $passOptions[$i] = (string) ($i + 1);
-        }
-
-        $this->logger->debug("TMSQ : max passes for test: {$test->getMaxPassOfTest()}");
-
-        $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $passOptions);
-
+        $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $this->generatePassOptions($test));
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
         $selectedScoringCompleted = $selectedFilters["selectedScoringCompleted"];
@@ -212,46 +296,24 @@ class TstManualScoringQuestion
             ->setTestRefId($test->getRefId())
             ->setPass($selectedPass);
 
-        /**
-         * @var Answer[] $answers
-         */
-        $answers = [];
+        //Pagination
 
-        /**
-         * @var ilTestParticipant[] $participants
-         */
-        $participants = [];
-        foreach ($test->getActiveParticipantList() as $participant) {
-            array_push($participants, $participant);
-        }
+        $answersData = $this->getAnswerData($test, $selectedPass, $selectedQuestionId);
+        $numberOfAnswersData = count($answersData);
+        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);
+        $currentPage = $paginationData["currentPage"];
+        $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
-        $this->logger->debug("TMSQ : " . "number of participants: " . count($participants));
+        $paginatedAnswersData = array_slice($answersData, $paginationData["start"], $paginationData["stop"]);
 
-        //Sort by active_id
-        usort($participants, function ($a, $b) {
-            return $a->getActiveId() >= $b->getActiveId();
-        });
-
-        $this->logger->debug("TMSQ : " . "number of participants after sorting by active_id: " . count($participants));
-
-        foreach ($participants as $participant) {
-            //Removed as customer wants to see ghost-passes like it's in the normal ilias version
-            //Ghost-passes are a bug!
-            //Ghost-passes can get created if a test has autosave enabled and the maximum passes are set to 1
-            /*
-            if (!$participant->isTestFinished() || $participant->hasUnfinishedPasses()) {
-                $this->logger->debug("TMSQ : skipped participant with activeId {$participant->getActiveId()} | finished={$participant->isTestFinished()} | unfinishedPass={$participant->hasUnfinishedPasses()}");
-
-                continue;
-
-            }
-            */
-
+        foreach ($paginatedAnswersData as $answerData) {
             $answer = new Answer($question);
             $answer
-                ->setActiveId((int) $participant->getActiveId())
-                ->setParticipant($participant)
+                ->setActiveId((int) $answerData["active_id"])
+                ->setUserName($answerData["participant"]->getName())
+                ->setLogin($answerData["login"])
                 ->setAnswerHtml($this->getAnswerDetail(
+                    $answerData["participant"],
                     $test,
                     $answer->getActiveId(),
                     $selectedPass,
@@ -259,26 +321,18 @@ class TstManualScoringQuestion
                     $testAccess
                 ))
                 ->setFeedback($answer->readFeedback())
-                ->setPoints($answer->readReachedPoints())
+                ->setPoints((float) $answerData["reached_points"])
                 ->setScoringCompleted($answer->readScoringCompleted());
-            array_push($answers, $answer);
+            $question->addAnswer($answer);
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
         }
 
-        //Pagination
-        $numberOfAnswers = count($answers);
-        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswers);
-        $currentPage = $paginationData["currentPage"];
-        $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
-
-        $paginatedAnswers = array_slice($answers, $paginationData["start"], $paginationData["stop"]);
-
-        $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswers} now " . count($paginatedAnswers));
+        $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswersData} now " . count($question->getAnswers()));
 
         if ($this->plugin->isAtLeastIlias6()) {
             $this->logger->debug("TMSQ : ilias 6 pagination filtering by user scoring state");
-            $finalAnswerArr = array_filter(
-                $paginatedAnswers,
+            $question->setAnswers(array_filter(
+                $question->getAnswers(),
                 function (Answer $answer) use ($selectedScoringCompleted) {
                     switch ($selectedScoringCompleted) {
                         case self::ONLY_FINALIZED:
@@ -289,15 +343,12 @@ class TstManualScoringQuestion
                             return true;
                     }
                 }
-            );
+            ));
         } else {
             $this->logger->debug("TMSQ : ilias 54 pagination");
-            $finalAnswerArr = $paginatedAnswers;
         }
 
-        $this->logger->debug("TMSQ : Final number of answers " . count($finalAnswerArr));
-
-        $question->setAnswers($finalAnswerArr);
+        $this->logger->debug("TMSQ : Final number of answers " . count($question->getAnswers()));
 
         if (count($question->getAnswers()) > 0) {
             $tpl->setCurrentBlock("question");
@@ -342,11 +393,10 @@ class TstManualScoringQuestion
                 $tpl->setVariable(
                     "QUESTION_HEADER_TEXT",
                     sprintf(
-                        "%s %s %s (%s)",
+                        "%s %s (%s)",
                         $this->plugin->txt("answer_of"),
-                        $answer->getParticipant()->getFirstname(),
-                        $answer->getParticipant()->getLastname(),
-                        $answer->getParticipant()->getLogin()
+                        $answer->getUserName(),
+                        $answer->getLogin()
                     )
                 );
 
@@ -461,11 +511,13 @@ class TstManualScoringQuestion
                     $this->sendInvalidForm($testRefId);
                 }
 
-                if (!$answer->readScoringCompleted() && $answer->getPoints() > $question->getMaximumPoints()) {
+                $scoringCompleted = $answer->readScoringCompleted();
+
+                if (!$scoringCompleted && $answer->getPoints() > $question->getMaximumPoints()) {
                     $this->sendInvalidForm($question->getTestRefId());
                 }
 
-                if (!$answer->readScoringCompleted() && !$answer->writePoints()) {
+                if (!$scoringCompleted && !$answer->writePoints()) {
                     ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
@@ -752,15 +804,17 @@ class TstManualScoringQuestion
 
     /**
      * Gets the answer detail html string to be displayed in the form
-     * @param ilObjTest    $test
-     * @param int          $activeId
-     * @param int          $pass
-     * @param int          $questionId
-     * @param ilTestAccess $testAccess
+     * @param ilTestEvaluationUserData $participant
+     * @param ilObjTest                $test
+     * @param int                      $activeId
+     * @param int                      $pass
+     * @param int                      $questionId
+     * @param ilTestAccess             $testAccess
      * @return string
      * @throws ilTemplateException
      */
     protected function getAnswerDetail(
+        ilTestEvaluationUserData $participant,
         ilObjTest $test,
         int $activeId,
         int $pass,
@@ -770,9 +824,6 @@ class TstManualScoringQuestion
         if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
             ilObjTestGUI::accessViolationRedirect();
         }
-
-        $data = $test->getCompleteEvaluationData(false);
-        $participant = $data->getParticipant($activeId);
 
         $question_gui = $test->createQuestionGUI('', $questionId);
 

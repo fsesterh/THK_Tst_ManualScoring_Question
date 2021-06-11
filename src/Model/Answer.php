@@ -3,12 +3,12 @@
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
-use ilTestParticipant;
 use assQuestion;
 use ilObjTest;
 use ilRTE;
 use ilObjAssessmentFolder;
 use ilObjTestAccess;
+use ilTstManualScoringQuestionPlugin;
 
 /**
  * Class Answer
@@ -18,9 +18,13 @@ use ilObjTestAccess;
 class Answer
 {
     /**
-     * @var ilTestParticipant
+     * @var string
      */
-    protected $participant;
+    protected $userName;
+    /**
+     * @var string
+     */
+    protected $login;
     /**
      * @var int
      */
@@ -57,15 +61,23 @@ class Answer
      */
     public function readScoringCompleted() : bool
     {
-        $manualFeedback = $this->getSingleManualFeedback(
-            $this->activeId,
-            $this->question->getId(),
-            $this->question->getPass()
-        );
-        if (!$manualFeedback || !isset($manualFeedback["finalized_evaluation"])) {
+        if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
+            global $DIC;
+            $result = $DIC->database()->queryF(
+                "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+                ['integer', 'integer', 'integer'],
+                [$this->activeId, $this->question->getId(), $this->getQuestion()->getPass()]
+            );
+            if ($result->numRows()) {
+                $row = $DIC->database()->fetchAssoc($result);
+                if(!isset($row["finalized_evaluation"])) {
+                    return false;
+                }
+                return (bool) $row["finalized_evaluation"];
+            }
             return false;
         }
-        return (bool) $manualFeedback["finalized_evaluation"];
+        return false;
     }
 
     /**
@@ -83,15 +95,43 @@ class Answer
      */
     public function readFeedback() : string
     {
-        $manualFeedback = $this->getSingleManualFeedback(
-            $this->activeId,
-            $this->question->getId(),
-            $this->question->getPass()
-        );
-        if ($manualFeedback) {
-            return $manualFeedback["feedback"];
-        }
-        return "";
+        return ilObjTest::getManualFeedback($this->activeId, $this->question->getId(), $this->question->getPass());
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserName() : string
+    {
+        return $this->userName;
+    }
+
+    /**
+     * @param string $userName
+     * @return Answer
+     */
+    public function setUserName(string $userName) : Answer
+    {
+        $this->userName = $userName;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogin() : string
+    {
+        return $this->login;
+    }
+
+    /**
+     * @param string $login
+     * @return Answer
+     */
+    public function setLogin(string $login) : Answer
+    {
+        $this->login = $login;
+        return $this;
     }
 
     /**
@@ -177,24 +217,6 @@ class Answer
 
         $this->setScoringCompleted((bool) $scoringCompleted);
 
-        return $this;
-    }
-
-    /**
-     * @return ilTestParticipant
-     */
-    public function getParticipant() : ilTestParticipant
-    {
-        return $this->participant;
-    }
-
-    /**
-     * @param ilTestParticipant $participant
-     * @return Answer
-     */
-    public function setParticipant(ilTestParticipant $participant) : Answer
-    {
-        $this->participant = $participant;
         return $this;
     }
 
