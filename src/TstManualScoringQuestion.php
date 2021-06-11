@@ -788,20 +788,20 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Redirects the user to the manual scoring by question sub tab
+     * Redirects the user to the tmsq manual scoring page
      * @param int|string $refId
      */
     protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
     {
-        $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "ref_id", (int) $refId);
+        $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
 
         if ($pageNumber >= 0) {
-            $this->ctrl->setParameterByClass(ilTestScoringByQuestionsGUI::class, "page", $pageNumber);
+            $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "page", $pageNumber);
         }
 
         $this->ctrl->redirectByClass(
-            [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
-            "showManScoringByQuestionParticipantsTable"
+            [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
+            "showTmsqManualScoring"
         );
     }
 
