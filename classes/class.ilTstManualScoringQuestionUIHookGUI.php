@@ -70,52 +70,16 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         );
     }
 
-    /**
-     * @param string $a_comp
-     * @param string $a_part
-     * @param array  $a_par
-     * @return array|string[]
-     * @throws Exception
-     */
-    public function getHTML($a_comp, $a_part, $a_par = array()) : array
-    {
-        $html = $a_par["html"];
-        $tplId = $a_par["tpl_id"];
-
-        if (
-            !$html ||
-            $tplId !== "Services/Table/tpl.table2.html" ||
-            $a_part !== "template_get" ||
-            $this->dic->tabs()->getActiveTab() !== "manscoring"
-        ) {
-            return $this->uiHookResponse();
-        }
-
-        $query = $this->request->getQueryParams();
-
-        if (!isset($query["tmsq_tab"]) || !(bool) $query["tmsq_tab"]) {
-            return $this->uiHookResponse();
-        }
-
-        $this->dic->tabs()->activateSubTab(self::TMSQ_TAB);
-        $this->tstManualScoringQuestion = new TstManualScoringQuestion($this->dic);
-
-        return $this->uiHookResponse(
-            self::REPLACE,
-            $this->tstManualScoringQuestion->modify((int) $query["ref_id"])
-        );
-    }
-
     public function modifyGUI($a_comp, $a_part, $a_par = array())
     {
         parent::modifyGUI($a_comp, $a_part, $a_par);
         $query = $this->request->getQueryParams();
         $t = ilObject::_lookupType($query["ref_id"]);
-        if($a_part !== "sub_tabs") {
+        if ($a_part !== "sub_tabs") {
             return;
         }
 
-        if($this->dic->tabs()->getActiveTab() !== "manscoring") {
+        if ($this->dic->tabs()->getActiveTab() !== "manscoring") {
             return;
         }
         $this->injectSubTab((int) $query["ref_id"]);
