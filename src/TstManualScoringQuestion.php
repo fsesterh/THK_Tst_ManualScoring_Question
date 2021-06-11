@@ -114,6 +114,52 @@ class TstManualScoringQuestion
     }
 
     /**
+     * Returns an array of answer data
+     * Code for retrieving data copied from class.ilTestScoringByQuestionsGUI.php
+     * @param ilObjTest $test
+     * @param int       $pass
+     * @param int       $questionId
+     * @return array
+     */
+    protected function getAnswerData(ilObjTest $test, int $pass, int $questionId) : array
+    {
+        $answersData = [];
+        $data = $test->getCompleteEvaluationData(false);
+        $participants = $data->getParticipants();
+
+        $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
+        $participantData->setActiveIdsFilter(array_keys($data->getParticipants()));
+
+        $participantData->setParticipantAccessFilter(
+            ilTestParticipantAccessFilter::getScoreParticipantsUserFilter($test->getRefId())
+        );
+
+        $participantData->load($test->getTestId());
+
+        foreach ($participantData->getActiveIds() as $active_id) {
+
+            /** @var $participant ilTestEvaluationUserData */
+            $participant = $participants[$active_id];
+            $testResultData = $test->getTestResult($active_id, $pass);
+            foreach ($testResultData as $questionData) {
+                if (!isset($questionData['qid']) || $questionData['qid'] != $questionId) {
+                    continue;
+                }
+
+                $user = ilObjUser::_getUserData([$participant->user_id]);
+                $answersData[] = [
+                    'active_id' => $active_id,
+                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $pass),
+                    'lastname' => $user[0]['lastname'],
+                    'firstname' => $user[0]['firstname'],
+                    'login' => $participant->getLogin(),
+                ];
+            }
+        }
+        return $answersData;
+    }
+
+    /**
      * Gets all the question ids for the test as an array
      * @param ilObjTest $test
      * @return int[]
@@ -241,54 +287,18 @@ class TstManualScoringQuestion
 
         $this->logger->debug("TMSQ : Selected filters: pass={$selectedPass} | scoringCompleted=$selectedScoringCompleted | answersPerPage={$selectedAnswersPerPage}");
 
-        //Copied from class.ilTestScoringByQuestionsGUI.php
-        $data = $test->getCompleteEvaluationData(false);
-        $participants = $data->getParticipants();
-
-        $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
-        $participantData->setActiveIdsFilter(array_keys($data->getParticipants()));
-
-        $participantData->setParticipantAccessFilter(
-            ilTestParticipantAccessFilter::getScoreParticipantsUserFilter($refId)
-        );
-
-        $participantData->load($test->getTestId());
-
-        $answersData = [];
-
-        foreach ($participantData->getActiveIds() as $active_id) {
-
-            /** @var $participant ilTestEvaluationUserData */
-            $participant = $participants[$active_id];
-            $testResultData = $test->getTestResult($active_id, $selectedPass);
-            foreach ($testResultData as $questionData) {
-                if (!isset($questionData['qid']) || $questionData['qid'] != $selectedQuestionId) {
-                    continue;
-                }
-
-                $user = ilObjUser::_getUserData(array($participant->user_id));
-                $answersData[] = array(
-                    'active_id' => $active_id,
-                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $selectedPass),
-                    'lastname' => $user[0]['lastname'],
-                    'firstname' => $user[0]['firstname'],
-                    'login' => $participant->getLogin(),
-                );
-            }
-        }
-
         $question = new Question($selectedQuestionId);
         $question
             ->setTestRefId($test->getRefId())
             ->setPass($selectedPass);
 
-        foreach ($answersData as $data) {
+        foreach ($this->getAnswerData($test, $selectedPass, $selectedQuestionId) as $answerData) {
             $answer = new Answer($question);
             $answer
-                ->setActiveId((int) $data["active_id"])
-                ->setFirstname($data["firstname"])
-                ->setLastName($data["lastname"])
-                ->setLogin($data["login"])
+                ->setActiveId((int) $answerData["active_id"])
+                ->setFirstname($answerData["firstname"])
+                ->setLastName($answerData["lastname"])
+                ->setLogin($answerData["login"])
                 ->setAnswerHtml($this->getAnswerDetail(
                     $test,
                     $answer->getActiveId(),
@@ -297,7 +307,7 @@ class TstManualScoringQuestion
                     $testAccess
                 ))
                 ->setFeedback($answer->readFeedback())
-                ->setPoints((float) $data["reached_points"])
+                ->setPoints((float) $answerData["reached_points"])
                 ->setScoringCompleted($answer->readScoringCompleted());
             $question->addAnswer($answer);
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
