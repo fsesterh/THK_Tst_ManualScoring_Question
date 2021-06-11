@@ -114,6 +114,69 @@ class TstManualScoringQuestion
     }
 
     /**
+     * Gets all the question ids for the test as an array
+     * @param ilObjTest $test
+     * @return int[]
+     */
+    protected function getAllQuestionIds(ilObjTest $test) : array
+    {
+        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoringTypes();
+
+        //Log allowed question types
+        $logMessage = "TMSQ : allowed question type: ";
+        foreach ($allowedQuestionTypes as $allowedQuestionType) {
+            $logMessage .= $allowedQuestionType . ", ";
+        }
+        $this->logger->debug($logMessage);
+
+        //Collect question ids and filter
+        $allQuestionIds = array_values(array_filter($test->getQuestions(),
+            function ($questionId) use ($test, $allowedQuestionTypes) {
+                return in_array($test->getQuestionType($questionId), $allowedQuestionTypes);
+            }));
+
+        //Convert to an array of integers
+        for ($i = 0; $i < count($allQuestionIds); $i++) {
+            $allQuestionIds[$i] = (int) $allQuestionIds[$i];
+        }
+
+        //Log question ids
+        $this->logger->debug("TMSQ : number of questions: " . count($test->getQuestions()));
+        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestionIds));
+        return $allQuestionIds;
+    }
+
+    /**
+     * Generates an array of question options to be used for the select field
+     * @param int[]     $questionIds
+     * @return array
+     */
+    protected function generateQuestionOptions(array $questionIds)
+    {
+        $questionOptions = [];
+        foreach ($questionIds as $questionId) {
+            $title = assQuestion::_getTitle($questionId);
+            $points = assQuestion::_getMaximumPoints($questionId);
+            $questionOptions[$questionId] = $title . " ({$points} {$this->lng->txt("points")}) [ID: {$questionId}]";
+        }
+        return $questionOptions;
+    }
+
+    /**
+     * Returns an array of pass options
+     * @param ilObjTest $test
+     * @return array
+     */
+    protected function generatePassOptions(ilObjTest $test) : array
+    {
+        $passOptions = [];
+        for ($i = 0; $i < $test->getMaxPassOfTest(); $i++) {
+            $passOptions[$i] = (string) ($i + 1);
+        }
+        return $passOptions;
+    }
+
+    /**
      * @param string   $cmd
      * @param string[] $query
      * @throws Exception
@@ -162,43 +225,15 @@ class TstManualScoringQuestion
         $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
-        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoringTypes();
-
-        $logMessage = "TMSQ : allowed question type: ";
-        foreach ($allowedQuestionTypes as $allowedQuestionType) {
-            $logMessage .= $allowedQuestionType . ", ";
-        }
-        $this->logger->debug($logMessage);
-
-        $allQuestionIds = array_filter($test->getQuestions(),
-            function ($questionId) use ($test, $allowedQuestionTypes) {
-                return in_array($test->getQuestionType($questionId), $allowedQuestionTypes);
-            });
-
-        $this->logger->debug("TMSQ : number of questions: " . count($test->getAllQuestions()));
-        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestionIds));
+        $allQuestionIds = $this->getAllQuestionIds($test);
 
         if (count($allQuestionIds) == 0) {
             return $this->showNoEntries($tpl);
         }
 
-        $questionOptions = [];
+        $questionOptions = $this->generateQuestionOptions($allQuestionIds);
 
-        foreach ($allQuestionIds as $questionId) {
-            $title = assQuestion::_getTitle($questionId);
-            $points = assQuestion::_getMaximumPoints($questionId);
-            $questionOptions[$questionId] = $title . " ({$points} {$this->lng->txt("points")}) [ID: {$questionId}]";
-        }
-
-        $passOptions = [];
-        for ($i = 0; $i < $test->getMaxPassOfTest(); $i++) {
-            $passOptions[$i] = (string) ($i + 1);
-        }
-
-        $this->logger->debug("TMSQ : max passes for test: {$test->getMaxPassOfTest()}");
-
-        $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $passOptions);
-
+        $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $this->generatePassOptions($test));
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
         $selectedScoringCompleted = $selectedFilters["selectedScoringCompleted"];
