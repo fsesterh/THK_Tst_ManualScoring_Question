@@ -151,7 +151,7 @@ class TstManualScoringQuestion
      * @throws ilTemplateException
      * @throws Exception
      */
-    public function modify(string $html, int $refId) : string
+    public function modify(int $refId) : string
     {
         $test = new ilObjTest($refId, true);
         $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
@@ -396,7 +396,7 @@ class TstManualScoringQuestion
             $this->mainTpl->getStandardTemplate();
         }
 
-        $this->mainTpl->setContent($this->modify("", $refId));
+        $this->mainTpl->setContent($this->modify($refId));
         $this->mainTpl->show();
     }
 

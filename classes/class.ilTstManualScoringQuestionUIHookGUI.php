@@ -102,7 +102,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
         return $this->uiHookResponse(
             self::REPLACE,
-            $this->tstManualScoringQuestion->modify($html, (int) $query["ref_id"])
+            $this->tstManualScoringQuestion->modify((int) $query["ref_id"])
         );
     }
 
