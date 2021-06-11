@@ -14,7 +14,6 @@ use ilCtrl;
 use ILIAS\DI\UIServices;
 use ilTstManualScoringQuestionUIHookGUI;
 use ilUIPluginRouterGUI;
-use ilTestScoringByQuestionsGUI;
 use ilUtil;
 use ilObjTestGUI;
 use ilToolbarGUI;
@@ -31,6 +30,10 @@ use ilTestParticipant;
 use ilObjAssessmentFolder;
 use ilLogger;
 use assQuestion;
+use ReflectionException;
+use ReflectionClass;
+use ReflectionMethod;
+use ilTestScoringByQuestionsGUI;
 
 /**
  * Class TstManualScoringQuestion
@@ -375,18 +378,25 @@ class TstManualScoringQuestion
      * Shows the tmsq manual scoring on a new page,
      * preventing ilias from rendering the normal view first.
      * @throws ilTemplateException
+     * @throws ReflectionException
      */
     protected function showTmsqManualScoring()
     {
+        $query = $this->request->getQueryParams();
+        $refId = (int) $query["ref_id"];
+        $this->drawHeader($refId);
+        $this->dic->tabs()->setBackTarget(
+            $this->lng->txt("back"),
+            $this->getManualScoringByQuestionTarget($refId)
+        );
+
         if ($this->plugin->isAtLeastIlias6()) {
             $this->mainTpl->loadStandardTemplate();
         } else {
             $this->mainTpl->getStandardTemplate();
         }
 
-        $query = $this->request->getQueryParams();
-
-        $this->mainTpl->setContent($this->modify("", (int) $query["ref_id"]));
+        $this->mainTpl->setContent($this->modify("", $refId));
         $this->mainTpl->show();
     }
 
@@ -718,6 +728,25 @@ class TstManualScoringQuestion
     }
 
     /**
+     * @throws ReflectionException
+     */
+    protected function drawHeader(int $refId) : void
+    {
+        $objTestGui = new ilObjTestGUI($refId);
+
+        $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, 'setTitleAndDescription');
+        $reflectionMethod->setAccessible(true);
+        $reflectionMethod->invoke($objTestGui);
+
+        $this->dic['ilLocator']->addRepositoryItems($refId);
+        $this->dic["ilLocator"]->addItem(
+            $objTestGui->object->getTitle(),
+            $this->getManualScoringByQuestionTarget($refId)
+        );
+        $this->mainTpl->setLocator();
+    }
+
+    /**
      * Gets the answer detail html string to be displayed in the form
      * @param ilObjTest    $test
      * @param int          $activeId
@@ -785,6 +814,20 @@ class TstManualScoringQuestion
         $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
 
         return $tmp_tpl->get();
+    }
+
+    /**
+     * Returns the target link to the scoring by question tab
+     * @param int $refId
+     * @return string
+     */
+    protected function getManualScoringByQuestionTarget(int $refId) : string
+    {
+        $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
+        return $this->ctrl->getLinkTargetByClass(
+            [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
+            "showManScoringByQuestionParticipantsTable"
+        );
     }
 
     /**
