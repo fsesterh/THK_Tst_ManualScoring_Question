@@ -73,6 +73,12 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         );
     }
 
+    /**
+     * Modifies the manual scoring tab to add a sub tab for the scoring using the plugin
+     * @param string $a_comp
+     * @param string $a_part
+     * @param array  $a_par
+     */
     public function modifyGUI($a_comp, $a_part, $a_par = array())
     {
         parent::modifyGUI($a_comp, $a_part, $a_par);
