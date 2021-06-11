@@ -31,7 +31,6 @@ use ilObjAssessmentFolder;
 use ilLogger;
 use assQuestion;
 use ReflectionException;
-use ReflectionClass;
 use ReflectionMethod;
 use ilTestScoringByQuestionsGUI;
 
