@@ -126,6 +126,15 @@ class Question
     }
 
     /**
+     * @param Answer $answer
+     * @return Question
+     */
+    public function addAnswer(Answer $answer) : Question {
+        array_push($this->answers, $answer);
+        return $this;
+    }
+
+    /**
      * @return int
      */
     public function getId() : int
