@@ -168,49 +168,23 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Gets all the question ids for the test as an array
-     * @param ilObjTest $test
-     * @return int[]
-     */
-    protected function getAllQuestionIds(ilObjTest $test) : array
-    {
-        $allowedQuestionTypes = ilObjAssessmentFolder::_getManualScoringTypes();
-
-        //Log allowed question types
-        $logMessage = "TMSQ : allowed question type: ";
-        foreach ($allowedQuestionTypes as $allowedQuestionType) {
-            $logMessage .= $allowedQuestionType . ", ";
-        }
-        $this->logger->debug($logMessage);
-
-        //Collect question ids and filter
-        $allQuestionIds = array_values(array_filter($test->getQuestions(),
-            function ($questionId) use ($test, $allowedQuestionTypes) {
-                return in_array($test->getQuestionType($questionId), $allowedQuestionTypes);
-            }));
-
-        //Convert to an array of integers
-        for ($i = 0, $iMax = count($allQuestionIds); $i < $iMax; $i++) {
-            $allQuestionIds[$i] = (int) $allQuestionIds[$i];
-        }
-
-        //Log question ids
-        $this->logger->debug("TMSQ : number of questions: " . count($test->getQuestions()));
-        $this->logger->debug("TMSQ : number of questions after filtering allowed question types: " . count($allQuestionIds));
-        return $allQuestionIds;
-    }
-
-    /**
      * Generates an array of question options to be used for the select field
-     * @param int[] $questionIds
+     * @param ilObjTest $test
      * @return array
      */
-    protected function generateQuestionOptions(array $questionIds)
+    protected function generateQuestionOptions(ilObjTest $test) : array
     {
         $questionOptions = [];
-        foreach ($questionIds as $questionId) {
-            $title = assQuestion::_getTitle($questionId);
-            $points = assQuestion::_getMaximumPoints($questionId);
+        if (!$test->isRandomTest()) {
+            $questions = $test->getTestQuestions();
+        } else {
+            $questions = $test->getPotentialRandomTestQuestions();
+        }
+
+        foreach ($questions as $questionData) {
+            $questionId = $questionData["question_id"];
+            $title = $questionData["title"];
+            $points = $questionData["points"];
             $questionOptions[$questionId] = $title . " ({$points} {$this->lng->txt("points")}) [ID: {$questionId}]";
         }
         return $questionOptions;
@@ -279,13 +253,12 @@ class TstManualScoringQuestion
         $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
         $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
 
-        $allQuestionIds = $this->getAllQuestionIds($test);
+        $questionOptions = $this->generateQuestionOptions($test);
 
-        if (count($allQuestionIds) == 0) {
+        if (count($questionOptions) == 0) {
             return $this->showNoEntries($tpl);
         }
 
-        $questionOptions = $this->generateQuestionOptions($allQuestionIds);
 
         $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $this->generatePassOptions($test));
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
