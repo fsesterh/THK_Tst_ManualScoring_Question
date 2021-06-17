@@ -15,6 +15,7 @@ use ilTextAreaInputGUI;
 use Exception;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilCheckboxInputGUI;
+use ilUtil;
 
 /**
  * Class ManualScoringForm
@@ -97,8 +98,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
             $manualFeedPackAreaInput->setRteTagSet('standard');
         }
 
-
-
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
             $this->lng->txt("finalized_evaluation"),
             "tmsq[{$questionId}][answers][{$activeId}][scoringCompleted]"
@@ -118,6 +117,108 @@ class TstManualScoringForm extends ilPropertyFormGUI
         }
 
         parent::__construct();
+    }
+
+    public function checkInput()
+    {
+        $lng = $this->lng;
+        /**
+         * @var ilNumberInputGUI $item
+         */
+
+        $valid = true;
+        foreach ($this->getItems() as $item) {
+            //Check required
+            if ($item->getRequired() && trim((string) $item->getValue()) == "") {
+                $item->setAlert($lng->txt("msg_input_is_required"));
+                $valid = false;
+            }
+
+            switch (true) {
+                case $item instanceof ilTextAreaInputGUI:
+                    if ($item->usePurifier() && $item->getPurifier()) {
+                        $item->setValue(ilUtil::stripOnlySlashes($item->getValue()));
+                        $item->setValue($item->getPurifier()->purify($item->getValue()));
+                    } else {
+                        $allowed = $item->getRteTagString();
+                        $value = ($item->getUseRte() || !$item->getUseTagsForRteOnly())
+                            ? ilUtil::stripSlashes($item->getValue(), true, $allowed)
+                            : $item->stripSlashesAddSpaceFallback($item->getValue());
+                        $item->setValue($value);
+                    }
+
+                    $item->setValue(ilTextAreaInputGUI::removeProhibitedCharacters($item->getValue()));
+
+                    if ($item->isCharLimited()) {
+                        //avoid whitespace surprises. #20630, #20674
+                        $ascii_whitespaces = chr(194) . chr(160);
+                        $ascii_breaklines = chr(13) . chr(10);
+
+                        $to_replace = array($ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;");
+                        $replace_to = array(' ', '', "_", "_", "_");
+
+                        #20630 mbstring extension is mandatory for 5.4
+                        $chars_entered = mb_strlen(strip_tags(str_replace($to_replace, $replace_to,
+                            $item->getValue())));
+
+                        if ($item->getMaxNumOfChars() && ($chars_entered > $item->getMaxNumOfChars())) {
+                            $item->setAlert($lng->txt("msg_input_char_limit_max"));
+
+                            $valid = false;
+                        } elseif ($item->getMinNumOfChars() && ($chars_entered < $item->getMinNumOfChars())) {
+                            $item->setAlert($lng->txt("msg_input_char_limit_min"));
+
+                            $valid = false;
+                        }
+                    }
+
+                    $valid = $valid ? $item->checkSubItemsInput() : false;
+                    break;
+                case $item instanceof ilNumberInputGUI:
+                    if (!is_numeric(str_replace(',', '.', $item->getValue()))) {
+                        $item->setMinValue($item->getMinValue(), true);
+                        $item->setMaxValue($item->getMaxLength(), true);
+                        $item->setAlert($lng->txt("form_msg_numeric_value_required"));
+                        $valid = false;
+                    }
+
+                    if ($item->minvalueShouldBeGreater()) {
+                        if ($item->getMinValue() !== false && $item->getValue() <= $item->getMinValue()) {
+                            $item->setMinValue($item->getMinValue(), true);
+                            $item->setAlert($lng->txt("form_msg_value_too_low"));
+                            $valid = false;
+                        }
+                    } else {
+                        if ($item->getMinValue() !== false && $item->getValue() < $item->getMinValue()) {
+                            $item->setMinValue($item->getMinValue(), true);
+                            $item->setAlert($lng->txt("form_msg_value_too_low"));
+                            $valid = false;
+                        }
+                    }
+
+                    if ($item->maxvalueShouldBeLess()) {
+                        if ($item->getMaxValue() !== false && $item->getValue() >= $item->getMaxValue()) {
+                            $item->setMaxValue($item->getMaxValue(), true);
+                            $item->setAlert($lng->txt("form_msg_value_too_high"));
+                            $valid = false;
+                        }
+                    } else {
+                        if ($item->getMaxValue() !== false && $item->getValue() > $item->getMaxValue()) {
+                            $item->setMaxValue($item->getMaxValue(), true);
+                            $item->setAlert($lng->txt("form_msg_value_too_high"));
+                            $valid = false;
+                        }
+                    }
+
+                    $valid = $valid ? $item->checkSubItemsInput() : false;
+                    break;
+                default:
+                    $valid = $valid ? $item->checkInput() : false;
+                    break;
+            }
+        }
+
+        return $valid;
     }
 
     /**
