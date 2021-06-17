@@ -26,7 +26,6 @@ use ilObjUser;
 use Exception;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
-use ilTestParticipant;
 use ilObjAssessmentFolder;
 use ilLogger;
 use assQuestion;
@@ -36,6 +35,7 @@ use ilTestEvaluationUserData;
 use ReflectionException;
 use ReflectionMethod;
 use ilTestScoringByQuestionsGUI;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
 
 /**
  * Class TstManualScoringQuestion
@@ -47,6 +47,10 @@ class TstManualScoringQuestion
     public const ALL_USERS = 0;
     public const ONLY_FINALIZED = 1;
     public const EXCEPT_FINALIZED = 2;
+    /**
+     * @var array
+     */
+    private $answersAndForms = [];
 
     /**
      * @var ilLogger
@@ -381,31 +385,69 @@ class TstManualScoringQuestion
                 )
             );
 
-            foreach ($question->getAnswers() as $answer) {
-                $form = new TstManualScoringForm(
-                    $this->lng,
-                    $answer
-                );
+            if (count($this->answersAndForms) > 0) {
+                foreach ($this->answersAndForms as $answerAndForm) {
+                    $correctAnswer = null;
+                    $form = null;
+                    foreach ($question->getAnswers() as $answer) {
+                        if ($answer->getActiveId() === $answerAndForm["answer"]->getActiveId()) {
+                            $correctAnswer = $answer;
+                            $form = $answerAndForm["form"];
+                            foreach ($form->getItems() as $item) {
+                                if ($item instanceof ilHtmlAreaInput) {
+                                    $item->setValue($correctAnswer->getAnswerHtml());
+                                    break;
+                                }
+                            }
 
-                $form->fillForm($answer);
+                            break;
+                        }
+                    }
+                    $tpl->setCurrentBlock("answer");
+                    $tpl->setVariable(
+                        "QUESTION_HEADER_TEXT",
+                        sprintf(
+                            "%s %s (%s)",
+                            $this->plugin->txt("answer_of"),
+                            $correctAnswer->getUserName(),
+                            $correctAnswer->getLogin()
+                        )
+                    );
 
-                $tpl->setCurrentBlock("answer");
-                $tpl->setVariable(
-                    "QUESTION_HEADER_TEXT",
-                    sprintf(
-                        "%s %s (%s)",
-                        $this->plugin->txt("answer_of"),
-                        $answer->getUserName(),
-                        $answer->getLogin()
-                    )
-                );
+                    $formHtml = $form->getHTML();
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
+                    $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
 
-                $formHtml = $form->getHTML();
-                $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
-                $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+                    $tpl->setVariable("ANSWER_FORM", $formHtml);
+                    $tpl->parseCurrentBlock("answer");
+                }
+            } else {
+                foreach ($question->getAnswers() as $answer) {
+                    $form = new TstManualScoringForm(
+                        $this->lng,
+                        $answer
+                    );
 
-                $tpl->setVariable("ANSWER_FORM", $formHtml);
-                $tpl->parseCurrentBlock("answer");
+                    $form->fillForm($answer);
+
+                    $tpl->setCurrentBlock("answer");
+                    $tpl->setVariable(
+                        "QUESTION_HEADER_TEXT",
+                        sprintf(
+                            "%s %s (%s)",
+                            $this->plugin->txt("answer_of"),
+                            $answer->getUserName(),
+                            $answer->getLogin()
+                        )
+                    );
+
+                    $formHtml = $form->getHTML();
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
+                    $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+
+                    $tpl->setVariable("ANSWER_FORM", $formHtml);
+                    $tpl->parseCurrentBlock("answer");
+                }
             }
 
             $tpl->parseCurrentBlock("question");
@@ -457,6 +499,7 @@ class TstManualScoringQuestion
     /**
      * Handles the saving of the manual scoring form
      * @param array $post
+     * @throws Exception
      */
     protected function saveManualScoring(array $post)
     {
@@ -506,10 +549,28 @@ class TstManualScoringQuestion
                 ilObjTestGUI::accessViolationRedirect();
             }
 
+            //Check all answer forms
+            $formsValid = true;
+            $this->answersAndForms = [];
             foreach ($question->getAnswers() as $answer) {
-                if (!$answer->checkValid(true)) {
-                    $this->sendInvalidForm($testRefId);
+                $form = new TstManualScoringForm($this->lng, $answer);
+                $form->fillForm($answer);
+                if (!$form->checkInput()) {
+                    $formsValid = false;
                 }
+                $this->answersAndForms[] = ["answer" => $answer, "form" => $form];
+            }
+
+            if (!$formsValid) {
+                ilUtil::sendFailure($this->lng->txt("form_input_not_valid"), true);
+                $this->showTmsqManualScoring();
+                return;
+                //echo $this->modify($question->getTestRefId());
+                //$this->sendInvalidForm($testRefId);
+            }
+
+            foreach ($question->getAnswers() as $answer) {
+
 
                 $scoringCompleted = $answer->readScoringCompleted();
 

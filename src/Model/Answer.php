@@ -36,7 +36,7 @@ class Answer
     /**
      * @var string
      */
-    protected $answerHtml;
+    protected $answerHtml = "";
     /**
      * @var float
      */
