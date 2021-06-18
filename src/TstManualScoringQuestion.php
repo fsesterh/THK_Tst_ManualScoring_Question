@@ -50,13 +50,11 @@ class TstManualScoringQuestion
     /**
      * @var array
      */
-    private $answersAndForms = [];
-
+    protected $answersAndForms = [];
     /**
      * @var ilLogger
      */
     protected $logger;
-
     /**
      * @var ilObjUser
      */
@@ -235,11 +233,9 @@ class TstManualScoringQuestion
 
     /**
      * Replaces the html for the manual scoring table.
-     * @param string $html
-     * @param int    $refId
+     * @param int $refId
      * @return string
      * @throws ilTemplateException
-     * @throws Exception
      */
     public function modify(int $refId) : string
     {
@@ -274,7 +270,6 @@ class TstManualScoringQuestion
             ->setPass($selectedPass);
 
         //Pagination
-
         $answersData = $this->getAnswerData($test, $selectedPass, $selectedQuestionId);
         $numberOfAnswersData = count($answersData);
         $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);

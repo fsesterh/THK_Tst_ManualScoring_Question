@@ -32,10 +32,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
      */
     protected $plugin;
 
-    public function __construct(
-        ilLanguage $lng,
-        Answer $answer
-    ) {
+    public function __construct(ilLanguage $lng, Answer $answer) {
         global $DIC;
         $this->request = $DIC->http()->request();
         $this->lng = $lng;
@@ -228,10 +225,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
      */
     public function fillForm(Answer $answer)
     {
-        if (!$answer->checkValid(true)) {
-            throw new Exception("Field not set in QuestionAnswer object");
-        }
-
         $question = $answer->getQuestion();
         $questionId = $question->getId();
         $activeId = $answer->getActiveId();

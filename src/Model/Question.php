@@ -13,7 +13,6 @@ use ilObjTest;
  */
 class Question
 {
-
     /**
      * @var Answer[]
      */
@@ -97,14 +96,6 @@ class Question
         $this->setAnswers($answers);
 
         return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function checkValid() : bool
-    {
-        return isset($this->id, $this->maximumPoints, $this->pass, $this->testRefId);
     }
 
     /**

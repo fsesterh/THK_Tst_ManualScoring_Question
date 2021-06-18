@@ -70,7 +70,7 @@ class Answer
             );
             if ($result->numRows()) {
                 $row = $DIC->database()->fetchAssoc($result);
-                if(!isset($row["finalized_evaluation"])) {
+                if (!isset($row["finalized_evaluation"])) {
                     return false;
                 }
                 return (bool) $row["finalized_evaluation"];
@@ -78,15 +78,6 @@ class Answer
             return false;
         }
         return false;
-    }
-
-    /**
-     * reads the reached points for the answer from ilias
-     * @return float
-     */
-    public function readReachedPoints() : float
-    {
-        return assQuestion::_getReachedPoints($this->activeId, $this->question->getId(), $this->question->getPass());
     }
 
     /**
@@ -167,29 +158,6 @@ class Answer
             1,
             $this->question->readIsObligatory()
         );
-    }
-
-    /**
-     * Checks if the fields are set
-     */
-    public function checkValid(bool $checkQuestionObject = false) : bool
-    {
-        $answerFieldsValid = isset($this->activeId, $this->scoringCompleted);
-
-        $pointsFieldValid = isset($this->points);
-        $feedbackFieldValid = isset($this->feedback);
-        if ($this->readScoringCompleted()) {
-            $pointsFieldValid = true;
-            $feedbackFieldValid = true;
-        }
-
-        $answerFieldsValid = $answerFieldsValid && $pointsFieldValid && $feedbackFieldValid;
-
-        if ($checkQuestionObject) {
-            $questionFieldsValid = $this->question->checkValid();
-            return $answerFieldsValid && $questionFieldsValid;
-        }
-        return $answerFieldsValid;
     }
 
     /**
