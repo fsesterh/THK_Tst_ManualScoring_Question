@@ -43,9 +43,9 @@ class Answer
      */
     protected $answerHtml = "";
     /**
-     * @var float
+     * @var ?float
      */
-    protected $points = 0;
+    protected $points;
     /**
      * @var Question
      */
@@ -262,9 +262,9 @@ class Answer
     }
 
     /**
-     * @return float
+     * @return ?float
      */
-    public function getPoints() : float
+    public function getPoints() : ?float
     {
         return $this->points;
     }
