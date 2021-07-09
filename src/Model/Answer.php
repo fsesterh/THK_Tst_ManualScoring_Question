@@ -155,6 +155,15 @@ class Answer
         );
     }
 
+    protected function readPoints() : float
+    {
+        return (float) assQuestion::_getReachedPoints(
+            $this->activeId,
+            $this->question->getId(),
+            $this->question->getPass()
+        );
+    }
+
     /**
      * Writes the points to ilias
      * Returns true on success
@@ -198,6 +207,9 @@ class Answer
 
         //If not set the scoring is set to no longer be completed
         //Restore from db
+        if (!isset($answerData["points"])) {
+            $this->setPoints($this->readPoints());
+        }
         if (!isset($answerData["feedback"])) {
             $this->setFeedback($this->readFeedback());
         }
