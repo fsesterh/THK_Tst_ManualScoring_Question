@@ -681,12 +681,12 @@ class TstManualScoringQuestion
 
         $pagination = $pagination->withCurrentPage($currentPage);
 
-        $start = $pagination->getOffset();
-        $stop = $start + $pagination->getPageLength();
+        $start = $pagination->getPageSize() * $currentPage;
+        $stop = $pagination->getPageSize();
 
         $translation = "";
         if (($totalNumberOfElements) > 1) {
-            $translation = sprintf($this->plugin->txt("answersFromTo"), $start + 1, $stop);
+            $translation = sprintf($this->plugin->txt("answersFromTo"), $start + 1, $start + $pagination->getPageLength());
         }
 
         $html = '<div class="tmsq-pagination">' .
