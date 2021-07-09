@@ -6,7 +6,6 @@ namespace ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput;
 use ilFormPropertyGUI;
 use ilTemplateException;
 use ilTemplate;
-use ilGlobalPageTemplate;
 
 /**
  * Class ilHtmlAreaInput
@@ -31,10 +30,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      * @var string
      */
     protected $value = "";
-    /**
-     * @var ilGlobalPageTemplate
-     */
-    protected $mainTpl;
 
     /**
      * ilRichTextInput constructor.
@@ -43,8 +38,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      */
     public function __construct($a_title = "", $a_postvar = "")
     {
-        global $DIC;
-        $this->mainTpl = $DIC->ui()->mainTemplate();
         parent::__construct($a_title, $a_postvar);
     }
 
