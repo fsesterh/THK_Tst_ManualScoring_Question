@@ -9,6 +9,7 @@ use ilRTE;
 use ilObjAssessmentFolder;
 use ilObjTestAccess;
 use ilTstManualScoringQuestionPlugin;
+use ilDBInterface;
 
 /**
  * Class Answer
@@ -17,6 +18,10 @@ use ilTstManualScoringQuestionPlugin;
  */
 class Answer
 {
+    /**
+     * @var ilDBInterface
+     */
+    protected $db;
     /**
      * @var string
      */
@@ -38,7 +43,7 @@ class Answer
      */
     protected $answerHtml = "";
     /**
-     * @var float
+     * @var ?float
      */
     protected $points;
     /**
@@ -52,6 +57,8 @@ class Answer
 
     public function __construct(Question $question)
     {
+        global $DIC;
+        $this->db = $DIC->database();
         $this->question = $question;
     }
 
@@ -86,7 +93,13 @@ class Answer
      */
     public function readFeedback() : string
     {
-        return ilObjTest::getManualFeedback($this->activeId, $this->question->getId(), $this->question->getPass());
+        $result = $this->db->queryF(
+            "SELECT feedback FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+            ['integer', 'integer', 'integer'],
+            [$this->activeId, $this->question->getId(), $this->question->getPass()]
+        );
+
+        return $this->db->fetchAssoc($result)["feedback"] ?? "";
     }
 
     /**
@@ -142,6 +155,15 @@ class Answer
         );
     }
 
+    protected function readPoints() : float
+    {
+        return (float) assQuestion::_getReachedPoints(
+            $this->activeId,
+            $this->question->getId(),
+            $this->question->getPass()
+        );
+    }
+
     /**
      * Writes the points to ilias
      * Returns true on success
@@ -171,6 +193,10 @@ class Answer
         $activeId = $answerData["activeId"];
         $scoringCompleted = $answerData["scoringCompleted"];
 
+        if (is_numeric($activeId)) {
+            $this->setActiveId((int) $activeId);
+        }
+
         if (is_numeric($points)) {
             $this->setPoints((float) $points);
         }
@@ -179,8 +205,13 @@ class Answer
             $this->setFeedback($feedback);
         }
 
-        if (is_numeric($activeId)) {
-            $this->setActiveId((int) $activeId);
+        //If not set the scoring is set to no longer be completed
+        //Restore from db
+        if (!isset($answerData["points"])) {
+            $this->setPoints($this->readPoints());
+        }
+        if (!isset($answerData["feedback"])) {
+            $this->setFeedback($this->readFeedback());
         }
 
         $this->setScoringCompleted((bool) $scoringCompleted);
@@ -243,9 +274,9 @@ class Answer
     }
 
     /**
-     * @return float
+     * @return ?float
      */
-    public function getPoints() : float
+    public function getPoints() : ?float
     {
         return $this->points;
     }
