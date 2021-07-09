@@ -567,8 +567,6 @@ class TstManualScoringQuestion
             }
 
             foreach ($question->getAnswers() as $answer) {
-
-
                 $scoringCompleted = $answer->readScoringCompleted();
 
                 if (!$scoringCompleted && $answer->getPoints() > $question->getMaximumPoints()) {
