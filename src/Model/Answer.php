@@ -40,7 +40,7 @@ class Answer
     /**
      * @var float
      */
-    protected $points;
+    protected $points = 0;
     /**
      * @var Question
      */

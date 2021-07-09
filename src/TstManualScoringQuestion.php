@@ -118,6 +118,26 @@ class TstManualScoringQuestion
         $this->logger = $dic->logger()->root();
     }
 
+    protected function readScoringCompleted(int $questionId, int $activeId, int $pass) : bool
+    {
+        if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
+            $result = $this->dic->database()->queryF(
+                "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+                ['integer', 'integer', 'integer'],
+                [$activeId, $questionId, $pass]
+            );
+            if ($result->numRows()) {
+                $row = $this->dic->database()->fetchAssoc($result);
+                if (!isset($row["finalized_evaluation"])) {
+                    return false;
+                }
+                return (bool) $row["finalized_evaluation"];
+            }
+            return false;
+        }
+        return false;
+    }
+
     /**
      * Returns an array of answer data
      * Code for retrieving data copied from class.ilTestScoringByQuestionsGUI.php
@@ -179,7 +199,13 @@ class TstManualScoringQuestion
             $questions = $test->getPotentialRandomTestQuestions();
         }
 
+        $enabledManualScoringTypes = ilObjAssessmentFolder::_getManualScoring();
+
         foreach ($questions as $questionData) {
+            if (!in_array($questionData["question_type_fi"], $enabledManualScoringTypes)) {
+                continue;
+            }
+
             $questionId = $questionData["question_id"];
             $title = $questionData["title"];
             $points = $questionData["points"];
@@ -255,7 +281,6 @@ class TstManualScoringQuestion
             return $this->showNoEntries($tpl);
         }
 
-
         $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $this->generatePassOptions($test));
         $selectedQuestionId = $selectedFilters["selectedQuestionId"];
         $selectedPass = $selectedFilters["selectedPass"];
@@ -271,6 +296,29 @@ class TstManualScoringQuestion
 
         //Pagination
         $answersData = $this->getAnswerData($test, $selectedPass, $selectedQuestionId);
+
+        if ($this->plugin->isAtLeastIlias6()) {
+            $this->logger->debug("TMSQ : ilias 6 filtering by user scoring state");
+            $answersData = array_filter(
+                $answersData,
+                function (array $answerData) use ($question, $selectedScoringCompleted) {
+                    $scoringCompleted = $this->readScoringCompleted(
+                        $question->getId(),
+                        (int) $answerData["active_id"],
+                        $question->getPass()
+                    );
+                    switch ($selectedScoringCompleted) {
+                        case self::ONLY_FINALIZED:
+                            return $scoringCompleted;
+                        case self::EXCEPT_FINALIZED:
+                            return !$scoringCompleted;
+                        default:
+                            return true;
+                    }
+                }
+            );
+        }
+
         $numberOfAnswersData = count($answersData);
         $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);
         $currentPage = $paginationData["currentPage"];
@@ -300,25 +348,6 @@ class TstManualScoringQuestion
         }
 
         $this->logger->debug("TMSQ : Answers array sliced by pagination. Number of answers before {$numberOfAnswersData} now " . count($question->getAnswers()));
-
-        if ($this->plugin->isAtLeastIlias6()) {
-            $this->logger->debug("TMSQ : ilias 6 pagination filtering by user scoring state");
-            $question->setAnswers(array_filter(
-                $question->getAnswers(),
-                function (Answer $answer) use ($selectedScoringCompleted) {
-                    switch ($selectedScoringCompleted) {
-                        case self::ONLY_FINALIZED:
-                            return $answer->isScoringCompleted();
-                        case self::EXCEPT_FINALIZED:
-                            return !$answer->isScoringCompleted();
-                        default:
-                            return true;
-                    }
-                }
-            ));
-        } else {
-            $this->logger->debug("TMSQ : ilias 54 pagination");
-        }
 
         $this->logger->debug("TMSQ : Final number of answers " . count($question->getAnswers()));
 
@@ -684,15 +713,10 @@ class TstManualScoringQuestion
         $start = $pagination->getOffset();
         $stop = $start + $pagination->getPageLength();
 
-        $translation = "";
-        if (($totalNumberOfElements) > 1) {
-            $translation = sprintf($this->plugin->txt("answersFromTo"), $start + 1, $stop);
-        }
-
         $html = '<div class="tmsq-pagination">' .
             $renderer->render($pagination)
             . '<hr class="tmsq-pagination-separator">'
-            . $translation
+            . sprintf($this->plugin->txt("answersFromTo"), $start + 1, $stop)
             . '</div>';
 
         return [
