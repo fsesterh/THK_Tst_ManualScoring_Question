@@ -18,7 +18,10 @@ use ilDBInterface;
  */
 class Answer
 {
-    protected ilDBInterface $db;
+    /**
+     * @var ilDBInterface
+     */
+    protected $db;
     /**
      * @var string
      */
