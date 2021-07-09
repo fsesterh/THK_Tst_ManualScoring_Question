@@ -710,7 +710,7 @@ class TstManualScoringQuestion
         $html = '<div class="tmsq-pagination">' .
             $renderer->render($pagination)
             . '<hr class="tmsq-pagination-separator">'
-            . sprintf($this->plugin->txt("answersFromTo"), $start + 1, $stop)
+            . sprintf($this->plugin->txt("answersFromTo"), $start + 1, $start + $pagination->getPageLength())
             . '</div>';
 
         return [
