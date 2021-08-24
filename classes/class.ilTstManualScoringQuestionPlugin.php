@@ -101,4 +101,13 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     {
         return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">=");
     }
+
+    /**
+     * Checks if the current ilias version is at least ilias 7
+     * @return bool
+     */
+    public function isAtLeastIlias7() : bool
+    {
+        return version_compare(ILIAS_VERSION_NUMERIC, "7.0", ">=");
+    }
 }

@@ -707,10 +707,23 @@ class TstManualScoringQuestion
         $start = $pagination->getPageSize() * $currentPage;
         $stop = $pagination->getPageSize();
 
+        if($totalNumberOfElements === 0) {
+            $pageLength = 0;
+        } else {
+            if($this->plugin->isAtLeastIlias7()) {
+                $range = $pagination->getRange();
+                $pageLength = $range->getLength();
+            } else {
+                $pageLength = $pagination->getPageLength();
+            }
+        }
+
+
+
         $html = '<div class="tmsq-pagination">' .
             $renderer->render($pagination)
             . '<hr class="tmsq-pagination-separator">'
-            . sprintf($this->plugin->txt("answersFromTo"), $start + 1, $start + $pagination->getPageLength())
+            . sprintf($this->plugin->txt("answersFromTo"), $totalNumberOfElements === 0 ? 0 : $start + 1, $start + $pageLength)
             . '</div>';
 
         return [
