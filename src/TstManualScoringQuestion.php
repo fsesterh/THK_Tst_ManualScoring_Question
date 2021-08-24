@@ -718,12 +718,14 @@ class TstManualScoringQuestion
             }
         }
 
-
-
         $html = '<div class="tmsq-pagination">' .
             $renderer->render($pagination)
             . '<hr class="tmsq-pagination-separator">'
-            . sprintf($this->plugin->txt("answersFromTo"), $totalNumberOfElements === 0 ? 0 : $start + 1, $start + $pageLength)
+            . sprintf(
+                $this->plugin->txt("answersFromTo"),
+                $totalNumberOfElements === 0 ? 0 : $start + 1,
+                $start + $pageLength
+            )
             . '</div>';
 
         return [
