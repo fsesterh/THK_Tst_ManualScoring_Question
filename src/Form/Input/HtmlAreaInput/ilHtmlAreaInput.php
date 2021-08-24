@@ -122,5 +122,4 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
             $this->editable = false;
         }
     }
-
 }

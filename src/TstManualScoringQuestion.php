@@ -707,10 +707,10 @@ class TstManualScoringQuestion
         $start = $pagination->getPageSize() * $currentPage;
         $stop = $pagination->getPageSize();
 
-        if($totalNumberOfElements === 0) {
+        if ($totalNumberOfElements === 0) {
             $pageLength = 0;
         } else {
-            if($this->plugin->isAtLeastIlias7()) {
+            if ($this->plugin->isAtLeastIlias7()) {
                 $range = $pagination->getRange();
                 $pageLength = $range->getLength();
             } else {
