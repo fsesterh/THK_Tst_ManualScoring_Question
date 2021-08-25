@@ -32,7 +32,8 @@ class TstManualScoringForm extends ilPropertyFormGUI
      */
     protected $plugin;
 
-    public function __construct(ilLanguage $lng, Answer $answer) {
+    public function __construct(ilLanguage $lng, Answer $answer)
+    {
         global $DIC;
         $this->request = $DIC->http()->request();
         $this->lng = $lng;
@@ -155,8 +156,11 @@ class TstManualScoringForm extends ilPropertyFormGUI
                         $replace_to = array(' ', '', "_", "_", "_");
 
                         #20630 mbstring extension is mandatory for 5.4
-                        $chars_entered = mb_strlen(strip_tags(str_replace($to_replace, $replace_to,
-                            $item->getValue())));
+                        $chars_entered = mb_strlen(strip_tags(str_replace(
+                            $to_replace,
+                            $replace_to,
+                            $item->getValue()
+                        )));
 
                         if ($item->getMaxNumOfChars() && ($chars_entered > $item->getMaxNumOfChars())) {
                             $item->setAlert($lng->txt("msg_input_char_limit_max"));

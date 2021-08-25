@@ -120,7 +120,8 @@ class Question
      * @param Answer $answer
      * @return Question
      */
-    public function addAnswer(Answer $answer) : Question {
+    public function addAnswer(Answer $answer) : Question
+    {
         array_push($this->answers, $answer);
         return $this;
     }
