@@ -8,17 +8,15 @@
 
 ## Description
 
-Modifies scoring by question sub-tab of the manual scoring tab in a test object
-Removes the need for the user to click on **Show Answer**  
-before being able to see the answer the user gave for the question.
+Adds a second sub-tab for scoring by question. Users are able to score/correct up to 10 answers to a question per page without having to open up each answer first.
 
-Also adds pagination to the **Manual Scoring** tab.
+It is highly recommended to rename the original scoring by question tab via the ILIAS language files to something different in order to avoid having to sub-tabs with the same name.
 
 ---
 
 ## Installation
 
-1. Clone this repository to **Customizing/global/plugins/Services/UIComponent/UserInterfaceHook**
+1. Clone this repository to **Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion**
 2. Install the Composer dependencies  
    ```bash
    cd Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
