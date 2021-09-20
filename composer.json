@@ -16,5 +16,8 @@
     "psr-4": {
       "ILIAS\\Plugin\\TstManualScoringQuestion\\": "src/"
     }
+  },
+  "config": {
+    "classmap-authoritative": true
   }
 }
