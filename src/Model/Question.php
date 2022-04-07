@@ -30,7 +30,7 @@ class Question
      */
     protected $testRefId;
     /**
-     * @var int
+     * @var float
      */
     protected $maximumPoints;
     /**
@@ -181,18 +181,18 @@ class Question
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getMaximumPoints() : int
+    public function getMaximumPoints() : float
     {
         return $this->maximumPoints;
     }
 
     /**
-     * @param int $maximumPoints
+     * @param float $maximumPoints
      * @return Question
      */
-    public function setMaximumPoints(int $maximumPoints) : Question
+    public function setMaximumPoints(float $maximumPoints) : Question
     {
         $this->maximumPoints = $maximumPoints;
         return $this;
