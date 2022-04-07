@@ -8,5 +8,5 @@ $version = "0.0.2";
 $ilias_min_version = "5.4";
 $ilias_max_version = "7.999";
 
-$responsible = "Marvin Beym";
-$responsible_mail = "mbeym@databay.de";
+$responsible = "Fabian Sesterhenn";
+$responsible_mail = "fabian.sesterhenn@th-koeln.de";
