@@ -924,10 +924,17 @@ class TstManualScoringQuestion
             false,
             true
         );
+
         $tmp_tpl->setVariable(
             'TEXT_YOUR_SOLUTION',
             $this->lng->txt('answers_of') . ' ' . $participant->getName()
         );
+
+        $tmp_tpl->setVariable(
+            'TEXT_SOLUTION_OUTPUT',
+            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+        );
+
         $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
 
         return $tmp_tpl->get();
