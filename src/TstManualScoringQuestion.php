@@ -5,39 +5,45 @@ declare(strict_types=1);
 
 namespace ILIAS\Plugin\TstManualScoringQuestion;
 
-use ILIAS\DI\Container;
-use ilTstManualScoringQuestionPlugin;
-use ilTemplate;
-use ilTemplateException;
-use ilObjTest;
-use ilLanguage;
-use ilTestAccess;
+use assQuestion;
+use Exception;
+use ilAccessHandler;
 use ilCtrl;
+use ilCtrlException;
+use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
-use ilTstManualScoringQuestionUIHookGUI;
-use ilUIPluginRouterGUI;
-use ilUtil;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
+use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
+use ILIAS\UI\Component\Input\Container\Filter\Standard;
+use ILIAS\UI\Factory;
+use ILIAS\UI\Renderer;
+use ilLanguage;
+use ilLogger;
+use ilObjAssessmentFolder;
+use ilObjTest;
 use ilObjTestGUI;
-use ilToolbarGUI;
+use ilObjUser;
 use ilSelectInputGUI;
 use ilSubmitButton;
-use Psr\Http\Message\RequestInterface;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
-use ilAccessHandler;
-use ilObjUser;
-use Exception;
-use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
-use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
-use ilObjAssessmentFolder;
-use ilLogger;
-use assQuestion;
-use ilTestParticipantData;
-use ilTestParticipantAccessFilter;
+use ilSystemStyleException;
+use ilTemplate;
+use ilTemplateException;
+use ilTestAccess;
 use ilTestEvaluationUserData;
+use ilTestParticipantAccessFilter;
+use ilTestParticipantData;
+use ilTestScoringByQuestionsGUI;
+use ilToolbarGUI;
+use ilTstManualScoringQuestionPlugin;
+use ilTstManualScoringQuestionUIHookGUI;
+use ilUIFilterService;
+use ilUIPluginRouterGUI;
+use Psr\Http\Message\RequestInterface;
 use ReflectionException;
 use ReflectionMethod;
-use ilTestScoringByQuestionsGUI;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
 
 /**
  * Class TstManualScoringQuestion
@@ -466,10 +472,10 @@ class TstManualScoringQuestion
             $tpl->parseCurrentBlock("question");
         } else {
             $this->logger->debug("TMSQ : no answers available, show no entries message");
-            return $this->showNoEntries($tpl);
+            return $this->uiRenderer->render($filter) . $this->showNoEntries($tpl);
         }
 
-        return $tpl->get();
+        return $this->uiRenderer->render($filter) . $tpl->get();
     }
 
     protected function showNoEntries($tpl): string
@@ -754,14 +760,7 @@ class TstManualScoringQuestion
         ];
     }
 
-    /**
-     * Setups the filter toolbar
-     * @param int   $testRefId
-     * @param array $questionOptions
-     * @param array $passOptions
-     * @return array
-     */
-    protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions): array
+    protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions): Standard
     {
         $answersPerPageOptions = range(1, 10);
         $answersPerPageOptions = array_combine($answersPerPageOptions, $answersPerPageOptions);
@@ -799,32 +798,26 @@ class TstManualScoringQuestion
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $testRefId);
         $filterBaseAction = $this->ctrl->getLinkTargetByClass(
             [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
-            "applyFilter"
+            "showTmsqManualScoring",
         );
 
-        $this->toolbar->setFormAction($filterAction);
-        $this->toolbar->addInputItem($selectQuestionInput, true);
-        $this->toolbar->addInputItem($selectPassInput, true);
-        $this->toolbar->addInputItem($selectAnswersPerPageInput, true);
-
-        if ($this->plugin->isAtLeastIlias6()) {
-            $this->toolbar->addInputItem($selectScoringCompletedInput, true);
-        }
-
-        $this->toolbar->addButtonInstance($applyFilterButton);
-        $this->toolbar->addButtonInstance($resetFilterButton);
-
-        $returnArr = [
-            "selectedQuestionId" => (int) $selectQuestionInput->getValue(),
-            "selectedPass" => (int) $selectPassInput->getValue(),
-            "selectedAnswersPerPage" => (int) $selectAnswersPerPageInput->getValue(),
-        ];
-
-        if ($this->plugin->isAtLeastIlias6()) {
-            $returnArr["selectedScoringCompleted"] = (int) $selectScoringCompletedInput->getValue();
-        }
-
-        return $returnArr;
+        return $this->uiFilterService->standard(
+            'tstFilter',
+            $filterBaseAction,
+            [
+                "question" => $selectQuestionInput,
+                "pass" => $selectPassInput,
+                "answersPerPage" => $selectAnswersPerPageInput,
+                "scoringCompleted" => $selectScoringCompletedInput
+            ],
+            [
+                true,
+                true,
+                true,
+                true
+            ],
+            false,
+        );
     }
 
     /**
