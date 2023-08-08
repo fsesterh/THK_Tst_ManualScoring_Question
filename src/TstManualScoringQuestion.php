@@ -500,11 +500,7 @@ class TstManualScoringQuestion
             $this->getManualScoringByQuestionTarget($refId)
         );
 
-        if ($this->plugin->isAtLeastIlias6()) {
-            $this->mainTpl->loadStandardTemplate();
-        } else {
-            $this->mainTpl->getStandardTemplate();
-        }
+        $this->mainTpl->loadStandardTemplate();
 
         $this->mainTpl->setContent($this->modify($refId));
 
