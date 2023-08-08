@@ -138,15 +138,22 @@ class TstManualScoringQuestion
         foreach ($participantData->getActiveIds() as $active_id) {
             /** @var $participant ilTestEvaluationUserData */
             $participant = $participants[$active_id];
-            $user = ilObjUser::_getUserData([$participant->user_id]);
-            $answersData[] = [
-                'active_id' => $active_id,
-                'reached_points' => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
-                'participant' => $participant,
-                'lastname' => $user[0]['lastname'],
-                'firstname' => $user[0]['firstname'],
-                'login' => $participant->getLogin(),
-            ];
+
+            $testResultData = $test->getTestResult($active_id, $pass);
+            foreach ($testResultData as $key => $questionData) {
+                if (!is_numeric($key)) {
+                    continue;
+                }
+                $user = ilObjUser::_getUserData([$participant->user_id]);
+                $answersData[] = [
+                    'active_id' => $active_id,
+                    'reached_points' => assQuestion::_getReachedPoints($active_id, (int) $questionData['qid'], $pass),
+                    'participant' => $participant,
+                    'lastname' => $user[0]['lastname'],
+                    'firstname' => $user[0]['firstname'],
+                    'login' => $participant->getLogin(),
+                ];
+            }
         }
         return $answersData;
     }
