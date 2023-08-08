@@ -19,7 +19,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * @var bool
      */
-    protected $disabled = false;
+    protected bool $disabled = false;
     /**
      * @var bool
      */
@@ -116,7 +116,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * @param bool $a_disabled
      */
-    public function setDisabled($a_disabled)
+    public function setDisabled($a_disabled): void
     {
         $this->disabled = $a_disabled;
         if ($a_disabled) {
