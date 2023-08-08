@@ -22,14 +22,10 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     public const SLOT_ID = "uihk";
     /** @var string */
     public const PNAME = "TstManualScoringQuestion";
-    /**
-     * @var Container
-     */
-    protected $dic;
-    /**
-     * @var ilCtrl
-     */
-    protected $ctrl;
+    protected Container $dic;
+    protected ilCtrl $ctrl;
+
+    private static ?ilTstManualScoringQuestionPlugin $instance = null;
 
     public function __construct(ilDBInterface $db, ilComponentRepositoryWrite $component_repository, string $id)
     {
@@ -40,11 +36,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
         parent::__construct($db, $component_repository, $id);
     }
-
-    /**
-     * @var ilTstManualScoringQuestionPlugin|null
-     */
-    private static $instance = null;
 
     /**
      * @inheritdoc

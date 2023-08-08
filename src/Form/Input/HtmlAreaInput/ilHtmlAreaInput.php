@@ -17,33 +17,10 @@ use ilTemplateException;
  */
 class ilHtmlAreaInput extends ilFormPropertyGUI
 {
-    /**
-     * @var bool
-     */
     protected bool $disabled = false;
-    /**
-     * @var bool
-     */
-    protected $editable = true;
-    /**
-     * @var string
-     */
-    protected $htmlClass = "html-area-input";
-    /**
-     * @var string
-     */
-    protected $value = "";
-
-    /**
-     * ilRichTextInput constructor.
-     *
-     * @param string $a_title
-     * @param string $a_postvar
-     */
-    public function __construct($a_title = "", $a_postvar = "")
-    {
-        parent::__construct($a_title, $a_postvar);
-    }
+    protected bool $editable = true;
+    protected string $htmlClass = "html-area-input";
+    protected string $value = "";
 
     public function checkInput(): bool
     {
@@ -59,7 +36,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * @param string[] $post
      */
-    public function setValueByArray(array $post)
+    public function setValueByArray(array $post): void
     {
         $value = $post[$this->getPostVar()];
         $this->setValue($value ?: "");

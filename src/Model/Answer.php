@@ -20,42 +20,15 @@ use ilTstManualScoringQuestionPlugin;
  */
 class Answer
 {
-    /**
-     * @var ilDBInterface
-     */
-    protected $db;
-    /**
-     * @var string
-     */
-    protected $userName;
-    /**
-     * @var string
-     */
-    protected $login;
-    /**
-     * @var int
-     */
-    protected $activeId;
-    /**
-     * @var string
-     */
-    protected $feedback = "";
-    /**
-     * @var string
-     */
-    protected $answerHtml = "";
-    /**
-     * @var ?float
-     */
-    protected $points;
-    /**
-     * @var Question
-     */
-    protected $question;
-    /**
-     * @var bool
-     */
-    protected $scoringCompleted;
+    protected ilDBInterface $db;
+    protected string $userName;
+    protected string $login;
+    protected int $activeId;
+    protected string $feedback = "";
+    protected string $answerHtml = "";
+    protected ?float $points;
+    protected Question $question;
+    protected bool $scoringCompleted;
 
     public function __construct(Question $question)
     {
@@ -71,21 +44,18 @@ class Answer
      */
     public function readScoringCompleted(): bool
     {
-        if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
-            global $DIC;
-            $result = $DIC->database()->queryF(
-                "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
-                ['integer', 'integer', 'integer'],
-                [$this->activeId, $this->question->getId(), $this->getQuestion()->getPass()]
-            );
-            if ($result->numRows()) {
-                $row = $DIC->database()->fetchAssoc($result);
-                if (!isset($row["finalized_evaluation"])) {
-                    return false;
-                }
-                return (bool) $row["finalized_evaluation"];
+        global $DIC;
+        $result = $DIC->database()->queryF(
+            "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+            ['integer', 'integer', 'integer'],
+            [$this->activeId, $this->question->getId(), $this->getQuestion()->getPass()]
+        );
+        if ($result->numRows()) {
+            $row = $DIC->database()->fetchAssoc($result);
+            if (!isset($row["finalized_evaluation"])) {
+                return false;
             }
-            return false;
+            return (bool) $row["finalized_evaluation"];
         }
         return false;
     }

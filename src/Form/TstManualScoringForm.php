@@ -26,14 +26,8 @@ use Psr\Http\Message\RequestInterface;
  */
 class TstManualScoringForm extends ilPropertyFormGUI
 {
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
-    /**
-     * @var ilTstManualScoringQuestionPlugin
-     */
-    protected $plugin;
+    protected RequestInterface $request;
+    protected ilTstManualScoringQuestionPlugin $plugin;
 
     public function __construct(ilLanguage $lng, Answer $answer)
     {
@@ -112,10 +106,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);
         $this->addItem($manualFeedPackAreaInput);
-
-        if ($this->plugin->isAtLeastIlias6()) {
-            $this->addItem($scoringCompletedCheckboxInput);
-        }
+        $this->addItem($scoringCompletedCheckboxInput);
 
         parent::__construct();
     }

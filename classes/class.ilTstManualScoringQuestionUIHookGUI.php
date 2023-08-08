@@ -21,26 +21,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
     private const TMSQ_TAB = "tmsq_man_scoring";
-    /**
-     * @var ilLanguage
-     */
-    protected $lng;
-    /**
-     * @var TstManualScoringQuestion
-     */
-    protected $tstManualScoringQuestion;
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
-    /**
-     * @var ilTstManualScoringQuestionPlugin
-     */
-    protected $plugin;
-    /**
-     * @var Container
-     */
-    protected $dic;
+    protected ilLanguage $lng;
+    protected TstManualScoringQuestion $tstManualScoringQuestion;
+    protected RequestInterface $request;
+    protected ilTstManualScoringQuestionPlugin $plugin;
+    protected Container $dic;
     private UiUtil $uiUtil;
 
     /**
