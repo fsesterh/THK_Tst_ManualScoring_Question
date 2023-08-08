@@ -160,10 +160,10 @@ class TstManualScoringQuestion
             $questions = $test->getPotentialRandomTestQuestions();
         }
 
-        $enabledManualScoringTypes = ilObjAssessmentFolder::_getManualScoring();
+        $enabledManualScoringTypes = ilObjAssessmentFolder::_getManualScoringTypes();
 
         foreach ($questions as $questionData) {
-            if (!in_array($questionData["question_type_fi"], $enabledManualScoringTypes, true)) {
+            if (!in_array($questionData["type_tag"], $enabledManualScoringTypes, true)) {
                 continue;
             }
 
