@@ -178,22 +178,15 @@ class TstManualScoringQuestion
 
             /** @var $participant ilTestEvaluationUserData */
             $participant = $participants[$active_id];
-            $testResultData = $test->getTestResult($active_id, $pass);
-            foreach ($testResultData as $questionData) {
-                if (!isset($questionData['qid']) || $questionData['qid'] != $questionId) {
-                    continue;
-                }
-
-                $user = ilObjUser::_getUserData([$participant->user_id]);
-                $answersData[] = [
-                    'active_id' => $active_id,
-                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionData['qid'], $pass),
-                    'participant' => $participant,
-                    'lastname' => $user[0]['lastname'],
-                    'firstname' => $user[0]['firstname'],
-                    'login' => $participant->getLogin(),
-                ];
-            }
+            $user = ilObjUser::_getUserData([$participant->user_id]);
+            $answersData[] = [
+                'active_id' => $active_id,
+                'reached_points' => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
+                'participant' => $participant,
+                'lastname' => $user[0]['lastname'],
+                'firstname' => $user[0]['firstname'],
+                'login' => $participant->getLogin(),
+            ];
         }
         return $answersData;
     }
@@ -272,9 +265,12 @@ class TstManualScoringQuestion
 
     /**
      * Replaces the html for the manual scoring table.
+     *
      * @param int $refId
      * @return string
      * @throws ilTemplateException
+     * @throws ilSystemStyleException
+     * @throws ilCtrlException
      */
     public function modify(int $refId): string
     {
@@ -290,15 +286,24 @@ class TstManualScoringQuestion
 
         $questionOptions = $this->generateQuestionOptions($test);
 
-        if (count($questionOptions) == 0) {
+        if (count($questionOptions) === 0) {
             return $this->showNoEntries($tpl);
         }
 
-        $selectedFilters = $this->setupFilter($test->getRefId(), $questionOptions, $this->generatePassOptions($test));
-        $selectedQuestionId = $selectedFilters["selectedQuestionId"];
-        $selectedPass = $selectedFilters["selectedPass"];
-        $selectedScoringCompleted = $selectedFilters["selectedScoringCompleted"];
-        $selectedAnswersPerPage = $selectedFilters["selectedAnswersPerPage"];
+        $passOptions = $this->generatePassOptions($test);
+        $filter = $this->setupFilter($test->getRefId(), $questionOptions, $passOptions);
+
+        $filterData = $this->uiFilterService->getData($filter) ?? [
+            "question" => null,
+            "pass" => null,
+            "scoringCompleted" => null,
+            "answersPerPage" => null
+        ];
+
+        $selectedQuestionId = $filterData["question"] ?: array_key_first($questionOptions);
+        $selectedPass = (int) ($filterData["pass"] ?: $passOptions[array_key_first($passOptions)] ?? 1);
+        $selectedScoringCompleted = $filterData["scoringCompleted"] ?: self::ALL_USERS ;
+        $selectedAnswersPerPage = $filterData["answersPerPage"] ?: 1;
 
         $this->logger->debug("TMSQ : Selected filters: pass={$selectedPass} | scoringCompleted=$selectedScoringCompleted | answersPerPage={$selectedAnswersPerPage}");
 
@@ -761,74 +766,38 @@ class TstManualScoringQuestion
         $answersPerPageOptions = range(1, 10);
         $answersPerPageOptions = array_combine($answersPerPageOptions, $answersPerPageOptions);
 
-        //Filter options
-        $selectQuestionInput = new ilSelectInputGUI($this->lng->txt("question"), "question");
-        $selectQuestionInput->setParent($this->plugin);
-        $selectQuestionInput->setOptions($questionOptions);
-        $selectQuestionInput->readFromSession();
+        $selectQuestionInput = $this->uiFieldFactory->select($this->lng->txt("question"), $questionOptions);
+        $selectPassInput = $this->uiFieldFactory->select($this->lng->txt("pass"), $passOptions);
+        $selectAnswersPerPageInput = $this->uiFieldFactory->select($this->plugin->txt("answersPerPage"), $answersPerPageOptions);
+        $selectScoringCompletedInput = $this->uiFieldFactory->select($this->lng->txt("finalized_evaluation"), [
+            self::ALL_USERS => $this->lng->txt('all_users'),
+            self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
+            self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
+        ]);
 
-        $selectPassInput = new ilSelectInputGUI($this->lng->txt("pass"), "pass");
-        $selectPassInput->setParent($this->plugin);
-        $selectPassInput->setOptions($passOptions);
-        $selectPassInput->readFromSession();
-
-        $selectAnswersPerPageInput = new ilSelectInputGUI($this->plugin->txt("answersPerPage"), "answersPerPage");
-        $selectAnswersPerPageInput->setParent($this->plugin);
-        $selectAnswersPerPageInput->setOptions($answersPerPageOptions);
-        $selectAnswersPerPageInput->readFromSession();
-
-        if ($selectAnswersPerPageInput->getValue() == null) {
-            $selectAnswersPerPageInput->setValue(10);
-        }
-
-        $selectScoringCompletedInput = new ilSelectInputGUI(
-            $this->lng->txt("finalized_evaluation"),
-            "scoringCompleted"
-        );
-
-        if ($this->plugin->isAtLeastIlias6()) {
-            $selectScoringCompletedInput->setParent($this->plugin);
-            $selectScoringCompletedInput->setOptions([
-                self::ALL_USERS => $this->lng->txt('all_users'),
-                self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
-                self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
-            ]);
-            $selectScoringCompletedInput->readFromSession();
+        if (!$selectAnswersPerPageInput->getValue()) {
+            $selectAnswersPerPageInput->withValue(10);
         }
 
         //Prevent invalid values
-        if (!in_array((int) $selectPassInput->getValue(), array_keys($passOptions))) {
+        if (!in_array((int) $selectPassInput->getValue(), array_keys($passOptions), true)) {
             //alternative as array_key_first() is not available in php 7.2
             reset($passOptions);
-            $selectPassInput->setValue((string) key($passOptions));
+            $selectPassInput->withValue((string) key($passOptions));
         }
 
-        if (!in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions))) {
+        if (!in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions), true)) {
             //alternative as array_key_first() is not available in php 7.2
             reset($questionOptions);
-            $selectQuestionInput->setValue((string) key($questionOptions));
+            $selectQuestionInput->withValue((string) key($questionOptions));
         }
 
-        if (!in_array((int) $selectAnswersPerPageInput->getValue(), $answersPerPageOptions)) {
-            $selectAnswersPerPageInput->setValue(10);
+        if (!in_array((int) $selectAnswersPerPageInput->getValue(), $answersPerPageOptions, true)) {
+            $selectAnswersPerPageInput->withValue(10);
         }
 
-        //Filter buttons
-        $applyFilterButton = ilSubmitButton::getInstance();
-
-        $applyFilterButton->setCaption($this->lng->txt("apply_filter"), false);
-        $applyFilterButton->setCommand('applyFilter');
-
-        $resetFilterButton = ilSubmitButton::getInstance();
-        $resetFilterButton->setCaption($this->lng->txt("reset_filter"), false);
-        $resetFilterButton->setCommand('resetFilter');
-
-        $this->ctrl->setParameterByClass(
-            ilTstManualScoringQuestionUIHookGUI::class,
-            'ref_id',
-            $testRefId
-        );
-        $filterAction = $this->ctrl->getFormActionByClass(
+        $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $testRefId);
+        $filterBaseAction = $this->ctrl->getLinkTargetByClass(
             [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
             "applyFilter"
         );
