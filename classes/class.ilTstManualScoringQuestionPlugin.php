@@ -72,19 +72,27 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     }
 
     /**
-     * @noinspection PhpIncompatibleReturnTypeInspection
      * @return ilTstManualScoringQuestionPlugin
      */
-    public static function getInstance() : ilTstManualScoringQuestionPlugin
+    public static function getInstance(): ilTstManualScoringQuestionPlugin
     {
-        if (null === self::$instance) {
-            return self::$instance = ilPluginAdmin::getPluginObject(
-                self::CTYPE,
-                self::CNAME,
-                self::SLOT_ID,
-                self::PNAME
-            );
+        global $DIC;
+
+        if (self::$instance instanceof self) {
+            return self::$instance;
         }
+
+        /** @var ilComponentRepository $component_repository */
+        $component_repository = $DIC['component.repository'];
+        /** @var ilComponentFactory $component_factory */
+        $component_factory = $DIC['component.factory'];
+
+        $plugin_info = $component_repository->getComponentByTypeAndName(
+            self::CTYPE,
+            self::CNAME
+        )->getPluginSlotById(self::SLOT_ID)->getPluginByName(self::PNAME);
+
+        self::$instance = $component_factory->getPlugin($plugin_info->getId());
 
         return self::$instance;
     }
