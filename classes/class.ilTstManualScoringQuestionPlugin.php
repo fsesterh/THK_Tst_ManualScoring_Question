@@ -9,6 +9,7 @@ use ILIAS\DI\Container;
 
 /**
  * Class ilTstManualScoringQuestionPlugin
+ *
  * @author  Marvin Beym <mbeym@databay.de>
  */
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
@@ -111,6 +112,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
     /**
      * Checks if the current ilias version is at least ilias 7
+     *
      * @return bool
      */
     public function isAtLeastIlias7(): bool

@@ -5,22 +5,23 @@ declare(strict_types=1);
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form;
 
-use ilPropertyFormGUI;
-use ilTstManualScoringQuestionPlugin;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
-use ilNonEditableValueGUI;
-use ilLanguage;
-use ilNumberInputGUI;
-use ilHiddenInputGUI;
-use Psr\Http\Message\RequestInterface;
-use ilTextAreaInputGUI;
 use Exception;
-use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilCheckboxInputGUI;
+use ilHiddenInputGUI;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
+use ilLanguage;
+use ilNonEditableValueGUI;
+use ilNumberInputGUI;
+use ilPropertyFormGUI;
+use ilTextAreaInputGUI;
+use ilTstManualScoringQuestionPlugin;
 use ilUtil;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Class ManualScoringForm
+ *
  * @author  Marvin Beym <mbeym@databay.de>
  */
 class TstManualScoringForm extends ilPropertyFormGUI
@@ -119,7 +120,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         parent::__construct();
     }
 
-    public function checkInput()
+    public function checkInput(): bool
     {
         $lng = $this->lng;
         /**
@@ -226,10 +227,11 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
     /**
      * Fills the form values
+     *
      * @param Answer $answer
      * @throws Exception
      */
-    public function fillForm(Answer $answer)
+    public function fillForm(Answer $answer): void
     {
         $question = $answer->getQuestion();
         $questionId = $question->getId();

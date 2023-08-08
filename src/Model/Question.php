@@ -9,6 +9,7 @@ use ilObjTest;
 
 /**
  * Class Question
+ *
  * @package TstManualScoringQuestion\Model
  * @author  Marvin Beym <mbeym@databay.de>
  */

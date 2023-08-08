@@ -5,15 +5,16 @@
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use assQuestion;
-use ilObjTest;
-use ilRTE;
-use ilObjAssessmentFolder;
-use ilObjTestAccess;
-use ilTstManualScoringQuestionPlugin;
 use ilDBInterface;
+use ilObjAssessmentFolder;
+use ilObjTest;
+use ilObjTestAccess;
+use ilRTE;
+use ilTstManualScoringQuestionPlugin;
 
 /**
  * Class Answer
+ *
  * @package TstManualScoringQuestion\Model
  * @author  Marvin Beym <mbeym@databay.de>
  */
@@ -65,6 +66,7 @@ class Answer
 
     /**
      * Reads if the scoring for the answer is completed
+     *
      * @return bool
      */
     public function readScoringCompleted(): bool
@@ -90,6 +92,7 @@ class Answer
 
     /**
      * Reads the feedback from ilias
+     *
      * @return string
      */
     public function readFeedback(): string
@@ -142,6 +145,7 @@ class Answer
     /**
      * Writes the feedback to ilias
      * Returns true on success
+     *
      * @return bool
      */
     public function writeFeedback(): bool
@@ -168,6 +172,7 @@ class Answer
     /**
      * Writes the points to ilias
      * Returns true on success
+     *
      * @return bool
      */
     public function writePoints(): bool
@@ -320,6 +325,7 @@ class Answer
 
     /**
      * Saves the manual feedback for a question in a test
+     *
      * @param integer $active_id   Active ID of the user
      * @param integer $question_id Question ID
      * @param integer $pass        Pass number
@@ -362,6 +368,7 @@ class Answer
 
     /**
      * Creates a log for the manual feedback
+     *
      * @param integer $active_id   Active ID of the user
      * @param integer $question_id Question ID
      * @param string  $feedback    The feedback text
@@ -388,6 +395,7 @@ class Answer
 
     /**
      * Inserts a manual feedback into the DB
+     *
      * @param integer $active_id    Active ID of the user
      * @param integer $question_id  Question ID
      * @param integer $pass         Pass number
@@ -437,6 +445,7 @@ class Answer
     /**
      * Required as ilias 5.4 does not have this function for retrieving the manual feedback
      * Retrieves the manual feedback for a question in a test
+     *
      * @param integer $active_id   Active ID of the user
      * @param integer $question_id Question ID
      * @param integer $pass        Pass number

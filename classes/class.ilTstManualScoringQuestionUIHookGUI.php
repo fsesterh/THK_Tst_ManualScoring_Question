@@ -6,14 +6,15 @@ declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 use ILIAS\DI\Container;
+use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
 use Psr\Http\Message\RequestInterface;
-use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
  * Class ilTstManualScoringQuestionUIHookGUI
+ *
  * @author            Marvin Beym <mbeym@databay.de>
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
  */
@@ -58,6 +59,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
     /**
      * Injects the sub tab for scoring by tmsq
+     *
      * @param int $ref_id
      */
     protected function injectSubTab(int $ref_id)
@@ -93,6 +95,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
     /**
      * Returns the array used to replace the html content
+     *
      * @param string $mode
      * @param string $html
      * @return string[]
@@ -105,6 +108,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     /**
      * Checks if the received command can be executed and redirects the command into the structure presentation class
      * for further processing
+     *
      * @throws Exception
      */
     public function executeCommand()

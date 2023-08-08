@@ -6,11 +6,12 @@ declare(strict_types=1);
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput;
 
 use ilFormPropertyGUI;
-use ilTemplateException;
 use ilTemplate;
+use ilTemplateException;
 
 /**
  * Class ilHtmlAreaInput
+ *
  * @package TstManualScoringQuestion\Form\Input\HtmlAreaInput
  * @author  Marvin Beym <mbeym@databay.de>
  */
@@ -35,6 +36,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
 
     /**
      * ilRichTextInput constructor.
+     *
      * @param string $a_title
      * @param string $a_postvar
      */
@@ -70,6 +72,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
 
     /**
      * Inserts the input into the template.
+     *
      * @param $a_tpl
      * @return void
      * @throws ilTemplateException
@@ -90,6 +93,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
 
     /**
      * Returns the path to the folder where the input is located.
+     *
      * @return string
      */
     protected function getFolderPath(): string
@@ -99,6 +103,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
 
     /**
      * Changes the html class of the div
+     *
      * @param string $htmlClass
      */
     public function setHtmlClass(string $htmlClass)

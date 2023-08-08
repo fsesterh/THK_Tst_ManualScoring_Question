@@ -27,7 +27,6 @@ use ilObjTest;
 use ilObjTestGUI;
 use ilObjUser;
 use ilSelectInputGUI;
-use ilSubmitButton;
 use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
@@ -47,6 +46,7 @@ use ReflectionMethod;
 
 /**
  * Class TstManualScoringQuestion
+ *
  * @package TstManualScoringQuestion
  * @author  Marvin Beym <mbeym@databay.de>
  */
@@ -160,6 +160,7 @@ class TstManualScoringQuestion
     /**
      * Returns an array of answer data
      * Code for retrieving data copied from class.ilTestScoringByQuestionsGUI.php
+     *
      * @param ilObjTest $test
      * @param int       $pass
      * @param int       $questionId
@@ -181,7 +182,6 @@ class TstManualScoringQuestion
         $participantData->load($test->getTestId());
 
         foreach ($participantData->getActiveIds() as $active_id) {
-
             /** @var $participant ilTestEvaluationUserData */
             $participant = $participants[$active_id];
             $user = ilObjUser::_getUserData([$participant->user_id]);
@@ -199,6 +199,7 @@ class TstManualScoringQuestion
 
     /**
      * Generates an array of question options to be used for the select field
+     *
      * @param ilObjTest $test
      * @return array
      */
@@ -228,6 +229,7 @@ class TstManualScoringQuestion
 
     /**
      * Returns an array of pass options
+     *
      * @param ilObjTest $test
      * @return array
      */
@@ -245,7 +247,7 @@ class TstManualScoringQuestion
      * @param string[] $query
      * @throws Exception
      */
-    public function performCommand(string $cmd, array $query)
+    public function performCommand(string $cmd, array $query): void
     {
         if (!isset($query["ref_id"])) {
             $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
@@ -308,7 +310,7 @@ class TstManualScoringQuestion
 
         $selectedQuestionId = $filterData["question"] ?: array_key_first($questionOptions);
         $selectedPass = (int) ($filterData["pass"] ?: $passOptions[array_key_first($passOptions)] ?? 1);
-        $selectedScoringCompleted = $filterData["scoringCompleted"] ?: self::ALL_USERS ;
+        $selectedScoringCompleted = $filterData["scoringCompleted"] ?: self::ALL_USERS;
         $selectedAnswersPerPage = $filterData["answersPerPage"] ?: 1;
 
         $this->logger->debug("TMSQ : Selected filters: pass={$selectedPass} | scoringCompleted=$selectedScoringCompleted | answersPerPage={$selectedAnswersPerPage}");
@@ -487,6 +489,7 @@ class TstManualScoringQuestion
     /**
      * Shows the tmsq manual scoring on a new page,
      * preventing ilias from rendering the normal view first.
+     *
      * @throws ilTemplateException
      * @throws ReflectionException
      */
@@ -513,6 +516,7 @@ class TstManualScoringQuestion
 
     /**
      * Handles the saving of the manual scoring form
+     *
      * @param array $post
      * @throws Exception
      */
@@ -612,12 +616,14 @@ class TstManualScoringQuestion
 
     /**
      * Handles the filtering command
+     *
      * @param string $cmd
      * @param array  $query
      * @param array  $post
      */
     protected function handleFilter(string $cmd, array $query, array $post)
     {
+        return;
         $filterCommand = $cmd;
 
         $selectQuestionInput = new ilSelectInputGUI($this->lng->txt("question"), "question");
@@ -691,6 +697,7 @@ class TstManualScoringQuestion
     /**
      * Creates the pagination html string
      * Returns an array with the 'html' and 'currentPage' fields
+     *
      * @param int $elementsPerPage
      * @param int $totalNumberOfElements
      * @return array
@@ -763,7 +770,10 @@ class TstManualScoringQuestion
 
         $selectQuestionInput = $this->uiFieldFactory->select($this->lng->txt("question"), $questionOptions);
         $selectPassInput = $this->uiFieldFactory->select($this->lng->txt("pass"), $passOptions);
-        $selectAnswersPerPageInput = $this->uiFieldFactory->select($this->plugin->txt("answersPerPage"), $answersPerPageOptions);
+        $selectAnswersPerPageInput = $this->uiFieldFactory->select(
+            $this->plugin->txt("answersPerPage"),
+            $answersPerPageOptions
+        );
         $selectScoringCompletedInput = $this->uiFieldFactory->select($this->lng->txt("finalized_evaluation"), [
             self::ALL_USERS => $this->lng->txt('all_users'),
             self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
@@ -837,6 +847,7 @@ class TstManualScoringQuestion
 
     /**
      * Gets the answer detail html string to be displayed in the form
+     *
      * @param ilTestEvaluationUserData $participant
      * @param ilObjTest                $test
      * @param int                      $activeId
@@ -913,6 +924,7 @@ class TstManualScoringQuestion
 
     /**
      * Returns the target link to the scoring by question tab
+     *
      * @param int $refId
      * @return string
      */
@@ -927,6 +939,7 @@ class TstManualScoringQuestion
 
     /**
      * Redirects the user to the tmsq manual scoring page
+     *
      * @param int|string $refId
      */
     protected function redirectToManualScoringTab($refId, int $pageNumber = -1)
@@ -945,6 +958,7 @@ class TstManualScoringQuestion
 
     /**
      * Sends an invalid form message and redirects to the manual scoring tab of the test (refId)
+     *
      * @param $refId
      */
     protected function sendInvalidForm($refId)
