@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
+<?php
+
+/** @noinspection PhpFieldAssignmentTypeMismatchInspection */
 declare(strict_types=1);
 
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
@@ -12,13 +14,13 @@ use ILIAS\DI\Container;
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
     /** @var string */
-    const CTYPE = "Services";
+    public const CTYPE = "Services";
     /** @var string */
-    const CNAME = "UIComponent";
+    public const CNAME = "UIComponent";
     /** @var string */
-    const SLOT_ID = "uihk";
+    public const SLOT_ID = "uihk";
     /** @var string */
-    const PNAME = "TstManualScoringQuestion";
+    public const PNAME = "TstManualScoringQuestion";
     /**
      * @var Container
      */
@@ -46,27 +48,27 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     /**
      * @inheritdoc
      */
-    public function getPluginName() : string
+    public function getPluginName(): string
     {
         return self::PNAME;
     }
 
-    public function assetsFolder() : string
+    public function assetsFolder(): string
     {
         return $this->getDirectory() . "/assets/";
     }
 
-    public function cssFolder(string $file = "") : string
+    public function cssFolder(string $file = ""): string
     {
         return $this->assetsFolder() . "/css/{$file}";
     }
 
-    public function templatesFolder(string $file = "") : string
+    public function templatesFolder(string $file = ""): string
     {
         return $this->assetsFolder() . "/templates/{$file}";
     }
 
-    public function jsFolder(string $file = "") : string
+    public function jsFolder(string $file = ""): string
     {
         return $this->assetsFolder() . "/js/{$file}";
     }
@@ -106,7 +108,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         }
     }
 
-    public function isAtLeastIlias6() : bool
+    public function isAtLeastIlias6(): bool
     {
         return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">=");
     }
@@ -115,7 +117,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
      * Checks if the current ilias version is at least ilias 7
      * @return bool
      */
-    public function isAtLeastIlias7() : bool
+    public function isAtLeastIlias7(): bool
     {
         return version_compare(ILIAS_VERSION_NUMERIC, "7.0", ">=");
     }

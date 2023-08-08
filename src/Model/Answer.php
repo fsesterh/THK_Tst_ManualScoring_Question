@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
@@ -66,7 +67,7 @@ class Answer
      * Reads if the scoring for the answer is completed
      * @return bool
      */
-    public function readScoringCompleted() : bool
+    public function readScoringCompleted(): bool
     {
         if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
             global $DIC;
@@ -91,7 +92,7 @@ class Answer
      * Reads the feedback from ilias
      * @return string
      */
-    public function readFeedback() : string
+    public function readFeedback(): string
     {
         $result = $this->db->queryF(
             "SELECT feedback FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
@@ -105,7 +106,7 @@ class Answer
     /**
      * @return string
      */
-    public function getUserName() : string
+    public function getUserName(): string
     {
         return $this->userName;
     }
@@ -114,7 +115,7 @@ class Answer
      * @param string $userName
      * @return Answer
      */
-    public function setUserName(string $userName) : Answer
+    public function setUserName(string $userName): Answer
     {
         $this->userName = $userName;
         return $this;
@@ -123,7 +124,7 @@ class Answer
     /**
      * @return string
      */
-    public function getLogin() : string
+    public function getLogin(): string
     {
         return $this->login;
     }
@@ -132,7 +133,7 @@ class Answer
      * @param string $login
      * @return Answer
      */
-    public function setLogin(string $login) : Answer
+    public function setLogin(string $login): Answer
     {
         $this->login = $login;
         return $this;
@@ -143,7 +144,7 @@ class Answer
      * Returns true on success
      * @return bool
      */
-    public function writeFeedback() : bool
+    public function writeFeedback(): bool
     {
         return $this->saveManualFeedback(
             $this->activeId,
@@ -155,7 +156,7 @@ class Answer
         );
     }
 
-    protected function readPoints() : float
+    protected function readPoints(): float
     {
         return (float) assQuestion::_getReachedPoints(
             $this->activeId,
@@ -169,7 +170,7 @@ class Answer
      * Returns true on success
      * @return bool
      */
-    public function writePoints() : bool
+    public function writePoints(): bool
     {
         return assQuestion::_setReachedPoints(
             $this->activeId,
@@ -186,7 +187,7 @@ class Answer
      * @param array $answerData
      * @return Answer
      */
-    public function loadFromPost(array $answerData) : Answer
+    public function loadFromPost(array $answerData): Answer
     {
         $points = $answerData["points"];
         $feedback = $answerData["feedback"];
@@ -222,7 +223,7 @@ class Answer
     /**
      * @return int
      */
-    public function getActiveId() : int
+    public function getActiveId(): int
     {
         return $this->activeId;
     }
@@ -231,7 +232,7 @@ class Answer
      * @param int $activeId
      * @return Answer
      */
-    public function setActiveId(int $activeId) : Answer
+    public function setActiveId(int $activeId): Answer
     {
         $this->activeId = $activeId;
         return $this;
@@ -240,7 +241,7 @@ class Answer
     /**
      * @return string
      */
-    public function getFeedback() : string
+    public function getFeedback(): string
     {
         return $this->feedback;
     }
@@ -249,7 +250,7 @@ class Answer
      * @param string $feedback
      * @return Answer
      */
-    public function setFeedback(string $feedback) : Answer
+    public function setFeedback(string $feedback): Answer
     {
         $this->feedback = $feedback;
         return $this;
@@ -258,7 +259,7 @@ class Answer
     /**
      * @return string
      */
-    public function getAnswerHtml() : string
+    public function getAnswerHtml(): string
     {
         return $this->answerHtml;
     }
@@ -267,7 +268,7 @@ class Answer
      * @param string $answerHtml
      * @return Answer
      */
-    public function setAnswerHtml(string $answerHtml) : Answer
+    public function setAnswerHtml(string $answerHtml): Answer
     {
         $this->answerHtml = $answerHtml;
         return $this;
@@ -276,7 +277,7 @@ class Answer
     /**
      * @return ?float
      */
-    public function getPoints() : ?float
+    public function getPoints(): ?float
     {
         return $this->points;
     }
@@ -285,7 +286,7 @@ class Answer
      * @param float $points
      * @return Answer
      */
-    public function setPoints(float $points) : Answer
+    public function setPoints(float $points): Answer
     {
         $this->points = $points;
         return $this;
@@ -294,7 +295,7 @@ class Answer
     /**
      * @return Question
      */
-    public function getQuestion() : Question
+    public function getQuestion(): Question
     {
         return $this->question;
     }
@@ -302,7 +303,7 @@ class Answer
     /**
      * @return bool
      */
-    public function isScoringCompleted() : bool
+    public function isScoringCompleted(): bool
     {
         return $this->scoringCompleted;
     }
@@ -311,7 +312,7 @@ class Answer
      * @param bool $scoringCompleted
      * @return Answer
      */
-    public function setScoringCompleted(bool $scoringCompleted) : Answer
+    public function setScoringCompleted(bool $scoringCompleted): Answer
     {
         $this->scoringCompleted = $scoringCompleted;
         return $this;
@@ -335,7 +336,7 @@ class Answer
         string $feedback,
         bool $finalized = false,
         bool $is_single_feedback = false
-    ) : bool {
+    ): bool {
         global $DIC;
 
         $feedback_old = $this->getSingleManualFeedback($active_id, $question_id, $pass);
@@ -442,7 +443,7 @@ class Answer
      * @return array The feedback text
      * @access public
      */
-    protected function getSingleManualFeedback(int $active_id, int $question_id, int $pass) : array
+    protected function getSingleManualFeedback(int $active_id, int $question_id, int $pass): array
     {
         global $DIC;
 

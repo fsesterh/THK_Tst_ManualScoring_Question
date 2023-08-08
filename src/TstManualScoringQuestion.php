@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion;
@@ -118,7 +120,7 @@ class TstManualScoringQuestion
         $this->logger = $dic->logger()->root();
     }
 
-    protected function readScoringCompleted(int $questionId, int $activeId, int $pass) : bool
+    protected function readScoringCompleted(int $questionId, int $activeId, int $pass): bool
     {
         if (ilTstManualScoringQuestionPlugin::getInstance()->isAtLeastIlias6()) {
             $result = $this->dic->database()->queryF(
@@ -146,7 +148,7 @@ class TstManualScoringQuestion
      * @param int       $questionId
      * @return array
      */
-    protected function getAnswerData(ilObjTest $test, int $pass, int $questionId) : array
+    protected function getAnswerData(ilObjTest $test, int $pass, int $questionId): array
     {
         $answersData = [];
         $data = $test->getCompleteEvaluationData(false);
@@ -190,7 +192,7 @@ class TstManualScoringQuestion
      * @param ilObjTest $test
      * @return array
      */
-    protected function generateQuestionOptions(ilObjTest $test) : array
+    protected function generateQuestionOptions(ilObjTest $test): array
     {
         $questionOptions = [];
         if (!$test->isRandomTest()) {
@@ -219,7 +221,7 @@ class TstManualScoringQuestion
      * @param ilObjTest $test
      * @return array
      */
-    protected function generatePassOptions(ilObjTest $test) : array
+    protected function generatePassOptions(ilObjTest $test): array
     {
         $passOptions = [];
         for ($i = 0; $i < $test->getMaxPassOfTest(); $i++) {
@@ -263,7 +265,7 @@ class TstManualScoringQuestion
      * @return string
      * @throws ilTemplateException
      */
-    public function modify(int $refId) : string
+    public function modify(int $refId): string
     {
         $test = new ilObjTest($refId, true);
         $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
@@ -454,7 +456,7 @@ class TstManualScoringQuestion
         return $tpl->get();
     }
 
-    protected function showNoEntries($tpl) : string
+    protected function showNoEntries($tpl): string
     {
         $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
         return $tpl->get();
@@ -675,7 +677,7 @@ class TstManualScoringQuestion
      * @param int $totalNumberOfElements
      * @return array
      */
-    protected function setupPagination(int $elementsPerPage, int $totalNumberOfElements) : array
+    protected function setupPagination(int $elementsPerPage, int $totalNumberOfElements): array
     {
         $factory = $this->dic->ui()->factory();
         $renderer = $this->dic->ui()->renderer();
@@ -743,7 +745,7 @@ class TstManualScoringQuestion
      * @param array $passOptions
      * @return array
      */
-    protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions) : array
+    protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions): array
     {
         $answersPerPageOptions = range(1, 10);
         $answersPerPageOptions = array_combine($answersPerPageOptions, $answersPerPageOptions);
@@ -848,7 +850,7 @@ class TstManualScoringQuestion
     /**
      * @throws ReflectionException
      */
-    protected function drawHeader(int $refId) : void
+    protected function drawHeader(int $refId): void
     {
         $objTestGui = new ilObjTestGUI($refId);
 
@@ -882,7 +884,7 @@ class TstManualScoringQuestion
         int $pass,
         int $questionId,
         ilTestAccess $testAccess
-    ) : string {
+    ): string {
         if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
             ilObjTestGUI::accessViolationRedirect();
         }
@@ -945,7 +947,7 @@ class TstManualScoringQuestion
      * @param int $refId
      * @return string
      */
-    protected function getManualScoringByQuestionTarget(int $refId) : string
+    protected function getManualScoringByQuestionTarget(int $refId): string
     {
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
         return $this->ctrl->getLinkTargetByClass(

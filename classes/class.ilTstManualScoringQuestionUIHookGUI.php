@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpMissingParamTypeInspection */
+<?php
+
+/** @noinspection PhpMissingParamTypeInspection */
 declare(strict_types=1);
 
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
@@ -92,7 +94,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
      * @param string $html
      * @return string[]
      */
-    protected function uiHookResponse(string $mode = self::KEEP, string $html = "") : array
+    protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array
     {
         return ['mode' => $mode, 'html' => $html];
     }

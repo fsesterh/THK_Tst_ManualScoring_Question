@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput;
@@ -41,7 +43,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         parent::__construct($a_title, $a_postvar);
     }
 
-    public function checkInput() : bool
+    public function checkInput(): bool
     {
         if ($this->required) {
             if (!empty($this->value)) {
@@ -90,7 +92,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      * Returns the path to the folder where the input is located.
      * @return string
      */
-    protected function getFolderPath() : string
+    protected function getFolderPath(): string
     {
         return strstr(realpath(__DIR__), "Customizing") . "/";
     }

@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
@@ -47,17 +48,17 @@ class Question
         }
     }
 
-    public function readMaximumPoints() : float
+    public function readMaximumPoints(): float
     {
         return assQuestion::_getMaximumPoints($this->id);
     }
 
-    public function readIsObligatory() : bool
+    public function readIsObligatory(): bool
     {
         return ilObjTest::isQuestionObligatory($this->id);
     }
 
-    public function loadFromPost($questionData) : ?Question
+    public function loadFromPost($questionData): ?Question
     {
         $answersData = $questionData["answers"];
         $testRefId = $questionData["testRefId"];
@@ -101,7 +102,7 @@ class Question
     /**
      * @return Answer[]
      */
-    public function getAnswers() : array
+    public function getAnswers(): array
     {
         return $this->answers;
     }
@@ -110,7 +111,7 @@ class Question
      * @param Answer[] $answers
      * @return Question
      */
-    public function setAnswers(array $answers) : Question
+    public function setAnswers(array $answers): Question
     {
         $this->answers = $answers;
         return $this;
@@ -120,7 +121,7 @@ class Question
      * @param Answer $answer
      * @return Question
      */
-    public function addAnswer(Answer $answer) : Question
+    public function addAnswer(Answer $answer): Question
     {
         array_push($this->answers, $answer);
         return $this;
@@ -129,7 +130,7 @@ class Question
     /**
      * @return int
      */
-    public function getId() : int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -138,7 +139,7 @@ class Question
      * @param int $id
      * @return Question
      */
-    public function setId(int $id) : Question
+    public function setId(int $id): Question
     {
         $this->id = $id;
         return $this;
@@ -147,7 +148,7 @@ class Question
     /**
      * @return int
      */
-    public function getPass() : int
+    public function getPass(): int
     {
         return $this->pass;
     }
@@ -156,7 +157,7 @@ class Question
      * @param int $pass
      * @return Question
      */
-    public function setPass(int $pass) : Question
+    public function setPass(int $pass): Question
     {
         $this->pass = $pass;
         return $this;
@@ -165,7 +166,7 @@ class Question
     /**
      * @return int
      */
-    public function getTestRefId() : int
+    public function getTestRefId(): int
     {
         return $this->testRefId;
     }
@@ -174,7 +175,7 @@ class Question
      * @param int $testRefId
      * @return Question
      */
-    public function setTestRefId(int $testRefId) : Question
+    public function setTestRefId(int $testRefId): Question
     {
         $this->testRefId = $testRefId;
         return $this;
@@ -183,7 +184,7 @@ class Question
     /**
      * @return float
      */
-    public function getMaximumPoints() : float
+    public function getMaximumPoints(): float
     {
         return $this->maximumPoints;
     }
@@ -192,7 +193,7 @@ class Question
      * @param float $maximumPoints
      * @return Question
      */
-    public function setMaximumPoints(float $maximumPoints) : Question
+    public function setMaximumPoints(float $maximumPoints): Question
     {
         $this->maximumPoints = $maximumPoints;
         return $this;
@@ -201,7 +202,7 @@ class Question
     /**
      * @return bool
      */
-    public function isObligatory() : bool
+    public function isObligatory(): bool
     {
         return $this->isObligatory;
     }
@@ -210,7 +211,7 @@ class Question
      * @param bool $isObligatory
      * @return Question
      */
-    public function setIsObligatory(bool $isObligatory) : Question
+    public function setIsObligatory(bool $isObligatory): Question
     {
         $this->isObligatory = $isObligatory;
         return $this;
