@@ -28,8 +28,9 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
      */
     protected $ctrl;
 
-    public function __construct()
+    public function __construct(ilDBInterface $db, ilComponentRepositoryWrite $component_repository, string $id)
     {
+        parent::__construct($db, $component_repository, $id);
         global $DIC;
         $this->dic = $DIC;
         $this->ctrl = $this->dic->ctrl();
