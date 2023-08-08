@@ -97,6 +97,11 @@ class TstManualScoringQuestion
      * @var Container
      */
     protected $dic;
+    private UiUtil $uiUtil;
+    protected Renderer $uiRenderer;
+    protected ilUIFilterService $uiFilterService;
+    protected $uiFieldFactory;
+    private Factory $uiFactory;
 
     public function __construct(Container $dic = null)
     {
@@ -118,6 +123,12 @@ class TstManualScoringQuestion
         $this->access = $dic->access();
         $this->user = $dic->user();
         $this->logger = $dic->logger()->root();
+        $this->uiUtil = new UiUtil($this->dic);
+
+        $this->uiFactory = $this->dic->ui()->factory();
+        $this->uiRenderer = $this->dic->ui()->renderer();
+        $this->uiFilterService = $this->dic->uiService()->filter();
+        $this->uiFieldFactory = $this->uiFactory->input()->field();
     }
 
     protected function readScoringCompleted(int $questionId, int $activeId, int $pass): bool
@@ -238,7 +249,7 @@ class TstManualScoringQuestion
     public function performCommand(string $cmd, array $query)
     {
         if (!isset($query["ref_id"])) {
-            ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
+            $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
             $this->plugin->redirectToHome();
         }
 
@@ -254,7 +265,7 @@ class TstManualScoringQuestion
                 break;
 
             default:
-                ilUtil::sendFailure($this->plugin->txt("cmdNotSupported"), true);
+                $this->uiUtil->sendFailure($this->plugin->txt("cmdNotSupported"), true);
                 $this->redirectToManualScoringTab((int) $query["ref_id"]);
         }
     }
@@ -501,7 +512,7 @@ class TstManualScoringQuestion
     protected function saveManualScoring(array $post)
     {
         if (!isset($post) || count($post) == 0) {
-            ilUtil::sendFailure($this->plugin->txt("nothingReceivedInPost"), true);
+            $this->uiUtil->sendFailure($this->plugin->txt("nothingReceivedInPost"), true);
             $this->plugin->redirectToHome();
         }
 
@@ -513,7 +524,7 @@ class TstManualScoringQuestion
         }
 
         if (!isset($post["tmsq"]) || !is_array($post["tmsq"])) {
-            ilUtil::sendFailure($this->plugin->txt("invalid_post_data"), true);
+            $this->uiUtil->sendFailure($this->plugin->txt("invalid_post_data"), true);
             $this->plugin->redirectToHome();
         }
 
@@ -538,7 +549,7 @@ class TstManualScoringQuestion
             $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
 
             if (!$testRefId) {
-                ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+                $this->uiUtil->sendFailure($this->plugin->txt("unknownError"), true);
                 $this->plugin->redirectToHome();
             }
 
@@ -559,7 +570,7 @@ class TstManualScoringQuestion
             }
 
             if (!$formsValid) {
-                ilUtil::sendFailure($this->lng->txt("form_input_not_valid"), true);
+                $this->uiUtil->sendFailure($this->lng->txt("form_input_not_valid"), true);
                 $this->showTmsqManualScoring();
                 return;
             }
@@ -572,22 +583,22 @@ class TstManualScoringQuestion
                 }
 
                 if (!$scoringCompleted && !$answer->writePoints()) {
-                    ilUtil::sendFailure($this->plugin->txt("saving_points_failed"), true);
+                    $this->uiUtil->sendFailure($this->plugin->txt("saving_points_failed"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
 
                 if (!$answer->writeFeedback()) {
-                    ilUtil::sendFailure($this->plugin->txt("saving_feedback_failed"), true);
+                    $this->uiUtil->sendFailure($this->plugin->txt("saving_feedback_failed"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId(), $currentPage);
                 }
             }
         }
 
         if ($testRefId == -1) {
-            ilUtil::sendFailure($this->plugin->txt("unknownError"), true);
+            $this->uiUtil->sendFailure($this->plugin->txt("unknownError"), true);
             $this->plugin->redirectToHome();
         } else {
-            ilUtil::sendSuccess($this->plugin->txt("saving_manualScoring"), true);
+            $this->uiUtil->sendSuccess($this->plugin->txt("saving_manualScoring"), true);
             $this->redirectToManualScoringTab($testRefId, $currentPage);
         }
     }
@@ -620,22 +631,22 @@ class TstManualScoringQuestion
         switch ($filterCommand) {
             case "applyFilter":
                 if (!isset($post["question"])) {
-                    ilUtil::sendFailure($this->plugin->txt("filter_missing_question"), true);
+                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_question"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
                 if (!isset($post["pass"])) {
-                    ilUtil::sendFailure($this->plugin->txt("filter_missing_pass"), true);
+                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_pass"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
 
                 if (!isset($post["answersPerPage"])) {
-                    ilUtil::sendFailure($this->plugin->txt("filter_missing_answersPerPage"), true);
+                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_answersPerPage"), true);
                     $this->redirectToManualScoringTab($query["ref_id"]);
                 }
 
                 if ($this->plugin->isAtLeastIlias6()) {
                     if (!isset($post["scoringCompleted"])) {
-                        ilUtil::sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
+                        $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
                         $this->redirectToManualScoringTab($query["ref_id"]);
                     }
                     $selectScoringCompletedInput->setValue($post["scoringCompleted"]);
@@ -650,7 +661,7 @@ class TstManualScoringQuestion
                 $selectPassInput->writeToSession();
                 $selectAnswersPerPageInput->writeToSession();
 
-                ilUtil::sendSuccess($this->plugin->txt("filter_applied"), true);
+                $this->uiUtil->sendSuccess($this->plugin->txt("filter_applied"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
                 break;
             case "resetFilter":
@@ -659,11 +670,11 @@ class TstManualScoringQuestion
                 $selectScoringCompletedInput->clearFromSession();
                 $selectAnswersPerPageInput->clearFromSession();
 
-                ilUtil::sendSuccess($this->plugin->txt("filter_reset"), true);
+                $this->uiUtil->sendSuccess($this->plugin->txt("filter_reset"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
                 break;
             default:
-                ilUtil::sendFailure($this->plugin->txt("filter_invalid_command"), true);
+                $this->uiUtil->sendFailure($this->plugin->txt("filter_invalid_command"), true);
                 $this->redirectToManualScoringTab($query["ref_id"]);
                 break;
         }
@@ -692,9 +703,9 @@ class TstManualScoringQuestion
         }
 
         $pagination = $factory->viewControl()->pagination()
-                              ->withTargetURL($url, $parameterName)
-                              ->withTotalEntries($totalNumberOfElements)
-                              ->withPageSize($elementsPerPage);
+            ->withTargetURL($url, $parameterName)
+            ->withTotalEntries($totalNumberOfElements)
+            ->withPageSize($elementsPerPage);
 
         $maxPage = $pagination->getNumberOfPages() - 1;
         if ($currentPage >= $maxPage) {
@@ -980,7 +991,7 @@ class TstManualScoringQuestion
      */
     protected function sendInvalidForm($refId)
     {
-        ilUtil::sendFailure($this->lng->txt("form_input_not_valid"), true);
+        $this->uiUtil->sendFailure($this->lng->txt("form_input_not_valid"), true);
         $this->redirectToManualScoringTab($refId);
     }
 }

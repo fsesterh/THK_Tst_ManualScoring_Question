@@ -6,6 +6,7 @@ declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 use ILIAS\DI\Container;
+use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
 use Psr\Http\Message\RequestInterface;
 use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
 
@@ -39,6 +40,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
      * @var Container
      */
     protected $dic;
+    private UiUtil $uiUtil;
 
     /**
      * ilTstManualScoringQuestionUIHookGUI constructor.
@@ -51,6 +53,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->lng = $this->dic->language();
         $this->lng->loadLanguageModule("assessment");
         $this->request = $this->dic->http()->request();
+        $this->uiUtil = new UiUtil($this->dic);
     }
 
     /**
@@ -112,7 +115,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $query = $request->getQueryParams();
         $cmd = $ctrl->getCmd();
         if (!isset($cmd)) {
-            ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
+            $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
             $ctrl->redirectToURL("ilias.php");
         }
 
