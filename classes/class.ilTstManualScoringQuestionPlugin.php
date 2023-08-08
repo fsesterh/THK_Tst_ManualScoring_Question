@@ -37,7 +37,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         $this->dic = $DIC;
         $this->ctrl = $this->dic->ctrl();
 
-        parent::__construct();
+        parent::__construct($db, $component_repository, $id);
     }
 
     /**
