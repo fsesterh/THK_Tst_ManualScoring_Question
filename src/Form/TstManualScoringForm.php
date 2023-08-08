@@ -55,7 +55,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $questionIdHiddenInput->setRequired(true);
 
         $activeIdHiddenInput = new ilHiddenInputGUI("tmsq[{$questionId}][answers][{$activeId}][activeId]");
-        $activeIdHiddenInput->setValue($activeId);
+        $activeIdHiddenInput->setValue((string) $activeId);
         $activeIdHiddenInput->setRequired(true);
 
         $pointsForAnswerInput = new ilNumberInputGUI(
@@ -178,7 +178,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
                     $valid = $valid ? $item->checkSubItemsInput() : false;
                     break;
                 case $item instanceof ilNumberInputGUI:
-                    if (!is_numeric(str_replace(',', '.', $item->getValue()))) {
+                    if (!is_numeric($item->getValue())) {
                         $item->setMinValue($item->getMinValue(), true);
                         $item->setMaxValue($item->getMaxLength(), true);
                         $item->setAlert($lng->txt("form_msg_numeric_value_required"));
