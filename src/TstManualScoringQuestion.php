@@ -858,7 +858,7 @@ class TstManualScoringQuestion
 
         $this->dic['ilLocator']->addRepositoryItems($refId);
         $this->dic["ilLocator"]->addItem(
-            $objTestGui->object->getTitle(),
+            $objTestGui->getObject()->getTitle(),
             $this->getManualScoringByQuestionTarget($refId)
         );
         $this->mainTpl->setLocator();
