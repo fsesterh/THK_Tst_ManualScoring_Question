@@ -101,11 +101,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
     public function redirectToHome()
     {
-        if ($this->isAtLeastIlias6()) {
-            $this->ctrl->redirectByClass("ilDashboardGUI", "show");
-        } else {
-            $this->ctrl->redirectByClass("ilPersonalDesktopGUI");
-        }
+        $this->ctrl->redirectByClass("ilDashboardGUI", "show");
     }
 
     public function isAtLeastIlias6(): bool
