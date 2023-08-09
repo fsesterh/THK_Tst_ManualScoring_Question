@@ -305,25 +305,24 @@ class Answer
     ): bool {
         global $DIC;
 
-        $feedback_old = $this->getSingleManualFeedback($active_id, $question_id, $pass);
+        $feedback_old = ilObjTest::getSingleManualFeedback($active_id, $question_id, $pass);
 
-        $finalized_record = (int) $feedback_old['finalized_evaluation'];
-        if ($finalized_record === 0 || ($is_single_feedback && $finalized_record === 1)) {
-            $DIC->database()->manipulateF(
-                "DELETE FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
-                array('integer', 'integer', 'integer'),
-                array($active_id, $question_id, $pass)
-            );
-
-            $this->insertManualFeedback($active_id, $question_id, $pass, $feedback, $finalized, $feedback_old);
-
-            if (ilObjAssessmentFolder::_enabledAssessmentLogging()) {
-                $this->logManualFeedback($active_id, $question_id, $feedback);
+        if ($feedback_old !== []) {
+            $finalized_record = (int) $feedback_old['finalized_evaluation'];
+            if ($finalized_record === 0 || ($is_single_feedback && $finalized_record === 1)) {
+                $DIC->database()->manipulateF(
+                    "DELETE FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
+                    array('integer', 'integer', 'integer'),
+                    array($active_id, $question_id, $pass)
+                );
             }
-            return true;
         }
+        $this->insertManualFeedback($active_id, $question_id, $pass, $feedback, $finalized, $feedback_old);
 
-        return false;
+        if (ilObjAssessmentFolder::_enabledAssessmentLogging()) {
+            $this->logManualFeedback($active_id, $question_id, $feedback);
+        }
+        return true;
     }
 
     /**
@@ -369,7 +368,7 @@ class Answer
         int $pass,
         string $feedback,
         bool $finalized,
-        array $feedback_old
+        ?array $feedback_old
     ) {
         global $DIC;
 
@@ -388,7 +387,7 @@ class Answer
             'tstamp' => ['integer', time()]
         ];
 
-        if ($feedback_old['finalized_evaluation'] == 1) {
+        if ($feedback_old !== null && isset($feedback_old['finalized_evaluation']) && (int) $feedback_old['finalized_evaluation'] === 1) {
             $user = $feedback_old['finalized_by_usr_id'];
             $finalized_time = $feedback_old['finalized_tstamp'];
         }
