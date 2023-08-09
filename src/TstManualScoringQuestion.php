@@ -244,26 +244,25 @@ class TstManualScoringQuestion
 
         $questionOptions = $this->generateQuestionOptions($test);
 
-        if (count($questionOptions) === 0) {
-            return $this->showNoEntries($tpl);
+        $passOptions = $this->generatePassOptions($test);
+        if ($questionOptions === [] || $passOptions === []) {
+            return $this->showNoEntries($test, $tpl);
         }
 
-        $passOptions = $this->generatePassOptions($test);
         $filter = $this->setupFilter($test->getRefId(), $questionOptions, $passOptions);
 
         $filterData = $this->uiFilterService->getData($filter) ?? [
-            "question" => null,
-            "pass" => null,
-            "scoringCompleted" => null,
-            "answersPerPage" => null
+            "question" => array_key_first($questionOptions),
+            "pass" => array_key_first($passOptions),
+            "scoringCompleted" => self::ALL_USERS,
+            "answersPerPage" => 10
         ];
 
-        $selectedQuestionId = $filterData["question"] ?: array_key_first($questionOptions);
-        $selectedPass = (int) ($filterData["pass"] ?: $passOptions[array_key_first($passOptions)] ?? 1);
-        $selectedScoringCompleted = $filterData["scoringCompleted"] ?: self::ALL_USERS;
-        $selectedAnswersPerPage = $filterData["answersPerPage"] ?: 1;
+        $selectedQuestionId = (int) ($filterData["question"] !== "" ? $filterData["question"] : array_key_first($questionOptions));
+        $selectedPass = (int) ($filterData["pass"] !== "" ? $filterData["pass"] : array_key_first($passOptions));
+        $selectedScoringCompleted = (int) ($filterData["scoringCompleted"] !== "" ? $filterData["scoringCompleted"] : self::ALL_USERS);
+        $selectedAnswersPerPage = (int) ($filterData["answersPerPage"] !== "" ? $filterData["answersPerPage"] : 10);
 
-        $this->logger->debug("TMSQ : Selected filters: pass=$selectedPass | scoringCompleted=$selectedScoringCompleted | answersPerPage=$selectedAnswersPerPage");
 
         $question = new Question($selectedQuestionId);
         $question
@@ -293,7 +292,7 @@ class TstManualScoringQuestion
         );
 
         $numberOfAnswersData = count($answersData);
-        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);
+        $paginationData = $this->setupPagination((int) $selectedAnswersPerPage, $numberOfAnswersData);
         $currentPage = $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
@@ -421,16 +420,17 @@ class TstManualScoringQuestion
             $tpl->parseCurrentBlock("question");
         } else {
             $this->logger->debug("TMSQ : no answers available, show no entries message");
-            return $this->uiRenderer->render($filter) . $this->showNoEntries($tpl);
+            return $this->showNoEntries($test, $tpl);
         }
 
         return $this->uiRenderer->render($filter) . $tpl->get();
     }
 
-    protected function showNoEntries($tpl): string
+    protected function showNoEntries(ilObjTest $test, ilTemplate $tpl): string
     {
         $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
-        return $tpl->get();
+        $filter = $this->setupFilter($test->getRefId(), $this->generateQuestionOptions($test), $this->generatePassOptions($test));
+        return $this->uiRenderer->render($filter) . $tpl->get();
     }
 
     /**
@@ -703,32 +703,45 @@ class TstManualScoringQuestion
             $this->plugin->txt("answersPerPage"),
             $answersPerPageOptions
         );
-        $selectScoringCompletedInput = $this->uiFieldFactory->select($this->lng->txt("finalized_evaluation"), [
+
+        $scoringCompletedOptions = [
             self::ALL_USERS => $this->lng->txt('all_users'),
             self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
             self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
-        ]);
+        ];
+        $selectScoringCompletedInput = $this->uiFieldFactory->select($this->lng->txt("finalized_evaluation"), $scoringCompletedOptions);
 
-        if (!$selectAnswersPerPageInput->getValue()) {
-            $selectAnswersPerPageInput->withValue(10);
+        //ToDo: doesn't do anything right now because ilias loads values from session regardless => https://mantis.ilias.de/view.php?id=37741
+        if (
+            $selectQuestionInput->getValue() === []
+            || !in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions), true)
+        ) {
+            $selectQuestionInput = $selectQuestionInput->withValue(array_key_first($questionOptions));
         }
 
-        //Prevent invalid values
-        if (!in_array((int) $selectPassInput->getValue(), array_keys($passOptions), true)) {
+        if ($selectPassInput->getValue() === null || !in_array((int) $selectPassInput->getValue(), array_keys($passOptions), true)) {
             //alternative as array_key_first() is not available in php 7.2
-            reset($passOptions);
-            $selectPassInput->withValue((string) key($passOptions));
+            $selectPassInput = $selectPassInput->withValue(array_key_first($passOptions));
         }
 
-        if (!in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions), true)) {
-            //alternative as array_key_first() is not available in php 7.2
-            reset($questionOptions);
-            $selectQuestionInput->withValue((string) key($questionOptions));
+        if (
+            $selectAnswersPerPageInput->getValue() === null
+            || !in_array((int) $selectAnswersPerPageInput->getValue(), $answersPerPageOptions, true)
+        ) {
+            $selectAnswersPerPageInput = $selectAnswersPerPageInput->withValue(10);
         }
 
-        if (!in_array((int) $selectAnswersPerPageInput->getValue(), $answersPerPageOptions, true)) {
-            $selectAnswersPerPageInput->withValue(10);
+        if (
+            $selectScoringCompletedInput->getValue() === null
+            || !in_array(
+                (int) $selectScoringCompletedInput->getValue(),
+                array_keys($scoringCompletedOptions),
+                true
+            )
+        ) {
+            $selectScoringCompletedInput->withValue(self::ALL_USERS);
         }
+
 
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $testRefId);
         $filterBaseAction = $this->ctrl->getLinkTargetByClass(
