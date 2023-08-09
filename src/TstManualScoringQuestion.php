@@ -141,13 +141,14 @@ class TstManualScoringQuestion
 
             $testResultData = $test->getTestResult($active_id, $pass);
             foreach ($testResultData as $key => $questionData) {
-                if (!is_numeric($key)) {
+                if (!isset($questionData['qid']) || (int) $questionData['qid'] !== $questionId) {
                     continue;
                 }
+
                 $user = ilObjUser::_getUserData([$participant->user_id]);
                 $answersData[] = [
                     'active_id' => $active_id,
-                    'reached_points' => assQuestion::_getReachedPoints($active_id, (int) $questionData['qid'], $pass),
+                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
                     'participant' => $participant,
                     'lastname' => $user[0]['lastname'],
                     'firstname' => $user[0]['firstname'],
