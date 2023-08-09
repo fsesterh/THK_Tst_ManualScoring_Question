@@ -164,33 +164,23 @@ class Answer
      */
     public function loadFromPost(array $answerData): Answer
     {
-        $points = $answerData["points"];
-        $feedback = $answerData["feedback"];
-        $activeId = $answerData["activeId"];
-        $scoringCompleted = $answerData["scoringCompleted"];
+        $this->setActiveId((int) $answerData["activeId"]);
 
-        if (is_numeric($activeId)) {
-            $this->setActiveId((int) $activeId);
-        }
-
-        if (is_numeric($points)) {
-            $this->setPoints((float) $points);
-        }
-
-        if (is_string($feedback)) {
-            $this->setFeedback($feedback);
-        }
-
-        //If not set the scoring is set to no longer be completed
-        //Restore from db
         if (!isset($answerData["points"])) {
             $this->setPoints($this->readPoints());
-        }
-        if (!isset($answerData["feedback"])) {
-            $this->setFeedback($this->readFeedback());
+        } elseif (is_numeric($answerData["points"])) {
+            $this->setPoints((float) $answerData["points"]);
         }
 
-        $this->setScoringCompleted((bool) $scoringCompleted);
+        if (!isset($answerData["feedback"])) {
+            $this->setFeedback($this->readFeedback());
+        } elseif (is_string($answerData["feedback"])) {
+            $this->setFeedback($answerData["feedback"]);
+        }
+
+        $scoringCompleted = (bool) ($answerData["scoringCompleted"] ?? false);
+
+        $this->setScoringCompleted($scoringCompleted);
 
         return $this;
     }
