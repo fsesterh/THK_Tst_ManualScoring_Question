@@ -77,7 +77,7 @@ class Question
             foreach ($answersData as $answerData) {
                 $answer = new Answer($this);
                 $answer->loadFromPost($answerData);
-                array_push($answers, $answer);
+                $answers[] = $answer;
             }
         }
         $this->setAnswers($answers);
@@ -103,100 +103,61 @@ class Question
         return $this;
     }
 
-    /**
-     * @param Answer $answer
-     * @return Question
-     */
     public function addAnswer(Answer $answer): Question
     {
-        array_push($this->answers, $answer);
+        $this->answers[] = $answer;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getId(): int
     {
         return $this->id;
     }
 
-    /**
-     * @param int $id
-     * @return Question
-     */
     public function setId(int $id): Question
     {
         $this->id = $id;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getPass(): int
     {
         return $this->pass;
     }
 
-    /**
-     * @param int $pass
-     * @return Question
-     */
     public function setPass(int $pass): Question
     {
         $this->pass = $pass;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getTestRefId(): int
     {
         return $this->testRefId;
     }
 
-    /**
-     * @param int $testRefId
-     * @return Question
-     */
     public function setTestRefId(int $testRefId): Question
     {
         $this->testRefId = $testRefId;
         return $this;
     }
 
-    /**
-     * @return float
-     */
     public function getMaximumPoints(): float
     {
         return $this->maximumPoints;
     }
 
-    /**
-     * @param float $maximumPoints
-     * @return Question
-     */
     public function setMaximumPoints(float $maximumPoints): Question
     {
         $this->maximumPoints = $maximumPoints;
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isObligatory(): bool
     {
         return $this->isObligatory;
     }
 
-    /**
-     * @param bool $isObligatory
-     * @return Question
-     */
     public function setIsObligatory(bool $isObligatory): Question
     {
         $this->isObligatory = $isObligatory;

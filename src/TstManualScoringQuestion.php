@@ -10,7 +10,6 @@ use Exception;
 use ilAccessHandler;
 use ilCtrl;
 use ilCtrlException;
-use ilGlobalPageTemplate;
 use ilGlobalTemplateInterface;
 use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
@@ -28,7 +27,6 @@ use ilObjAssessmentFolder;
 use ilObjTest;
 use ilObjTestGUI;
 use ilObjUser;
-use ilSelectInputGUI;
 use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
@@ -205,12 +203,6 @@ class TstManualScoringQuestion
         }
 
         switch (true) {
-            case ($cmd === "applyFilter"):
-            case ($cmd === "resetFilter"):
-                $post = $this->request->getParsedBody();
-                $this->handleFilter($cmd, $query, $post);
-                break;
-
             case method_exists($this, $cmd):
                 $this->$cmd($this->request->getParsedBody());
                 break;
@@ -429,7 +421,11 @@ class TstManualScoringQuestion
     protected function showNoEntries(ilObjTest $test, ilTemplate $tpl): string
     {
         $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
-        $filter = $this->setupFilter($test->getRefId(), $this->generateQuestionOptions($test), $this->generatePassOptions($test));
+        $filter = $this->setupFilter(
+            $test->getRefId(),
+            $this->generateQuestionOptions($test),
+            $this->generatePassOptions($test)
+        );
         return $this->uiRenderer->render($filter) . $tpl->get();
     }
 
@@ -557,84 +553,6 @@ class TstManualScoringQuestion
         }
     }
 
-    /**
-     * Handles the filtering command
-     *
-     * @param string $cmd
-     * @param array  $query
-     * @param array  $post
-     */
-    protected function handleFilter(string $cmd, array $query, array $post): void
-    {
-        return;
-        $filterCommand = $cmd;
-
-        $selectQuestionInput = new ilSelectInputGUI($this->lng->txt("question"), "question");
-        $selectQuestionInput->setParent($this->plugin);
-
-        $selectPassInput = new ilSelectInputGUI($this->lng->txt("pass"), "pass");
-        $selectPassInput->setParent($this->plugin);
-
-        $selectAnswersPerPageInput = new ilSelectInputGUI($this->plugin->txt("answersPerPage"), "answersPerPage");
-        $selectAnswersPerPageInput->setParent($this->plugin);
-
-        $selectScoringCompletedInput = new ilSelectInputGUI(
-            $this->lng->txt("finalized_evaluation"),
-            "scoringCompleted"
-        );
-        $selectScoringCompletedInput->setParent($this->plugin);
-
-        switch ($filterCommand) {
-            case "applyFilter":
-                if (!isset($post["question"])) {
-                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_question"), true);
-                    $this->redirectToManualScoringTab($query["ref_id"]);
-                }
-                if (!isset($post["pass"])) {
-                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_pass"), true);
-                    $this->redirectToManualScoringTab($query["ref_id"]);
-                }
-
-                if (!isset($post["answersPerPage"])) {
-                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_answersPerPage"), true);
-                    $this->redirectToManualScoringTab($query["ref_id"]);
-                }
-
-                if (!isset($post["scoringCompleted"])) {
-                    $this->uiUtil->sendFailure($this->plugin->txt("filter_missing_scoringCompleted"), true);
-                    $this->redirectToManualScoringTab($query["ref_id"]);
-                }
-                $selectScoringCompletedInput->setValue($post["scoringCompleted"]);
-                $selectScoringCompletedInput->writeToSession();
-
-                $selectQuestionInput->setValue($post["question"]);
-                $selectPassInput->setValue($post["pass"]);
-                $selectAnswersPerPageInput->setValue($post["answersPerPage"]);
-
-                $selectQuestionInput->writeToSession();
-                $selectPassInput->writeToSession();
-                $selectAnswersPerPageInput->writeToSession();
-
-                $this->uiUtil->sendSuccess($this->plugin->txt("filter_applied"), true);
-                $this->redirectToManualScoringTab($query["ref_id"]);
-                break;
-            case "resetFilter":
-                $selectQuestionInput->clearFromSession();
-                $selectPassInput->clearFromSession();
-                $selectScoringCompletedInput->clearFromSession();
-                $selectAnswersPerPageInput->clearFromSession();
-
-                $this->uiUtil->sendSuccess($this->plugin->txt("filter_reset"), true);
-                $this->redirectToManualScoringTab($query["ref_id"]);
-                break;
-            default:
-                $this->uiUtil->sendFailure($this->plugin->txt("filter_invalid_command"), true);
-                $this->redirectToManualScoringTab($query["ref_id"]);
-                break;
-        }
-        $this->redirectToManualScoringTab($query["ref_id"]);
-    }
-
     protected function setupPagination(int $elementsPerPage, int $totalNumberOfElements): array
     {
         $factory = $this->dic->ui()->factory();
@@ -709,7 +627,10 @@ class TstManualScoringQuestion
             self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
             self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
         ];
-        $selectScoringCompletedInput = $this->uiFieldFactory->select($this->lng->txt("finalized_evaluation"), $scoringCompletedOptions);
+        $selectScoringCompletedInput = $this->uiFieldFactory->select(
+            $this->lng->txt("finalized_evaluation"),
+            $scoringCompletedOptions
+        );
 
         //ToDo: doesn't do anything right now because ilias loads values from session regardless => https://mantis.ilias.de/view.php?id=37741
         if (
@@ -719,7 +640,11 @@ class TstManualScoringQuestion
             $selectQuestionInput = $selectQuestionInput->withValue(array_key_first($questionOptions));
         }
 
-        if ($selectPassInput->getValue() === null || !in_array((int) $selectPassInput->getValue(), array_keys($passOptions), true)) {
+        if ($selectPassInput->getValue() === null || !in_array(
+            (int) $selectPassInput->getValue(),
+            array_keys($passOptions),
+            true
+        )) {
             //alternative as array_key_first() is not available in php 7.2
             $selectPassInput = $selectPassInput->withValue(array_key_first($passOptions));
         }

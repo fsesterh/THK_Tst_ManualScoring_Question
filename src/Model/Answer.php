@@ -10,7 +10,6 @@ use ilObjAssessmentFolder;
 use ilObjTest;
 use ilObjTestAccess;
 use ilRTE;
-use ilTstManualScoringQuestionPlugin;
 
 /**
  * Class Answer
@@ -37,11 +36,6 @@ class Answer
         $this->question = $question;
     }
 
-    /**
-     * Reads if the scoring for the answer is completed
-     *
-     * @return bool
-     */
     public function readScoringCompleted(): bool
     {
         global $DIC;
@@ -60,11 +54,6 @@ class Answer
         return false;
     }
 
-    /**
-     * Reads the feedback from ilias
-     *
-     * @return string
-     */
     public function readFeedback(): string
     {
         $result = $this->db->queryF(
@@ -76,48 +65,28 @@ class Answer
         return $this->db->fetchAssoc($result)["feedback"] ?? "";
     }
 
-    /**
-     * @return string
-     */
     public function getUserName(): string
     {
         return $this->userName;
     }
 
-    /**
-     * @param string $userName
-     * @return Answer
-     */
     public function setUserName(string $userName): Answer
     {
         $this->userName = $userName;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getLogin(): string
     {
         return $this->login;
     }
 
-    /**
-     * @param string $login
-     * @return Answer
-     */
     public function setLogin(string $login): Answer
     {
         $this->login = $login;
         return $this;
     }
 
-    /**
-     * Writes the feedback to ilias
-     * Returns true on success
-     *
-     * @return bool
-     */
     public function writeFeedback(): bool
     {
         return $this->saveManualFeedback(
@@ -139,12 +108,6 @@ class Answer
         );
     }
 
-    /**
-     * Writes the points to ilias
-     * Returns true on success
-     *
-     * @return bool
-     */
     public function writePoints(): bool
     {
         return assQuestion::_setReachedPoints(
@@ -158,10 +121,6 @@ class Answer
         );
     }
 
-    /**
-     * @param array $answerData
-     * @return Answer
-     */
     public function loadFromPost(array $answerData): Answer
     {
         $this->setActiveId((int) $answerData["activeId"]);
@@ -185,116 +144,66 @@ class Answer
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getActiveId(): int
     {
         return $this->activeId;
     }
 
-    /**
-     * @param int $activeId
-     * @return Answer
-     */
     public function setActiveId(int $activeId): Answer
     {
         $this->activeId = $activeId;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getFeedback(): string
     {
         return $this->feedback;
     }
 
-    /**
-     * @param string $feedback
-     * @return Answer
-     */
     public function setFeedback(string $feedback): Answer
     {
         $this->feedback = $feedback;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getAnswerHtml(): string
     {
         return $this->answerHtml;
     }
 
-    /**
-     * @param string $answerHtml
-     * @return Answer
-     */
     public function setAnswerHtml(string $answerHtml): Answer
     {
         $this->answerHtml = $answerHtml;
         return $this;
     }
 
-    /**
-     * @return ?float
-     */
     public function getPoints(): ?float
     {
         return $this->points;
     }
 
-    /**
-     * @param float $points
-     * @return Answer
-     */
     public function setPoints(float $points): Answer
     {
         $this->points = $points;
         return $this;
     }
 
-    /**
-     * @return Question
-     */
     public function getQuestion(): Question
     {
         return $this->question;
     }
 
-    /**
-     * @return bool
-     */
     public function isScoringCompleted(): bool
     {
         return $this->scoringCompleted;
     }
 
-    /**
-     * @param bool $scoringCompleted
-     * @return Answer
-     */
     public function setScoringCompleted(bool $scoringCompleted): Answer
     {
         $this->scoringCompleted = $scoringCompleted;
         return $this;
     }
 
-    /**
-     * Saves the manual feedback for a question in a test
-     *
-     * @param integer $active_id   Active ID of the user
-     * @param integer $question_id Question ID
-     * @param integer $pass        Pass number
-     * @param string  $feedback    The feedback text
-     * @param boolean $finalized   In Feedback is final
-     * @param boolean $is_single_feedback
-     * @return boolean TRUE if the operation succeeds, FALSE otherwise
-     * @access public
-     */
     private function saveManualFeedback(
         int $active_id,
         int $question_id,
@@ -325,14 +234,7 @@ class Answer
         return true;
     }
 
-    /**
-     * Creates a log for the manual feedback
-     *
-     * @param integer $active_id   Active ID of the user
-     * @param integer $question_id Question ID
-     * @param string  $feedback    The feedback text
-     */
-    private function logManualFeedback(int $active_id, int $question_id, string $feedback)
+    private function logManualFeedback(int $active_id, int $question_id, string $feedback): void
     {
         global $DIC;
 
@@ -352,16 +254,6 @@ class Answer
         );
     }
 
-    /**
-     * Inserts a manual feedback into the DB
-     *
-     * @param integer $active_id    Active ID of the user
-     * @param integer $question_id  Question ID
-     * @param integer $pass         Pass number
-     * @param string  $feedback     The feedback text
-     * @param array   $feedback_old The feedback before update
-     * @param boolean $finalized    In Feedback is final
-     */
     private function insertManualFeedback(
         int $active_id,
         int $question_id,
@@ -369,7 +261,7 @@ class Answer
         string $feedback,
         bool $finalized,
         ?array $feedback_old
-    ) {
+    ): void {
         global $DIC;
 
         $ilDB = $DIC->database();

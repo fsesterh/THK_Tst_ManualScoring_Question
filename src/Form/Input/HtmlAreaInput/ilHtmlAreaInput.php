@@ -42,7 +42,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         $this->setValue($value ?: "");
     }
 
-    public function setValue(string $value)
+    public function setValue(string $value): void
     {
         $this->value = $value;
     }
@@ -52,9 +52,9 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      *
      * @param $a_tpl
      * @return void
-     * @throws ilTemplateException
+     * @throws ilTemplateException|\ilSystemStyleException
      */
-    public function insert($a_tpl)
+    public function insert($a_tpl): void
     {
         $tpl = new ilTemplate($this->getFolderPath() . "tpl.htmlAreaInput.html", true, true);
         $tpl->setVariable("TEXT", $this->value);
@@ -83,12 +83,12 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      *
      * @param string $htmlClass
      */
-    public function setHtmlClass(string $htmlClass)
+    public function setHtmlClass(string $htmlClass): void
     {
         $this->htmlClass = $htmlClass;
     }
 
-    public function setEditable(bool $editable)
+    public function setEditable(bool $editable): void
     {
         if (!$this->disabled) {
             $this->editable = $editable;
@@ -98,7 +98,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * @param bool $a_disabled
      */
-    public function setDisabled($a_disabled): void
+    public function setDisabled(bool $a_disabled): void
     {
         $this->disabled = $a_disabled;
         if ($a_disabled) {
