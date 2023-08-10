@@ -19,7 +19,9 @@ use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
 use ILIAS\UI\Component\Input\Container\Filter\Standard;
+use ILIAS\UI\Component\Input\Field\Select;
 use ILIAS\UI\Factory;
+use ILIAS\UI\Implementation\Component\Input\Field\Input;
 use ILIAS\UI\Renderer;
 use ilLanguage;
 use ilLogger;
@@ -39,6 +41,7 @@ use ilToolbarGUI;
 use ilTstManualScoringQuestionPlugin;
 use ilTstManualScoringQuestionUIHookGUI;
 use ilUIFilterService;
+use ilUIFilterServiceSessionGateway;
 use ilUIPluginRouterGUI;
 use Psr\Http\Message\RequestInterface;
 use ReflectionException;
@@ -674,15 +677,20 @@ class TstManualScoringQuestion
             "showTmsqManualScoring",
         );
 
+        $filterInputs = [
+            "question" => $selectQuestionInput,
+            "pass" => $selectPassInput,
+            "answersPerPage" => $selectAnswersPerPageInput,
+            "scoringCompleted" => $selectScoringCompletedInput
+        ];
+
+
+        $this->fixIlias8FilterOptionError($filterInputs);
+
         return $this->uiFilterService->standard(
             'tstFilter',
             $filterBaseAction,
-            [
-                "question" => $selectQuestionInput,
-                "pass" => $selectPassInput,
-                "answersPerPage" => $selectAnswersPerPageInput,
-                "scoringCompleted" => $selectScoringCompletedInput
-            ],
+            $filterInputs,
             [
                 true,
                 true,
@@ -833,5 +841,38 @@ class TstManualScoringQuestion
     {
         $this->uiUtil->sendFailure($this->lng->txt("form_input_not_valid"), true);
         $this->redirectToManualScoringTab($refId);
+    }
+
+    /**
+     * Fixes an issue in ilias causing an exception when a filter option is no longer available but still stored in session
+     * https://mantis.ilias.de/view.php?id=37741
+     * @param Input[] $filterInputs
+     * @return void
+     */
+    private function fixIlias8FilterOptionError(array $filterInputs)
+    {
+        $filterServiceSessionGateway = new ilUIFilterServiceSessionGateway();
+
+        foreach ($filterInputs as $inputId => $input) {
+            if (!$input instanceof Select) {
+                continue;
+            }
+            $value = $filterServiceSessionGateway->getValue("tstFilter", $inputId);
+            $optionFound = false;
+
+            if ($value !== null) {
+                foreach ($input->getOptions() as $key => $optionValue) {
+                    $key = (string) $key;
+                    if ($value === $key) {
+                        $optionFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$optionFound) {
+                $filterServiceSessionGateway->writeValue("tstFilter", $inputId, $input->getValue());
+            }
+        }
     }
 }
