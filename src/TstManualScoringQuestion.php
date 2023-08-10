@@ -372,7 +372,7 @@ class TstManualScoringQuestion
                             "%s %s (%s)",
                             $this->plugin->txt("answer_of"),
                             $correctAnswer->getUserName(),
-                            $correctAnswer->getLogin()
+                            $test->getAnonymity() ? $this->lng->txt("anonymous") : $correctAnswer->getLogin()
                         )
                     );
 
@@ -399,7 +399,7 @@ class TstManualScoringQuestion
                             "%s %s (%s)",
                             $this->plugin->txt("answer_of"),
                             $answer->getUserName(),
-                            $answer->getLogin()
+                            $test->getAnonymity() ? $this->lng->txt("anonymous") : $answer->getLogin()
                         )
                     );
 
