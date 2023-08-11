@@ -755,6 +755,10 @@ class TstManualScoringQuestion
 
         $question_gui = $test->createQuestionGUI('', $questionId);
 
+        if (!$question_gui) {
+            return "";
+        }
+
         $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'Modules/Test');
 
         if (
@@ -799,6 +803,19 @@ class TstManualScoringQuestion
         $tmp_tpl->setVariable(
             'TEXT_SOLUTION_OUTPUT',
             $this->lng->txt('answers_of') . ' ' . $participant->getName()
+        );
+
+        $tmp_tpl->setVariable('TEXT_RECEIVED_POINTS', $this->lng->txt('scoring'));
+
+        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
+
+        $tmp_tpl->setVariable(
+            'RECEIVED_POINTS',
+            sprintf(
+                $this->lng->txt('part_received_a_of_b_points'),
+                $question_gui->object->getReachedPoints($activeId, $pass),
+                $question_gui->object->getMaximumPoints()
+            )
         );
 
         $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
