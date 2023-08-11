@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput;
 
 use ilFormPropertyGUI;
+use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
 
@@ -52,7 +53,7 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
      *
      * @param $a_tpl
      * @return void
-     * @throws ilTemplateException|\ilSystemStyleException
+     * @throws ilTemplateException|ilSystemStyleException
      */
     public function insert($a_tpl): void
     {

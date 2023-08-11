@@ -421,6 +421,10 @@ class TstManualScoringQuestion
         return $this->uiRenderer->render($filter) . $tpl->get();
     }
 
+    /**
+     * @throws ilCtrlException
+     * @throws ilTemplateException
+     */
     protected function showNoEntries(ilObjTest $test, ilTemplate $tpl): string
     {
         $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
@@ -438,6 +442,7 @@ class TstManualScoringQuestion
      *
      * @throws ilTemplateException
      * @throws ReflectionException
+     * @throws ilCtrlException|ilSystemStyleException
      */
     protected function showTmsqManualScoring(): void
     {
@@ -613,6 +618,9 @@ class TstManualScoringQuestion
         ];
     }
 
+    /**
+     * @throws ilCtrlException
+     */
     protected function setupFilter(int $testRefId, array $questionOptions, array $passOptions): Standard
     {
         $answersPerPageOptions = range(1, 10);
@@ -703,6 +711,7 @@ class TstManualScoringQuestion
 
     /**
      * @throws ReflectionException
+     * @throws ilCtrlException
      */
     protected function drawHeader(int $refId): void
     {
@@ -817,6 +826,7 @@ class TstManualScoringQuestion
      * Redirects the user to the tmsq manual scoring page
      *
      * @param int|string $refId
+     * @throws ilCtrlException
      */
     protected function redirectToManualScoringTab($refId, int $pageNumber = -1): void
     {
@@ -836,6 +846,7 @@ class TstManualScoringQuestion
      * Sends an invalid form message and redirects to the manual scoring tab of the test (refId)
      *
      * @param $refId
+     * @throws ilCtrlException
      */
     protected function sendInvalidForm($refId): void
     {
@@ -844,12 +855,13 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Fixes an issue in ilias causing an exception when a filter option is no longer available but still stored in session
-     * https://mantis.ilias.de/view.php?id=37741
+     * Fixes an issue in ilias causing an exception when a filter option is no longer available but still stored in
+     * session https://mantis.ilias.de/view.php?id=37741
+     *
      * @param Input[] $filterInputs
      * @return void
      */
-    private function fixIlias8FilterOptionError(array $filterInputs)
+    private function fixIlias8FilterOptionError(array $filterInputs): void
     {
         $filterServiceSessionGateway = new ilUIFilterServiceSessionGateway();
 
