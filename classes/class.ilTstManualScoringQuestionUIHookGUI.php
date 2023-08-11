@@ -1,42 +1,32 @@
-<?php /** @noinspection PhpMissingParamTypeInspection */
+<?php
+
+/** @noinspection PhpMissingParamTypeInspection */
 declare(strict_types=1);
 
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 use ILIAS\DI\Container;
-use Psr\Http\Message\RequestInterface;
 use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
+use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
+use Psr\Http\Message\RequestInterface;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
  * Class ilTstManualScoringQuestionUIHookGUI
+ *
  * @author            Marvin Beym <mbeym@databay.de>
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
     private const TMSQ_TAB = "tmsq_man_scoring";
-    /**
-     * @var ilLanguage
-     */
-    protected $lng;
-    /**
-     * @var TstManualScoringQuestion
-     */
-    protected $tstManualScoringQuestion;
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
-    /**
-     * @var ilTstManualScoringQuestionPlugin
-     */
-    protected $plugin;
-    /**
-     * @var Container
-     */
-    protected $dic;
+    protected ilLanguage $lng;
+    protected TstManualScoringQuestion $tstManualScoringQuestion;
+    protected RequestInterface $request;
+    protected ilTstManualScoringQuestionPlugin $plugin;
+    protected Container $dic;
+    private UiUtil $uiUtil;
 
     /**
      * ilTstManualScoringQuestionUIHookGUI constructor.
@@ -49,10 +39,12 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->lng = $this->dic->language();
         $this->lng->loadLanguageModule("assessment");
         $this->request = $this->dic->http()->request();
+        $this->uiUtil = new UiUtil($this->dic);
     }
 
     /**
      * Injects the sub tab for scoring by tmsq
+     *
      * @param int $ref_id
      */
     protected function injectSubTab(int $ref_id)
@@ -73,15 +65,8 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         );
     }
 
-    /**
-     * Modifies the manual scoring tab to add a sub tab for the scoring using the plugin
-     * @param string $a_comp
-     * @param string $a_part
-     * @param array  $a_par
-     */
-    public function modifyGUI($a_comp, $a_part, $a_par = array())
+    public function modifyGUI(string $a_comp, string $a_part, array $a_par = []): void
     {
-        parent::modifyGUI($a_comp, $a_part, $a_par);
         $query = $this->request->getQueryParams();
         if ($a_part !== "sub_tabs") {
             return;
@@ -95,11 +80,12 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
     /**
      * Returns the array used to replace the html content
+     *
      * @param string $mode
      * @param string $html
      * @return string[]
      */
-    protected function uiHookResponse(string $mode = self::KEEP, string $html = "") : array
+    protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array
     {
         return ['mode' => $mode, 'html' => $html];
     }
@@ -107,6 +93,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     /**
      * Checks if the received command can be executed and redirects the command into the structure presentation class
      * for further processing
+     *
      * @throws Exception
      */
     public function executeCommand()
@@ -117,7 +104,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $query = $request->getQueryParams();
         $cmd = $ctrl->getCmd();
         if (!isset($cmd)) {
-            ilUtil::sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
+            $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
             $ctrl->redirectToURL("ilias.php");
         }
 

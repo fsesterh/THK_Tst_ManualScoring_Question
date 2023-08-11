@@ -1,36 +1,33 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 /* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form;
 
-use ilPropertyFormGUI;
-use ilTstManualScoringQuestionPlugin;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
-use ilNonEditableValueGUI;
-use ilLanguage;
-use ilNumberInputGUI;
-use ilHiddenInputGUI;
-use Psr\Http\Message\RequestInterface;
-use ilTextAreaInputGUI;
 use Exception;
-use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilCheckboxInputGUI;
+use ilHiddenInputGUI;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
+use ilLanguage;
+use ilNonEditableValueGUI;
+use ilNumberInputGUI;
+use ilPropertyFormGUI;
+use ilTextAreaInputGUI;
+use ilTstManualScoringQuestionPlugin;
 use ilUtil;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Class ManualScoringForm
+ *
  * @author  Marvin Beym <mbeym@databay.de>
  */
 class TstManualScoringForm extends ilPropertyFormGUI
 {
-    /**
-     * @var RequestInterface
-     */
-    protected $request;
-    /**
-     * @var ilTstManualScoringQuestionPlugin
-     */
-    protected $plugin;
+    protected RequestInterface $request;
+    protected ilTstManualScoringQuestionPlugin $plugin;
 
     public function __construct(ilLanguage $lng, Answer $answer)
     {
@@ -43,22 +40,22 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $questionId = $question->getId();
         $activeId = $answer->getActiveId();
 
-        $testRefIdHiddenInput = new ilHiddenInputGUI("tmsq[{$questionId}][testRefId]");
+        $testRefIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][testRefId]");
         $testRefIdHiddenInput->setRequired(true);
 
-        $passHiddenInput = new ilHiddenInputGUI("tmsq[{$questionId}][pass]");
+        $passHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][pass]");
         $passHiddenInput->setRequired(true);
 
-        $questionIdHiddenInput = new ilHiddenInputGUI("tmsq[{$questionId}][questionId]");
+        $questionIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][questionId]");
         $questionIdHiddenInput->setRequired(true);
 
-        $activeIdHiddenInput = new ilHiddenInputGUI("tmsq[{$questionId}][answers][{$activeId}][activeId]");
-        $activeIdHiddenInput->setValue($activeId);
+        $activeIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][answers][{$activeId}][activeId]");
+        $activeIdHiddenInput->setValue((string) $activeId);
         $activeIdHiddenInput->setRequired(true);
 
         $pointsForAnswerInput = new ilNumberInputGUI(
             $this->lng->txt("tst_change_points_for_question"),
-            "tmsq[{$questionId}][answers][{$activeId}][points]"
+            "tmsq[$questionId][answers][{$activeId}][points]"
         );
         $pointsForAnswerInput->setDisabled($answer->isScoringCompleted());
         $pointsForAnswerInput->setMinValue(0.00);
@@ -81,13 +78,13 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
         $manualFeedPackAreaInput = new ilTextAreaInputGUI(
             $this->lng->txt('set_manual_feedback'),
-            "tmsq[{$questionId}][answers][{$activeId}][feedback]"
+            "tmsq[$questionId][answers][{$activeId}][feedback]"
         );
 
         if ($answer->isScoringCompleted()) {
             $manualFeedPackAreaInput = new ilHtmlAreaInput(
                 $this->lng->txt('set_manual_feedback'),
-                "tmsq[{$questionId}][answers][{$activeId}][feedback]"
+                "tmsq[$questionId][answers][{$activeId}][feedback]"
             );
             $manualFeedPackAreaInput->setDisabled(true);
             $manualFeedPackAreaInput->setHtmlClass("tmsq-html-area-input");
@@ -98,7 +95,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
             $this->lng->txt("finalized_evaluation"),
-            "tmsq[{$questionId}][answers][{$activeId}][scoringCompleted]"
+            "tmsq[$questionId][answers][{$activeId}][scoringCompleted]"
         );
 
         $this->addItem($testRefIdHiddenInput);
@@ -109,15 +106,12 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->addItem($pointsForAnswerInput);
         $this->addItem($maximumPointsNonEditInput);
         $this->addItem($manualFeedPackAreaInput);
-
-        if ($this->plugin->isAtLeastIlias6()) {
-            $this->addItem($scoringCompletedCheckboxInput);
-        }
+        $this->addItem($scoringCompletedCheckboxInput);
 
         parent::__construct();
     }
 
-    public function checkInput()
+    public function checkInput(): bool
     {
         $lng = $this->lng;
         /**
@@ -176,7 +170,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
                     $valid = $valid ? $item->checkSubItemsInput() : false;
                     break;
                 case $item instanceof ilNumberInputGUI:
-                    if (!is_numeric(str_replace(',', '.', $item->getValue()))) {
+                    if (!is_numeric($item->getValue())) {
                         $item->setMinValue($item->getMinValue(), true);
                         $item->setMaxValue($item->getMaxLength(), true);
                         $item->setAlert($lng->txt("form_msg_numeric_value_required"));
@@ -224,23 +218,24 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
     /**
      * Fills the form values
+     *
      * @param Answer $answer
      * @throws Exception
      */
-    public function fillForm(Answer $answer)
+    public function fillForm(Answer $answer): void
     {
         $question = $answer->getQuestion();
         $questionId = $question->getId();
         $activeId = $answer->getActiveId();
 
         $this->setValuesByArray([
-            "tmsq[{$questionId}][testRefId]" => $question->getTestRefId(),
-            "tmsq[{$questionId}][pass]" => $question->getPass(),
-            "tmsq[{$questionId}][questionId]" => $questionId,
-            "tmsq[{$questionId}][answers][{$activeId}][activeId]" => $activeId,
-            "tmsq[{$questionId}][answers][{$activeId}][points]" => $answer->getPoints(),
-            "tmsq[{$questionId}][answers][{$activeId}][feedback]" => $answer->getFeedback(),
-            "tmsq[{$questionId}][answers][{$activeId}][scoringCompleted]" => $answer->isScoringCompleted()
+            "tmsq[$questionId][testRefId]" => $question->getTestRefId(),
+            "tmsq[$questionId][pass]" => $question->getPass(),
+            "tmsq[$questionId][questionId]" => $questionId,
+            "tmsq[$questionId][answers][{$activeId}][activeId]" => $activeId,
+            "tmsq[$questionId][answers][{$activeId}][points]" => $answer->getPoints(),
+            "tmsq[$questionId][answers][{$activeId}][feedback]" => $answer->getFeedback(),
+            "tmsq[$questionId][answers][{$activeId}][scoringCompleted]" => $answer->isScoringCompleted()
         ], true);
     }
 }
