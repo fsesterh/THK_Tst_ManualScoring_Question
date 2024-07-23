@@ -46,17 +46,17 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
     public function cssFolder(string $file = ""): string
     {
-        return $this->assetsFolder() . "/css/{$file}";
+        return $this->assetsFolder() . "/css/$file";
     }
 
     public function templatesFolder(string $file = ""): string
     {
-        return $this->assetsFolder() . "/templates/{$file}";
+        return $this->assetsFolder() . "/templates/$file";
     }
 
     public function jsFolder(string $file = ""): string
     {
-        return $this->assetsFolder() . "/js/{$file}";
+        return $this->assetsFolder() . "/js/$file";
     }
 
     public static function getInstance(): ilTstManualScoringQuestionPlugin
