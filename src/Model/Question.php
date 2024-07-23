@@ -46,7 +46,7 @@ class Question
 
     public function readMaximumPoints(): float
     {
-        return assQuestion::_getMaximumPoints($this->id);
+        return assQuestion::instantiateQuestion($this->id)->getMaximumPoints();
     }
 
     public function readIsObligatory(): bool
