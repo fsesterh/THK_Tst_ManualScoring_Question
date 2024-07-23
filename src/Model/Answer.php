@@ -253,12 +253,13 @@ class Answer
         $username = ilObjTestAccess::_getParticipantData($active_id);
 
         $test = new ilObjTest($this->question->getTestRefId(), true);
+        $question = assQuestion::instantiateQuestion($question_id);
         $test->logAction(
             sprintf(
                 $lng->txtlng('assessment', 'log_manual_feedback', ilObjAssessmentFolder::_getLogLanguage()),
                 $ilUser->getFullname() . ' (' . $ilUser->getLogin() . ')',
                 $username,
-                assQuestion::_getQuestionTitle($question_id),
+                $question->getTitle(),
                 $feedback
             )
         );
