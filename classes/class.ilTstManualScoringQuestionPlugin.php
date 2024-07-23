@@ -25,9 +25,9 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     public const ID = "tmsq";
 
     protected Container $dic;
-    protected ilCtrl $ctrl;
+    protected ilCtrlInterface $ctrl;
 
-    private static ?ilTstManualScoringQuestionPlugin $instance = null;
+    private static ilTstManualScoringQuestionPlugin|ilPlugin|null $instance = null;
 
     public function __construct(ilDBInterface $db, ilComponentRepositoryWrite $component_repository, string $id)
     {
@@ -76,7 +76,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         return self::$instance;
     }
 
-    public function redirectToHome()
+    public function redirectToHome(): void
     {
         $this->ctrl->redirectByClass("ilDashboardGUI", "show");
     }

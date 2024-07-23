@@ -23,8 +23,8 @@ namespace ILIAS\Plugin\TstManualScoringQuestion;
 use assQuestion;
 use Exception;
 use ilAccessHandler;
-use ilCtrl;
 use ilCtrlException;
+use ilCtrlInterface;
 use ilGlobalTemplateInterface;
 use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
@@ -36,7 +36,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
 use ILIAS\UI\Component\Input\Container\Filter\Standard;
 use ILIAS\UI\Component\Input\Field\Select;
 use ILIAS\UI\Factory;
-use ILIAS\UI\Implementation\Component\Input\Field\Input;
+use ILIAS\UI\Implementation\Component\Input\Field\FormInput;
 use ILIAS\UI\Renderer;
 use ilLanguage;
 use ilLogger;
@@ -49,7 +49,7 @@ use ilTemplate;
 use ilTemplateException;
 use ilTestAccess;
 use ilTestEvaluationUserData;
-use ilTestParticipantAccessFilter;
+use ilTestParticipantAccessFilterFactory;
 use ilTestParticipantData;
 use ilTestScoringByQuestionsGUI;
 use ilToolbarGUI;
@@ -74,7 +74,7 @@ class TstManualScoringQuestion
     protected RequestInterface $request;
     protected ilToolbarGUI $toolbar;
     protected UIServices $ui;
-    protected ilCtrl $ctrl;
+    protected ilCtrlInterface $ctrl;
     protected ilGlobalTemplateInterface $mainTpl;
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected ilLanguage $lng;
@@ -139,8 +139,9 @@ class TstManualScoringQuestion
         $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
         $participantData->setActiveIdsFilter(array_keys($data->getParticipants()));
 
+        $participantAccessFilter = new ilTestParticipantAccessFilterFactory($this->dic->access());
         $participantData->setParticipantAccessFilter(
-            ilTestParticipantAccessFilter::getScoreParticipantsUserFilter($test->getRefId())
+            $participantAccessFilter->getScoreParticipantsUserFilter($test->getRefId())
         );
 
         $participantData->load($test->getTestId());
@@ -716,7 +717,6 @@ class TstManualScoringQuestion
         $objTestGui = new ilObjTestGUI($refId);
 
         $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, 'setTitleAndDescription');
-        $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($objTestGui);
 
         $this->dic['ilLocator']->addRepositoryItems($refId);
@@ -828,7 +828,7 @@ class TstManualScoringQuestion
      * @param int|string $refId
      * @throws ilCtrlException
      */
-    protected function redirectToManualScoringTab($refId, int $pageNumber = -1): void
+    protected function redirectToManualScoringTab(int $refId, int $pageNumber = -1): void
     {
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
 
@@ -845,7 +845,7 @@ class TstManualScoringQuestion
     /**
      * @throws ilCtrlException
      */
-    protected function sendInvalidForm($refId): void
+    protected function sendInvalidForm(int $refId): void
     {
         $this->uiUtil->sendFailure($this->lng->txt("form_input_not_valid"), true);
         $this->redirectToManualScoringTab($refId);
@@ -855,7 +855,7 @@ class TstManualScoringQuestion
      * Fixes an issue in ilias causing an exception when a filter option is no longer available but still stored in
      * session https://mantis.ilias.de/view.php?id=37741
      *
-     * @param Input[] $filterInputs
+     * @param FormInput[] $filterInputs
      */
     private function fixIlias8FilterOptionError(array $filterInputs): void
     {
