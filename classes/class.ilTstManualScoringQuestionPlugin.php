@@ -22,14 +22,8 @@ use ILIAS\DI\Container;
 
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
-    /** @var string */
-    public const CTYPE = "Services";
-    /** @var string */
-    public const CNAME = "UIComponent";
-    /** @var string */
-    public const SLOT_ID = "uihk";
-    /** @var string */
-    public const PNAME = "TstManualScoringQuestion";
+    public const ID = "tmsq";
+
     protected Container $dic;
     protected ilCtrl $ctrl;
 
@@ -43,11 +37,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         $this->ctrl = $this->dic->ctrl();
 
         parent::__construct($db, $component_repository, $id);
-    }
-
-    public function getPluginName(): string
-    {
-        return self::PNAME;
     }
 
     public function assetsFolder(): string
@@ -78,18 +67,12 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
             return self::$instance;
         }
 
-        /** @var ilComponentRepository $component_repository */
-        $component_repository = $DIC['component.repository'];
-        /** @var ilComponentFactory $component_factory */
-        $component_factory = $DIC['component.factory'];
+        /**
+         * @var ilComponentFactory $componentFactory
+         */
+        $componentFactory = $DIC["component.factory"];
 
-        $plugin_info = $component_repository->getComponentByTypeAndName(
-            self::CTYPE,
-            self::CNAME
-        )->getPluginSlotById(self::SLOT_ID)->getPluginByName(self::PNAME);
-
-        self::$instance = $component_factory->getPlugin($plugin_info->getId());
-
+        self::$instance = $componentFactory->getPlugin(self::ID);
         return self::$instance;
     }
 
