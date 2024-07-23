@@ -501,11 +501,24 @@ class TstManualScoringQuestion
             $this->refinery->byTrying([
                 $this->refinery->kindlyTo()->listOf(
                     $this->refinery->kindlyTo()->recordOf([
-                        "answers" => $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
-                            "points" => $this->refinery->kindlyTo()->float(),
-                            "feedback" => $this->refinery->kindlyTo()->string(),
-                            "activeId" => $this->refinery->kindlyTo()->int()
-                        ])),
+                        "answers" => $this->refinery->byTrying([
+                            //When checking scoringCompleted
+                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
+                                "points" => $this->refinery->kindlyTo()->float(),
+                                "feedback" => $this->refinery->kindlyTo()->string(),
+                                "scoringCompleted" => $this->refinery->kindlyTo()->bool(),
+                                "activeId" => $this->refinery->kindlyTo()->int()
+                            ])),
+                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
+                                "points" => $this->refinery->kindlyTo()->float(),
+                                "feedback" => $this->refinery->kindlyTo()->string(),
+                                "activeId" => $this->refinery->kindlyTo()->int()
+                            ])),
+                            //When unchecking scoring completed checkbox
+                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
+                                "activeId" => $this->refinery->kindlyTo()->int()
+                            ]))
+                        ]),
                         "testRefId" => $this->refinery->kindlyTo()->int(),
                         "pass" => $this->refinery->kindlyTo()->int(),
                         "questionId" => $this->refinery->kindlyTo()->int()
@@ -688,10 +701,10 @@ class TstManualScoringQuestion
         }
 
         if ($selectPassInput->getValue() === null || !in_array(
-            (int) $selectPassInput->getValue(),
-            array_keys($passOptions),
-            true
-        )) {
+                (int) $selectPassInput->getValue(),
+                array_keys($passOptions),
+                true
+            )) {
             //alternative as array_key_first() is not available in php 7.2
             $selectPassInput = $selectPassInput->withValue(array_key_first($passOptions));
         }
@@ -768,12 +781,13 @@ class TstManualScoringQuestion
      */
     protected function getAnswerDetail(
         ilTestEvaluationUserData $participant,
-        ilObjTest $test,
-        int $activeId,
-        int $pass,
-        int $questionId,
-        ilTestAccess $testAccess
-    ): string {
+        ilObjTest                $test,
+        int                      $activeId,
+        int                      $pass,
+        int                      $questionId,
+        ilTestAccess             $testAccess
+    ): string
+    {
         if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
             ilObjTestGUI::accessViolationRedirect();
         }
