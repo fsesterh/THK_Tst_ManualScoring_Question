@@ -51,8 +51,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * Inserts the input into the template.
      *
-     * @param $a_tpl
-     * @return void
      * @throws ilTemplateException|ilSystemStyleException
      */
     public function insert($a_tpl): void
@@ -72,7 +70,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * Returns the path to the folder where the input is located.
      *
-     * @return string
      */
     protected function getFolderPath(): string
     {
@@ -82,7 +79,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     /**
      * Changes the html class of the div
      *
-     * @param string $htmlClass
      */
     public function setHtmlClass(string $htmlClass): void
     {
@@ -96,9 +92,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         }
     }
 
-    /**
-     * @param bool $a_disabled
-     */
     public function setDisabled(bool $a_disabled): void
     {
         $this->disabled = $a_disabled;

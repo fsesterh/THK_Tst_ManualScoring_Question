@@ -45,7 +45,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     /**
      * Injects the sub tab for scoring by tmsq
      *
-     * @param int $ref_id
      */
     protected function injectSubTab(int $ref_id)
     {
@@ -81,8 +80,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     /**
      * Returns the array used to replace the html content
      *
-     * @param string $mode
-     * @param string $html
      * @return string[]
      */
     protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array

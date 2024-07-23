@@ -146,8 +146,8 @@ class TstManualScoringForm extends ilPropertyFormGUI
                         $ascii_whitespaces = chr(194) . chr(160);
                         $ascii_breaklines = chr(13) . chr(10);
 
-                        $to_replace = array($ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;");
-                        $replace_to = array(' ', '', "_", "_", "_");
+                        $to_replace = [$ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;"];
+                        $replace_to = [' ', '', "_", "_", "_"];
 
                         #20630 mbstring extension is mandatory for 5.4
                         $chars_entered = mb_strlen(strip_tags(str_replace(
@@ -219,7 +219,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
     /**
      * Fills the form values
      *
-     * @param Answer $answer
      * @throws Exception
      */
     public function fillForm(Answer $answer): void

@@ -37,9 +37,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         parent::__construct($db, $component_repository, $id);
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getPluginName(): string
     {
         return self::PNAME;
@@ -65,9 +62,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         return $this->assetsFolder() . "/js/{$file}";
     }
 
-    /**
-     * @return ilTstManualScoringQuestionPlugin
-     */
     public static function getInstance(): ilTstManualScoringQuestionPlugin
     {
         global $DIC;
@@ -104,7 +98,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     /**
      * Checks if the current ilias version is at least ilias 7
      *
-     * @return bool
      */
     public function isAtLeastIlias7(): bool
     {

@@ -194,7 +194,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * @param string   $cmd
      * @param string[] $query
      * @throws Exception
      */
@@ -219,8 +218,6 @@ class TstManualScoringQuestion
     /**
      * Replaces the html for the manual scoring table.
      *
-     * @param int $refId
-     * @return string
      * @throws ilTemplateException
      * @throws ilSystemStyleException
      * @throws ilCtrlException
@@ -464,7 +461,6 @@ class TstManualScoringQuestion
     /**
      * Handles the saving of the manual scoring form
      *
-     * @param array $post
      * @throws Exception
      */
     protected function saveManualScoring(array $post): void
@@ -732,13 +728,6 @@ class TstManualScoringQuestion
     /**
      * Gets the answer detail html string to be displayed in the form
      *
-     * @param ilTestEvaluationUserData $participant
-     * @param ilObjTest                $test
-     * @param int                      $activeId
-     * @param int                      $pass
-     * @param int                      $questionId
-     * @param ilTestAccess             $testAccess
-     * @return string
      * @throws ilTemplateException
      */
     protected function getAnswerDetail(
@@ -826,8 +815,6 @@ class TstManualScoringQuestion
     /**
      * Returns the target link to the scoring by question tab
      *
-     * @param int $refId
-     * @return string
      * @throws ilCtrlException
      */
     protected function getManualScoringByQuestionTarget(int $refId): string
@@ -862,7 +849,6 @@ class TstManualScoringQuestion
     /**
      * Sends an invalid form message and redirects to the manual scoring tab of the test (refId)
      *
-     * @param $refId
      * @throws ilCtrlException
      */
     protected function sendInvalidForm($refId): void
@@ -876,7 +862,6 @@ class TstManualScoringQuestion
      * session https://mantis.ilias.de/view.php?id=37741
      *
      * @param Input[] $filterInputs
-     * @return void
      */
     private function fixIlias8FilterOptionError(array $filterInputs): void
     {

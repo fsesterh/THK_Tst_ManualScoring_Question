@@ -221,8 +221,8 @@ class Answer
             if ($finalized_record === 0 || ($is_single_feedback && $finalized_record === 1)) {
                 $DIC->database()->manipulateF(
                     "DELETE FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
-                    array('integer', 'integer', 'integer'),
-                    array($active_id, $question_id, $pass)
+                    ['integer', 'integer', 'integer'],
+                    [$active_id, $question_id, $pass]
                 );
             }
         }

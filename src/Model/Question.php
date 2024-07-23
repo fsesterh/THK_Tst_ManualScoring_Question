@@ -95,7 +95,6 @@ class Question
 
     /**
      * @param Answer[] $answers
-     * @return Question
      */
     public function setAnswers(array $answers): Question
     {
