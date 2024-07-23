@@ -286,7 +286,7 @@ class Answer
             'active_fi' => ['integer', $active_id],
             'question_fi' => ['integer', $question_id],
             'pass' => ['integer', $pass],
-            'feedback' => ['clob', ilRTE::_replaceMediaObjectImageSrc($feedback, 0)],
+            'feedback' => ['clob', ilRTE::_replaceMediaObjectImageSrc($feedback)],
             'tstamp' => ['integer', time()]
         ];
 
