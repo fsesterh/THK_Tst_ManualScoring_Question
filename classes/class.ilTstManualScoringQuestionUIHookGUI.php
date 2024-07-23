@@ -19,11 +19,10 @@
 declare(strict_types=1);
 
 use ILIAS\DI\Container;
+use ILIAS\HTTP\Wrapper\WrapperFactory;
 use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
-use Psr\Http\Message\RequestInterface;
-
-require_once __DIR__ . '/../vendor/autoload.php';
+use ILIAS\Refinery\Factory;
 
 /**
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
@@ -31,12 +30,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
     private const TMSQ_TAB = "tmsq_man_scoring";
+
     protected ilLanguage $lng;
-    protected TstManualScoringQuestion $tstManualScoringQuestion;
-    protected RequestInterface $request;
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected Container $dic;
     private UiUtil $uiUtil;
+    private WrapperFactory $httpWrapper;
+    private Factory $refinery;
 
     public function __construct()
     {
@@ -45,7 +45,8 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         $this->lng = $this->dic->language();
         $this->lng->loadLanguageModule("assessment");
-        $this->request = $this->dic->http()->request();
+        $this->httpWrapper = $this->dic->http()->wrapper();
+        $this->refinery = $this->dic->refinery();
         $this->uiUtil = new UiUtil($this->dic);
     }
 
@@ -69,7 +70,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
     public function modifyGUI(string $a_comp, string $a_part, array $a_par = []): void
     {
-        $query = $this->request->getQueryParams();
         if ($a_part !== "sub_tabs") {
             return;
         }
@@ -77,7 +77,17 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         if ($this->dic->tabs()->getActiveTab() !== "manscoring") {
             return;
         }
-        $this->injectSubTab((int) $query["ref_id"]);
+
+
+        $refId = $this->httpWrapper->query()->retrieve(
+            "ref_id",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        $this->injectSubTab($refId);
     }
 
     /**
@@ -93,10 +103,8 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
      */
     public function executeCommand()
     {
-        $request = $this->dic->http()->request();
         $user = $this->dic->user();
         $ctrl = $this->dic->ctrl();
-        $query = $request->getQueryParams();
         $cmd = $ctrl->getCmd();
         if (!isset($cmd)) {
             $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
@@ -107,6 +115,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
             $ctrl->redirectToURL('login.php');
         }
 
-        (new TstManualScoringQuestion($this->dic))->performCommand($cmd, $query);
+        (new TstManualScoringQuestion($this->dic))->performCommand($cmd);
     }
 }

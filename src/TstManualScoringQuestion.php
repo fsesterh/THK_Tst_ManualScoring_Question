@@ -28,6 +28,7 @@ use ilCtrlInterface;
 use ilGlobalTemplateInterface;
 use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
+use ILIAS\HTTP\Wrapper\WrapperFactory;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
@@ -84,6 +85,8 @@ class TstManualScoringQuestion
     protected ilUIFilterService $uiFilterService;
     protected \ILIAS\UI\Component\Input\Field\Factory $uiFieldFactory;
     private Factory $uiFactory;
+    private WrapperFactory $httpWrapper;
+    private \ILIAS\Refinery\Factory $refinery;
 
     public function __construct(Container $dic = null)
     {
@@ -101,7 +104,9 @@ class TstManualScoringQuestion
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         $this->ui = $dic->ui();
         $this->ctrl = $dic->ctrl();
-        $this->request = $dic->http()->request();
+        $this->request = $this->dic->http()->request();
+        $this->httpWrapper = $this->dic->http()->wrapper();
+        $this->refinery = $this->dic->refinery();
         $this->access = $dic->access();
         $this->user = $dic->user();
         $this->logger = $dic->logger()->root();
@@ -204,12 +209,19 @@ class TstManualScoringQuestion
     }
 
     /**
-     * @param string[] $query
      * @throws Exception
      */
-    public function performCommand(string $cmd, array $query): void
+    public function performCommand(string $cmd): void
     {
-        if (!isset($query["ref_id"])) {
+        $refId = $this->httpWrapper->query()->retrieve(
+            "ref_id",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (!$refId) {
             $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
             $this->plugin->redirectToHome();
         }
@@ -221,7 +233,7 @@ class TstManualScoringQuestion
 
             default:
                 $this->uiUtil->sendFailure($this->plugin->txt("cmdNotSupported"), true);
-                $this->redirectToManualScoringTab((int) $query["ref_id"]);
+                $this->redirectToManualScoringTab($refId);
         }
     }
 
@@ -448,8 +460,14 @@ class TstManualScoringQuestion
      */
     protected function showTmsqManualScoring(): void
     {
-        $query = $this->request->getQueryParams();
-        $refId = (int) $query["ref_id"];
+        $refId = $this->httpWrapper->query()->retrieve(
+            "ref_id",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
         $this->drawHeader($refId);
         $this->dic->tabs()->setBackTarget(
             $this->lng->txt("back"),
@@ -466,33 +484,48 @@ class TstManualScoringQuestion
     /**
      * @throws Exception
      */
-    protected function saveManualScoring(array $post): void
+    protected function saveManualScoring(): void
     {
-        if (!isset($post) || count($post) === 0) {
-            $this->uiUtil->sendFailure($this->plugin->txt("nothingReceivedInPost"), true);
-            $this->plugin->redirectToHome();
-        }
+        $page = $this->httpWrapper->query()->retrieve(
+            "page",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
 
-        $query = $this->request->getQueryParams();
-        if (isset($query["page"])) {
-            $currentPage = (int) $query["page"];
-        } else {
-            $currentPage = -1;
-        }
+        $currentPage = $page ?? -1;
 
-        if (!isset($post["tmsq"]) || !is_array($post["tmsq"])) {
+        $tmsq = $this->httpWrapper->post()->retrieve(
+            "tmsq",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->listOf(
+                    $this->refinery->kindlyTo()->recordOf([
+                        "answers" => $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
+                            "points" => $this->refinery->kindlyTo()->float(),
+                            "feedback" => $this->refinery->kindlyTo()->string(),
+                            "activeId" => $this->refinery->kindlyTo()->int()
+                        ])),
+                        "testRefId" => $this->refinery->kindlyTo()->int(),
+                        "pass" => $this->refinery->kindlyTo()->int(),
+                        "questionId" => $this->refinery->kindlyTo()->int()
+                    ])
+                ),
+                $this->refinery->always(null)
+            ])
+        );
+
+        if (!$tmsq) {
             $this->uiUtil->sendFailure($this->plugin->txt("invalid_post_data"), true);
             $this->plugin->redirectToHome();
         }
-
-        $postData = $post["tmsq"];
 
         /**
          * @var Question[] $questions
          */
         $questions = [];
 
-        foreach ($postData as $key => $questionData) {
+        foreach ($tmsq as $questionData) {
             $question = new Question();
             $question->loadFromPost($questionData);
             $questions[] = $question;
@@ -567,12 +600,16 @@ class TstManualScoringQuestion
         $url = $this->request->getRequestTarget();
 
         $parameterName = 'page';
-        $query = $this->request->getQueryParams();
-        if (isset($query[$parameterName])) {
-            $currentPage = (int) $query[$parameterName];
-        } else {
-            $currentPage = 0;
-        }
+
+        $page = $this->httpWrapper->query()->retrieve(
+            "page",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        $currentPage = $page ?? 0;
 
         $pagination = $factory->viewControl()->pagination()
             ->withTargetURL($url, $parameterName)
@@ -704,7 +741,6 @@ class TstManualScoringQuestion
                 true,
                 true
             ],
-            false,
         );
     }
 

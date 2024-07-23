@@ -32,17 +32,14 @@ use ilPropertyFormGUI;
 use ilTextAreaInputGUI;
 use ilTstManualScoringQuestionPlugin;
 use ilUtil;
-use Psr\Http\Message\RequestInterface;
 
 class TstManualScoringForm extends ilPropertyFormGUI
 {
-    protected RequestInterface $request;
     protected ilTstManualScoringQuestionPlugin $plugin;
 
     public function __construct(ilLanguage $lng, Answer $answer)
     {
         global $DIC;
-        $this->request = $DIC->http()->request();
         $this->lng = $lng;
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
 
