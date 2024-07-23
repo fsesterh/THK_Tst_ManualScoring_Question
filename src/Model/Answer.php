@@ -27,12 +27,6 @@ use ilObjTest;
 use ilObjTestAccess;
 use ilRTE;
 
-/**
- * Class Answer
- *
- * @package TstManualScoringQuestion\Model
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class Answer
 {
     protected ilDBInterface $db;

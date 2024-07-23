@@ -62,12 +62,6 @@ use Psr\Http\Message\RequestInterface;
 use ReflectionException;
 use ReflectionMethod;
 
-/**
- * Class TstManualScoringQuestion
- *
- * @package TstManualScoringQuestion
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class TstManualScoringQuestion
 {
     public const ALL_USERS = 0;
@@ -231,8 +225,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Replaces the html for the manual scoring table.
-     *
      * @throws ilTemplateException
      * @throws ilSystemStyleException
      * @throws ilCtrlException
@@ -449,9 +441,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Shows the tmsq manual scoring on a new page,
-     * preventing ilias from rendering the normal view first.
-     *
      * @throws ilTemplateException
      * @throws ReflectionException
      * @throws ilCtrlException|ilSystemStyleException
@@ -474,8 +463,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Handles the saving of the manual scoring form
-     *
      * @throws Exception
      */
     protected function saveManualScoring(array $post): void
@@ -741,8 +728,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Gets the answer detail html string to be displayed in the form
-     *
      * @throws ilTemplateException
      */
     protected function getAnswerDetail(
@@ -828,8 +813,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Returns the target link to the scoring by question tab
-     *
      * @throws ilCtrlException
      */
     protected function getManualScoringByQuestionTarget(int $refId): string
@@ -842,8 +825,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Redirects the user to the tmsq manual scoring page
-     *
      * @param int|string $refId
      * @throws ilCtrlException
      */
@@ -862,8 +843,6 @@ class TstManualScoringQuestion
     }
 
     /**
-     * Sends an invalid form message and redirects to the manual scoring tab of the test (refId)
-     *
      * @throws ilCtrlException
      */
     protected function sendInvalidForm($refId): void

@@ -25,12 +25,6 @@ use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
 
-/**
- * Class ilHtmlAreaInput
- *
- * @package TstManualScoringQuestion\Form\Input\HtmlAreaInput
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class ilHtmlAreaInput extends ilFormPropertyGUI
 {
     protected bool $disabled = false;
@@ -64,8 +58,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     }
 
     /**
-     * Inserts the input into the template.
-     *
      * @throws ilTemplateException|ilSystemStyleException
      */
     public function insert($a_tpl): void
@@ -82,19 +74,11 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         $a_tpl->parseCurrentBlock();
     }
 
-    /**
-     * Returns the path to the folder where the input is located.
-     *
-     */
     protected function getFolderPath(): string
     {
         return strstr(realpath(__DIR__), "Customizing") . "/";
     }
 
-    /**
-     * Changes the html class of the div
-     *
-     */
     public function setHtmlClass(string $htmlClass): void
     {
         $this->htmlClass = $htmlClass;

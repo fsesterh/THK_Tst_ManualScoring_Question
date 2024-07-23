@@ -23,12 +23,6 @@ namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 use assQuestion;
 use ilObjTest;
 
-/**
- * Class Question
- *
- * @package TstManualScoringQuestion\Model
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class Question
 {
     /**

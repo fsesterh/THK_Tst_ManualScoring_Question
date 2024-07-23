@@ -22,12 +22,6 @@ namespace ILIAS\Plugin\TstManualScoringQuestion\Utils;
 
 use ILIAS\DI\Container;
 
-/**
- * Class UiUtil
- *
- * @package ILIAS\Plugin\TstManualScoringQuestion\Utils
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class UiUtil
 {
     private Container $dic;

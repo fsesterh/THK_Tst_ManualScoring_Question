@@ -20,11 +20,6 @@ declare(strict_types=1);
 
 use ILIAS\DI\Container;
 
-/**
- * Class ilTstManualScoringQuestionPlugin
- *
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
     /** @var string */
@@ -101,19 +96,5 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     public function redirectToHome()
     {
         $this->ctrl->redirectByClass("ilDashboardGUI", "show");
-    }
-
-    public function isAtLeastIlias6(): bool
-    {
-        return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">=");
-    }
-
-    /**
-     * Checks if the current ilias version is at least ilias 7
-     *
-     */
-    public function isAtLeastIlias7(): bool
-    {
-        return version_compare(ILIAS_VERSION_NUMERIC, "7.0", ">=");
     }
 }

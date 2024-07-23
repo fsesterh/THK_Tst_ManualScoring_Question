@@ -34,11 +34,6 @@ use ilTstManualScoringQuestionPlugin;
 use ilUtil;
 use Psr\Http\Message\RequestInterface;
 
-/**
- * Class ManualScoringForm
- *
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class TstManualScoringForm extends ilPropertyFormGUI
 {
     protected RequestInterface $request;
@@ -232,8 +227,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
     }
 
     /**
-     * Fills the form values
-     *
      * @throws Exception
      */
     public function fillForm(Answer $answer): void

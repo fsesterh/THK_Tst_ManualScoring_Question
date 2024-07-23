@@ -26,9 +26,6 @@ use Psr\Http\Message\RequestInterface;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
- * Class ilTstManualScoringQuestionUIHookGUI
- *
- * @author            Marvin Beym <mbeym@databay.de>
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
@@ -41,9 +38,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     protected Container $dic;
     private UiUtil $uiUtil;
 
-    /**
-     * ilTstManualScoringQuestionUIHookGUI constructor.
-     */
     public function __construct()
     {
         global $DIC;
@@ -55,10 +49,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->uiUtil = new UiUtil($this->dic);
     }
 
-    /**
-     * Injects the sub tab for scoring by tmsq
-     *
-     */
     protected function injectSubTab(int $ref_id)
     {
         $this->dic->ctrl()->setParameterByClass(
@@ -91,8 +81,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     }
 
     /**
-     * Returns the array used to replace the html content
-     *
      * @return string[]
      */
     protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array
@@ -101,9 +89,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     }
 
     /**
-     * Checks if the received command can be executed and redirects the command into the structure presentation class
-     * for further processing
-     *
      * @throws Exception
      */
     public function executeCommand()
