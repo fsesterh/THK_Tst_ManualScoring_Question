@@ -111,7 +111,7 @@ class Answer
 
     protected function readPoints(): float
     {
-        return (float) assQuestion::_getReachedPoints(
+        return assQuestion::_getReachedPoints(
             $this->activeId,
             $this->question->getId(),
             $this->question->getPass()
@@ -126,7 +126,7 @@ class Answer
             $this->points,
             $this->question->getMaximumPoints(),
             $this->question->getPass(),
-            1,
+            true,
             $this->question->readIsObligatory()
         );
     }
