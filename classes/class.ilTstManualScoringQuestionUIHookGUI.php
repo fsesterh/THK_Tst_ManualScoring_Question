@@ -101,7 +101,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     /**
      * @throws Exception
      */
-    public function executeCommand()
+    public function executeCommand(): void
     {
         $user = $this->dic->user();
         $ctrl = $this->dic->ctrl();
