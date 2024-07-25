@@ -1,6 +1,22 @@
 <?php
 
-/* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
@@ -11,12 +27,6 @@ use ilObjTest;
 use ilObjTestAccess;
 use ilRTE;
 
-/**
- * Class Answer
- *
- * @package TstManualScoringQuestion\Model
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class Answer
 {
     protected ilDBInterface $db;
@@ -101,7 +111,7 @@ class Answer
 
     protected function readPoints(): float
     {
-        return (float) assQuestion::_getReachedPoints(
+        return assQuestion::_getReachedPoints(
             $this->activeId,
             $this->question->getId(),
             $this->question->getPass()
@@ -116,7 +126,7 @@ class Answer
             $this->points,
             $this->question->getMaximumPoints(),
             $this->question->getPass(),
-            1,
+            true,
             $this->question->readIsObligatory()
         );
     }
@@ -221,8 +231,8 @@ class Answer
             if ($finalized_record === 0 || ($is_single_feedback && $finalized_record === 1)) {
                 $DIC->database()->manipulateF(
                     "DELETE FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
-                    array('integer', 'integer', 'integer'),
-                    array($active_id, $question_id, $pass)
+                    ['integer', 'integer', 'integer'],
+                    [$active_id, $question_id, $pass]
                 );
             }
         }
@@ -243,12 +253,13 @@ class Answer
         $username = ilObjTestAccess::_getParticipantData($active_id);
 
         $test = new ilObjTest($this->question->getTestRefId(), true);
+        $question = assQuestion::instantiateQuestion($question_id);
         $test->logAction(
             sprintf(
                 $lng->txtlng('assessment', 'log_manual_feedback', ilObjAssessmentFolder::_getLogLanguage()),
                 $ilUser->getFullname() . ' (' . $ilUser->getLogin() . ')',
                 $username,
-                assQuestion::_getQuestionTitle($question_id),
+                $question->getTitle(),
                 $feedback
             )
         );
@@ -275,7 +286,7 @@ class Answer
             'active_fi' => ['integer', $active_id],
             'question_fi' => ['integer', $question_id],
             'pass' => ['integer', $pass],
-            'feedback' => ['clob', ilRTE::_replaceMediaObjectImageSrc($feedback, 0)],
+            'feedback' => ['clob', ilRTE::_replaceMediaObjectImageSrc($feedback)],
             'tstamp' => ['integer', time()]
         ];
 

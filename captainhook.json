@@ -5,8 +5,8 @@
       {
         "action": "\\CaptainHook\\App\\Hook\\Message\\Action\\Beams",
         "options": {
-          "subjectLength": 50,
-          "bodyLineLength": 72
+          "subjectLength": 80,
+          "bodyLineLength": 100
         },
         "conditions": []
       },
@@ -32,7 +32,7 @@
         "conditions": []
       },
       {
-        "action": "vendor/friendsofphp/php-cs-fixer/php-cs-fixer fix",
+        "action": "vendor/bin/php-cs-fixer fix",
         "options": [],
         "conditions": []
       }
@@ -51,6 +51,14 @@
     "actions": []
   },
   "post-checkout": {
+    "enabled": false,
+    "actions": []
+  },
+  "post-rewrite": {
+    "enabled": false,
+    "actions": []
+  },
+  "post-change": {
     "enabled": false,
     "actions": []
   }

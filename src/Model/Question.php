@@ -1,18 +1,28 @@
 <?php
 
-/* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
+declare(strict_types=1);
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use assQuestion;
 use ilObjTest;
 
-/**
- * Class Question
- *
- * @package TstManualScoringQuestion\Model
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class Question
 {
     /**
@@ -36,7 +46,7 @@ class Question
 
     public function readMaximumPoints(): float
     {
-        return assQuestion::_getMaximumPoints($this->id);
+        return assQuestion::instantiateQuestion($this->id)->getMaximumPoints();
     }
 
     public function readIsObligatory(): bool
@@ -95,7 +105,6 @@ class Question
 
     /**
      * @param Answer[] $answers
-     * @return Question
      */
     public function setAnswers(array $answers): Question
     {

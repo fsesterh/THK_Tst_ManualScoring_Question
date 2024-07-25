@@ -1,36 +1,43 @@
 <?php
 
-/** @noinspection PhpMissingParamTypeInspection */
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
 declare(strict_types=1);
 
-/* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
-
 use ILIAS\DI\Container;
+use ILIAS\HTTP\Wrapper\WrapperFactory;
 use ILIAS\Plugin\TstManualScoringQuestion\TstManualScoringQuestion;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
-use Psr\Http\Message\RequestInterface;
-
-require_once __DIR__ . '/../vendor/autoload.php';
+use ILIAS\Refinery\Factory;
 
 /**
- * Class ilTstManualScoringQuestionUIHookGUI
- *
- * @author            Marvin Beym <mbeym@databay.de>
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
     private const TMSQ_TAB = "tmsq_man_scoring";
+
     protected ilLanguage $lng;
-    protected TstManualScoringQuestion $tstManualScoringQuestion;
-    protected RequestInterface $request;
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected Container $dic;
     private UiUtil $uiUtil;
+    private WrapperFactory $httpWrapper;
+    private Factory $refinery;
 
-    /**
-     * ilTstManualScoringQuestionUIHookGUI constructor.
-     */
     public function __construct()
     {
         global $DIC;
@@ -38,15 +45,11 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         $this->lng = $this->dic->language();
         $this->lng->loadLanguageModule("assessment");
-        $this->request = $this->dic->http()->request();
+        $this->httpWrapper = $this->dic->http()->wrapper();
+        $this->refinery = $this->dic->refinery();
         $this->uiUtil = new UiUtil($this->dic);
     }
 
-    /**
-     * Injects the sub tab for scoring by tmsq
-     *
-     * @param int $ref_id
-     */
     protected function injectSubTab(int $ref_id)
     {
         $this->dic->ctrl()->setParameterByClass(
@@ -67,7 +70,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 
     public function modifyGUI(string $a_comp, string $a_part, array $a_par = []): void
     {
-        $query = $this->request->getQueryParams();
         if ($a_part !== "sub_tabs") {
             return;
         }
@@ -75,14 +77,20 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         if ($this->dic->tabs()->getActiveTab() !== "manscoring") {
             return;
         }
-        $this->injectSubTab((int) $query["ref_id"]);
+
+
+        $refId = $this->httpWrapper->query()->retrieve(
+            "ref_id",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
+        $this->injectSubTab($refId);
     }
 
     /**
-     * Returns the array used to replace the html content
-     *
-     * @param string $mode
-     * @param string $html
      * @return string[]
      */
     protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array
@@ -91,17 +99,12 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     }
 
     /**
-     * Checks if the received command can be executed and redirects the command into the structure presentation class
-     * for further processing
-     *
      * @throws Exception
      */
-    public function executeCommand()
+    public function executeCommand(): void
     {
-        $request = $this->dic->http()->request();
         $user = $this->dic->user();
         $ctrl = $this->dic->ctrl();
-        $query = $request->getQueryParams();
         $cmd = $ctrl->getCmd();
         if (!isset($cmd)) {
             $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
@@ -112,6 +115,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
             $ctrl->redirectToURL('login.php');
         }
 
-        (new TstManualScoringQuestion($this->dic))->performCommand($cmd, $query);
+        (new TstManualScoringQuestion($this->dic))->performCommand($cmd);
     }
 }

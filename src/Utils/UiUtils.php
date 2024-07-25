@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 /**
  * This file is part of ILIAS, a powerful learning management system
  * published by ILIAS open source e-Learning e.V.
@@ -17,16 +16,12 @@ declare(strict_types=1);
  *
  *********************************************************************/
 
+declare(strict_types=1);
+
 namespace ILIAS\Plugin\TstManualScoringQuestion\Utils;
 
 use ILIAS\DI\Container;
 
-/**
- * Class UiUtil
- *
- * @package ILIAS\Plugin\TstManualScoringQuestion\Utils
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class UiUtil
 {
     private Container $dic;

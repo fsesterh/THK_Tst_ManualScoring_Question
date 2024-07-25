@@ -1,7 +1,22 @@
 <?php
 
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
 declare(strict_types=1);
-/* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput;
 
@@ -10,12 +25,6 @@ use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
 
-/**
- * Class ilHtmlAreaInput
- *
- * @package TstManualScoringQuestion\Form\Input\HtmlAreaInput
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class ilHtmlAreaInput extends ilFormPropertyGUI
 {
     protected bool $disabled = false;
@@ -49,10 +58,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
     }
 
     /**
-     * Inserts the input into the template.
-     *
-     * @param $a_tpl
-     * @return void
      * @throws ilTemplateException|ilSystemStyleException
      */
     public function insert($a_tpl): void
@@ -69,21 +74,11 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         $a_tpl->parseCurrentBlock();
     }
 
-    /**
-     * Returns the path to the folder where the input is located.
-     *
-     * @return string
-     */
     protected function getFolderPath(): string
     {
         return strstr(realpath(__DIR__), "Customizing") . "/";
     }
 
-    /**
-     * Changes the html class of the div
-     *
-     * @param string $htmlClass
-     */
     public function setHtmlClass(string $htmlClass): void
     {
         $this->htmlClass = $htmlClass;
@@ -96,9 +91,6 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         }
     }
 
-    /**
-     * @param bool $a_disabled
-     */
     public function setDisabled(bool $a_disabled): void
     {
         $this->disabled = $a_disabled;

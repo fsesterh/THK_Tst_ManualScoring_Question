@@ -1,7 +1,22 @@
 <?php
 
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
+
 declare(strict_types=1);
-/* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
 
 namespace ILIAS\Plugin\TstManualScoringQuestion\Form;
 
@@ -17,22 +32,14 @@ use ilPropertyFormGUI;
 use ilTextAreaInputGUI;
 use ilTstManualScoringQuestionPlugin;
 use ilUtil;
-use Psr\Http\Message\RequestInterface;
 
-/**
- * Class ManualScoringForm
- *
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class TstManualScoringForm extends ilPropertyFormGUI
 {
-    protected RequestInterface $request;
     protected ilTstManualScoringQuestionPlugin $plugin;
 
     public function __construct(ilLanguage $lng, Answer $answer)
     {
         global $DIC;
-        $this->request = $DIC->http()->request();
         $this->lng = $lng;
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
 
@@ -146,8 +153,8 @@ class TstManualScoringForm extends ilPropertyFormGUI
                         $ascii_whitespaces = chr(194) . chr(160);
                         $ascii_breaklines = chr(13) . chr(10);
 
-                        $to_replace = array($ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;");
-                        $replace_to = array(' ', '', "_", "_", "_");
+                        $to_replace = [$ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;"];
+                        $replace_to = [' ', '', "_", "_", "_"];
 
                         #20630 mbstring extension is mandatory for 5.4
                         $chars_entered = mb_strlen(strip_tags(str_replace(
@@ -217,9 +224,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
     }
 
     /**
-     * Fills the form values
-     *
-     * @param Answer $answer
      * @throws Exception
      */
     public function fillForm(Answer $answer): void

@@ -1,31 +1,33 @@
 <?php
 
-/** @noinspection PhpFieldAssignmentTypeMismatchInspection */
-declare(strict_types=1);
+/**
+ * This file is part of ILIAS, a powerful learning management system
+ * published by ILIAS open source e-Learning e.V.
+ *
+ * ILIAS is licensed with the GPL-3.0,
+ * see https://www.gnu.org/licenses/gpl-3.0.en.html
+ * You should have received a copy of said license along with the
+ * source code, too.
+ *
+ * If this is not the case or you just want to try ILIAS, you'll find
+ * us at:
+ * https://www.ilias.de
+ * https://github.com/ILIAS-eLearning
+ *
+ *********************************************************************/
 
-/* Copyright (c) 1998-2020 ILIAS open source, Extended GPL, see docs/LICENSE */
+declare(strict_types=1);
 
 use ILIAS\DI\Container;
 
-/**
- * Class ilTstManualScoringQuestionPlugin
- *
- * @author  Marvin Beym <mbeym@databay.de>
- */
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
-    /** @var string */
-    public const CTYPE = "Services";
-    /** @var string */
-    public const CNAME = "UIComponent";
-    /** @var string */
-    public const SLOT_ID = "uihk";
-    /** @var string */
-    public const PNAME = "TstManualScoringQuestion";
-    protected Container $dic;
-    protected ilCtrl $ctrl;
+    public const ID = "tmsq";
 
-    private static ?ilTstManualScoringQuestionPlugin $instance = null;
+    protected Container $dic;
+    protected ilCtrlInterface $ctrl;
+
+    private static ilTstManualScoringQuestionPlugin|ilPlugin|null $instance = null;
 
     public function __construct(ilDBInterface $db, ilComponentRepositoryWrite $component_repository, string $id)
     {
@@ -37,14 +39,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         parent::__construct($db, $component_repository, $id);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getPluginName(): string
-    {
-        return self::PNAME;
-    }
-
     public function assetsFolder(): string
     {
         return $this->getDirectory() . "/assets/";
@@ -52,22 +46,19 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
     public function cssFolder(string $file = ""): string
     {
-        return $this->assetsFolder() . "/css/{$file}";
+        return $this->assetsFolder() . "/css/$file";
     }
 
     public function templatesFolder(string $file = ""): string
     {
-        return $this->assetsFolder() . "/templates/{$file}";
+        return $this->assetsFolder() . "/templates/$file";
     }
 
     public function jsFolder(string $file = ""): string
     {
-        return $this->assetsFolder() . "/js/{$file}";
+        return $this->assetsFolder() . "/js/$file";
     }
 
-    /**
-     * @return ilTstManualScoringQuestionPlugin
-     */
     public static function getInstance(): ilTstManualScoringQuestionPlugin
     {
         global $DIC;
@@ -76,38 +67,17 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
             return self::$instance;
         }
 
-        /** @var ilComponentRepository $component_repository */
-        $component_repository = $DIC['component.repository'];
-        /** @var ilComponentFactory $component_factory */
-        $component_factory = $DIC['component.factory'];
+        /**
+         * @var ilComponentFactory $componentFactory
+         */
+        $componentFactory = $DIC["component.factory"];
 
-        $plugin_info = $component_repository->getComponentByTypeAndName(
-            self::CTYPE,
-            self::CNAME
-        )->getPluginSlotById(self::SLOT_ID)->getPluginByName(self::PNAME);
-
-        self::$instance = $component_factory->getPlugin($plugin_info->getId());
-
+        self::$instance = $componentFactory->getPlugin(self::ID);
         return self::$instance;
     }
 
-    public function redirectToHome()
+    public function redirectToHome(): void
     {
         $this->ctrl->redirectByClass("ilDashboardGUI", "show");
-    }
-
-    public function isAtLeastIlias6(): bool
-    {
-        return version_compare(ILIAS_VERSION_NUMERIC, "6.0.0", ">=");
-    }
-
-    /**
-     * Checks if the current ilias version is at least ilias 7
-     *
-     * @return bool
-     */
-    public function isAtLeastIlias7(): bool
-    {
-        return version_compare(ILIAS_VERSION_NUMERIC, "7.0", ">=");
     }
 }
