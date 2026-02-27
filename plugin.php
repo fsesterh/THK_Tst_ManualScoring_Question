@@ -18,10 +18,10 @@
 
 $id = "tmsq";
 
-$version = "9.0.0";
+$version = "10.0.0";
 
-$ilias_min_version = "9.0";
-$ilias_max_version = "9.999";
+$ilias_min_version = "10.0";
+$ilias_max_version = "10.999";
 
 $responsible = "Fabian Sesterhenn";
 $responsible_mail = "fabian.sesterhenn@th-koeln.de";
