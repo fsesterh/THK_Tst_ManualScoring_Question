@@ -68,6 +68,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
     public function redirectToHome(): void
     {
-        $this->dic->ctrl()->redirectByClass("ilDashboardGUI", "show");
+        $this->dic->ctrl()->redirectByClass(ilDashboardGUI::class, "show");
     }
 }

@@ -50,10 +50,10 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->uiUtil = new UiUtil($this->dic);
     }
 
-    protected function injectSubTab(int $ref_id)
+    protected function injectSubTab(int $ref_id): void
     {
         $this->dic->ctrl()->setParameterByClass(
-            ilTstManualScoringQuestionUIHookGUI::class,
+            self::class,
             'ref_id',
             $ref_id
         );
