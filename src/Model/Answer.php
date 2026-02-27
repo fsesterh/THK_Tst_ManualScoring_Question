@@ -127,7 +127,8 @@ class Answer
             $this->question->getMaximumPoints(),
             $this->question->getPass(),
             true,
-            $this->question->readIsObligatory()
+            $this->question->readIsObligatory(),
+            $this->question->getTestId()
         );
     }
 
