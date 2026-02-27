@@ -1,9 +1,24 @@
-# UIHook Plugin - TstManualScoringQuestion
+# UserInterfaceHook Plugin - TstManualScoringQuestion
+
+## Requirements
 
 | Component | Version(s)                                                                                             | Link                      |
 |-----------|--------------------------------------------------------------------------------------------------------|---------------------------|
 | PHP       | ![](https://img.shields.io/badge/8.2-blue.svg) ![](https://img.shields.io/badge/8.3-blue.svg)          | [PHP](https://php.net)    |
 | ILIAS     | ![](https://img.shields.io/badge/10-orange.svg) to ![](https://img.shields.io/badge/10.999-orange.svg) | [ILIAS](https://ilias.de) |
+---
+
+## Table of contents
+
+<!-- TOC -->
+* [UserInterfaceHook Plugin - TstManualScoringQuestion](#userinterfacehook-plugin---tstmanualscoringquestion)
+  * [Requirements](#requirements)
+  * [Table of contents](#table-of-contents)
+  * [Description](#description)
+  * [Installation](#installation)
+  * [Usage](#usage)
+<!-- TOC -->
+
 ---
 
 ## Description
