@@ -25,7 +25,7 @@ use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
 
-class ilHtmlAreaInput extends ilFormPropertyGUI
+class HtmlAreaInput extends ilFormPropertyGUI
 {
     protected bool $disabled = false;
     protected bool $editable = true;

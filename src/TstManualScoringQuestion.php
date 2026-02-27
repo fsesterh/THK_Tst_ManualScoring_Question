@@ -30,7 +30,7 @@ use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
 use ILIAS\HTTP\Wrapper\WrapperFactory;
 use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\HtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
@@ -378,7 +378,7 @@ class TstManualScoringQuestion
                             $correctAnswer = $answer;
                             $form = $answerAndForm["form"];
                             foreach ($form->getItems() as $item) {
-                                if ($item instanceof ilHtmlAreaInput) {
+                                if ($item instanceof HtmlAreaInput) {
                                     $item->setValue($correctAnswer->getAnswerHtml());
                                     break;
                                 }

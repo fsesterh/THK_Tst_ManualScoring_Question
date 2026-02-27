@@ -23,7 +23,7 @@ namespace ILIAS\Plugin\TstManualScoringQuestion\Form;
 use Exception;
 use ilCheckboxInputGUI;
 use ilHiddenInputGUI;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\HtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilLanguage;
 use ilNonEditableValueGUI;
@@ -72,7 +72,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $pointsForAnswerInput->setDecimals(2);
         $pointsForAnswerInput->setSize(5);
 
-        $userSolutionHtmlAreaInput = new ilHtmlAreaInput($this->plugin->txt("userSolution"));
+        $userSolutionHtmlAreaInput = new HtmlAreaInput($this->plugin->txt("userSolution"));
         $userSolutionHtmlAreaInput->setValue($answer->getAnswerHtml());
         $userSolutionHtmlAreaInput->setEditable(false);
         $userSolutionHtmlAreaInput->setHtmlClass("tmsq-html-area-input");
@@ -89,7 +89,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         );
 
         if ($answer->isScoringCompleted()) {
-            $manualFeedPackAreaInput = new ilHtmlAreaInput(
+            $manualFeedPackAreaInput = new HtmlAreaInput(
                 $this->lng->txt('set_manual_feedback'),
                 "tmsq[$questionId][answers][{$activeId}][feedback]"
             );
