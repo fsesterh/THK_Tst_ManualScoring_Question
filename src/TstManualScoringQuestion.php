@@ -701,10 +701,10 @@ class TstManualScoringQuestion
         }
 
         if ($selectPassInput->getValue() === null || !in_array(
-                (int) $selectPassInput->getValue(),
-                array_keys($passOptions),
-                true
-            )) {
+            (int) $selectPassInput->getValue(),
+            array_keys($passOptions),
+            true
+        )) {
             //alternative as array_key_first() is not available in php 7.2
             $selectPassInput = $selectPassInput->withValue(array_key_first($passOptions));
         }
@@ -781,13 +781,12 @@ class TstManualScoringQuestion
      */
     protected function getAnswerDetail(
         ilTestEvaluationUserData $participant,
-        ilObjTest                $test,
-        int                      $activeId,
-        int                      $pass,
-        int                      $questionId,
-        ilTestAccess             $testAccess
-    ): string
-    {
+        ilObjTest $test,
+        int $activeId,
+        int $pass,
+        int $questionId,
+        ilTestAccess $testAccess
+    ): string {
         if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
             ilObjTestGUI::accessViolationRedirect();
         }
