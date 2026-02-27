@@ -23,12 +23,12 @@ It is highly recommended to rename the original scoring by question tab via the 
    composer install --no-dev
    ```
    Developers **MUST** omit the `--no-dev` argument.
-
-
-3. Login to ILIAS with an administrator account (e.g. root)
-4. Select **Plugins** in **Extending ILIAS** inside the **Administration** main menu.
-5. Search for the **TstManualScoringQuestion** plugin in the list of plugin and choose **Install** from the **Actions** drop down.
-6. Choose **Activate** from the **Actions** dropdown.
+3. Run ``composer install --no-dev`` in the ilias root directory!
+4. Login to ILIAS with an administrator account (e.g. root)
+5. Select **Plugins** in **Extending ILIAS** inside the **Administration** main menu.
+6. Search for the **TstManualScoringQuestion** plugin in the list of plugin and choose **Install** from the **Actions**
+   drop-down.
+7. Choose **Activate** from the **Actions** dropdown.
 
 ## Usage
 
