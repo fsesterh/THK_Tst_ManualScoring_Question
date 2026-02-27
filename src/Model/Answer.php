@@ -22,9 +22,7 @@ namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use assQuestion;
 use ilDBInterface;
-use ilObjAssessmentFolder;
 use ilObjTest;
-use ilObjTestAccess;
 use ilRTE;
 
 class Answer
@@ -126,9 +124,7 @@ class Answer
             $this->points,
             $this->question->getMaximumPoints(),
             $this->question->getPass(),
-            true,
-            $this->question->readIsObligatory(),
-            $this->question->getTestId()
+            true
         );
     }
 
@@ -238,32 +234,7 @@ class Answer
             }
         }
         $this->insertManualFeedback($active_id, $question_id, $pass, $feedback, $finalized, $feedback_old);
-
-        if (ilObjAssessmentFolder::_enabledAssessmentLogging()) {
-            $this->logManualFeedback($active_id, $question_id, $feedback);
-        }
         return true;
-    }
-
-    private function logManualFeedback(int $active_id, int $question_id, string $feedback): void
-    {
-        global $DIC;
-
-        $ilUser = $DIC->user();
-        $lng = $DIC->language();
-        $username = ilObjTestAccess::_getParticipantData($active_id);
-
-        $test = new ilObjTest($this->question->getTestRefId(), true);
-        $question = assQuestion::instantiateQuestion($question_id);
-        $test->logAction(
-            sprintf(
-                $lng->txtlng('assessment', 'log_manual_feedback', ilObjAssessmentFolder::_getLogLanguage()),
-                $ilUser->getFullname() . ' (' . $ilUser->getLogin() . ')',
-                $username,
-                $question->getTitle(),
-                $feedback
-            )
-        );
     }
 
     private function insertManualFeedback(

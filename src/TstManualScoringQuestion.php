@@ -42,7 +42,6 @@ use ILIAS\UI\Implementation\Component\Input\Field\FormInput;
 use ILIAS\UI\Renderer;
 use ilLanguage;
 use ilLogger;
-use ilObjAssessmentFolder;
 use ilObjTest;
 use ilObjTestGUI;
 use ilObjUser;
@@ -185,13 +184,7 @@ class TstManualScoringQuestion
             $questions = $test->getPotentialRandomTestQuestions();
         }
 
-        $enabledManualScoringTypes = ilObjAssessmentFolder::_getManualScoringTypes();
-
         foreach ($questions as $questionData) {
-            if (!in_array($questionData["type_tag"], $enabledManualScoringTypes, true)) {
-                continue;
-            }
-
             $questionId = $questionData["question_id"];
             $title = $questionData["title"];
             $points = $questionData["points"];
@@ -246,7 +239,7 @@ class TstManualScoringQuestion
     public function modify(int $refId): string
     {
         $test = new ilObjTest($refId, true);
-        $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+        $testAccess = new ilTestAccess($test->getRefId());
 
         if (!$testAccess->checkScoreParticipantsAccess()) {
             ilObjTestGUI::accessViolationRedirect();
@@ -554,7 +547,7 @@ class TstManualScoringQuestion
         foreach ($questions as $question) {
             $testRefId = $question->getTestRefId();
             $test = new ilObjTest($testRefId, true);
-            $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+            $testAccess = new ilTestAccess($test->getRefId());
 
             if (!$testRefId) {
                 $this->uiUtil->sendFailure($this->plugin->txt("unknownError"), true);
