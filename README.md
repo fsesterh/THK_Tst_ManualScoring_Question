@@ -16,10 +16,10 @@ It is highly recommended to rename the original scoring by question tab via the 
 
 ## Installation
 
-1. Clone this repository to **Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion**
+1. Clone this repository to **public/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion**
 2. Install the Composer dependencies  
    ```bash
-   cd Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
+   cd public/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
    composer install --no-dev
    ```
    Developers **MUST** omit the `--no-dev` argument.
