@@ -23,5 +23,5 @@ $version = "10.0.0";
 $ilias_min_version = "10.0";
 $ilias_max_version = "10.999";
 
-$responsible = "Fabian Sesterhenn";
-$responsible_mail = "fabian.sesterhenn@th-koeln.de";
+$responsible = "Fabian Sesterhenn / Marvin Beym";
+$responsible_mail = "fabian.sesterhenn@th-koeln.de / mbeym@databay.de";
