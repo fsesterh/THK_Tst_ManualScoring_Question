@@ -31,6 +31,7 @@ class Question
     protected array $answers = [];
     protected int $id;
     protected int $pass;
+    protected int $testId;
     protected int $testRefId;
     protected float $maximumPoints;
     protected bool $isObligatory;
@@ -64,6 +65,13 @@ class Question
         if (is_numeric($testRefId)) {
             $this->setTestRefId((int) $testRefId);
         }
+
+        $this->setTestId(
+            ilObjTest::_getTestIDFromObjectID(
+                ilObjTest::_lookupObjId($this->getTestRefId())
+            )
+        );
+
 
         if (is_numeric($pass)) {
             $this->setPass((int) $pass);
@@ -137,6 +145,17 @@ class Question
     public function setPass(int $pass): Question
     {
         $this->pass = $pass;
+        return $this;
+    }
+
+    public function getTestId(): int
+    {
+        return $this->testId;
+    }
+
+    public function setTestId(int $testId): Question
+    {
+        $this->testId = $testId;
         return $this;
     }
 
