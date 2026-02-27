@@ -29,6 +29,7 @@ use ilGlobalTemplateInterface;
 use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
 use ILIAS\HTTP\Wrapper\WrapperFactory;
+use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
@@ -251,8 +252,12 @@ class TstManualScoringQuestion
             ilObjTestGUI::accessViolationRedirect();
         }
 
-        $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
-        $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
+        $this->mainTpl->addCss($this->plugin->assetsFile(PluginAsset::CSS, "tstManualScoringQuestion.css"));
+        $tpl = new ilTemplate(
+            $this->plugin->assetsFile(PluginAsset::TEMPLATES, "tpl.manualScoringQuestionPanel.html", false),
+            true,
+            true
+        );
 
         $questionOptions = $this->generateQuestionOptions($test);
 

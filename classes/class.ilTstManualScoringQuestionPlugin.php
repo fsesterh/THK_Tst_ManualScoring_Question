@@ -19,6 +19,7 @@
 declare(strict_types=1);
 
 use ILIAS\DI\Container;
+use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
 
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
@@ -37,24 +38,15 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         parent::__construct($db, $component_repository, $id);
     }
 
-    public function assetsFolder(): string
+    public function getRelativeDirectory(): string
     {
-        return $this->getDirectory() . "/assets/";
+        return str_replace(ILIAS_ABSOLUTE_PATH . "/public/", "", realpath($this->getDirectory()));
     }
 
-    public function cssFolder(string $file = ""): string
+    public function assetsFile(PluginAsset $assetType, string $file, bool $relative = true): string
     {
-        return $this->assetsFolder() . "/css/$file";
-    }
-
-    public function templatesFolder(string $file = ""): string
-    {
-        return $this->assetsFolder() . "/templates/$file";
-    }
-
-    public function jsFolder(string $file = ""): string
-    {
-        return $this->assetsFolder() . "/js/$file";
+        $basePath = $relative ? $this->getRelativeDirectory() : $this->getDirectory();
+        return $basePath . "/assets/" . $assetType->value . "/" . $file;
     }
 
     public static function getInstance(): ilTstManualScoringQuestionPlugin
