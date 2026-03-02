@@ -25,6 +25,7 @@ use Exception;
 use ilAccessHandler;
 use ilCtrlException;
 use ilCtrlInterface;
+use ilDBConstants;
 use ilGlobalTemplateInterface;
 use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
@@ -122,7 +123,7 @@ class TstManualScoringQuestion
     {
         $result = $this->dic->database()->queryF(
             "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
-            ['integer', 'integer', 'integer'],
+            [ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER],
             [$activeId, $questionId, $pass]
         );
         if ($result->numRows()) {
