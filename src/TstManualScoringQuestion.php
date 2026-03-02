@@ -795,7 +795,7 @@ class TstManualScoringQuestion
             return "";
         }
 
-        $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'Modules/Test');
+        $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'components/ILIAS/Test');
 
         if (
             method_exists($question_gui, "supportsIntermediateSolutionOutput") &&
