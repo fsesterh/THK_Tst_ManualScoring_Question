@@ -785,7 +785,7 @@ class TstManualScoringQuestion
         int $questionId,
         ilTestAccess $testAccess
     ): string {
-        if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId, $test->getId())) {
+        if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId, $test->getTestId())) {
             $this->plugin->accessViolationRedirect();
         }
 
