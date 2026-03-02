@@ -849,8 +849,8 @@ class TstManualScoringQuestion
             'RECEIVED_POINTS',
             sprintf(
                 $this->lng->txt('part_received_a_of_b_points'),
-                $question_gui->object->getReachedPoints($activeId, $pass),
-                $question_gui->object->getMaximumPoints()
+                $question_gui->getObject()->getReachedPoints($activeId, $pass),
+                $question_gui->getObject()->getMaximumPoints()
             )
         );
 
