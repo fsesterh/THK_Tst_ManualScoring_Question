@@ -21,6 +21,7 @@ declare(strict_types=1);
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use assQuestion;
+use ilDBConstants;
 use ilDBInterface;
 use ilObjTest;
 use ilRTE;
@@ -118,7 +119,7 @@ class Answer
 
     public function writePoints(): bool
     {
-        return assQuestion::_setReachedPoints(
+        assQuestion::_setReachedPoints(
             $this->activeId,
             $this->question->getId(),
             $this->points,
@@ -126,6 +127,29 @@ class Answer
             $this->question->getPass(),
             true
         );
+
+
+        $result = $this->db->queryF(
+            "SELECT EXISTS(SELECT 1 FROM tst_test_result "
+            . "WHERE question_fi = %s AND active_fi = %s AND pass = %s AND points = %s AND manual = %s"
+            . ") AS does_exist",
+            [
+                ilDBConstants::T_INTEGER,
+                ilDBConstants::T_INTEGER,
+                ilDBConstants::T_INTEGER,
+                ilDBConstants::T_FLOAT,
+                ilDBConstants::T_INTEGER
+            ],
+            [
+                $this->question->getId(),
+                $this->activeId,
+                $this->question->getPass(),
+                $this->getPoints(),
+                true
+            ]
+        );
+
+        return (bool) $this->db->fetchAssoc($result)["does_exist"];
     }
 
     public function loadFromPost(array $answerData): Answer
