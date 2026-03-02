@@ -35,6 +35,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
+use ILIAS\Test\Scoring\Manual\TestScoringByQuestionGUI;
 use ILIAS\UI\Component\Input\Container\Filter\Standard;
 use ILIAS\UI\Component\Input\Field\Select;
 use ILIAS\UI\Factory;
@@ -52,7 +53,6 @@ use ilTestAccess;
 use ilTestEvaluationUserData;
 use ilTestParticipantAccessFilterFactory;
 use ilTestParticipantData;
-use ilTestScoringByQuestionsGUI;
 use ilToolbarGUI;
 use ilTstManualScoringQuestionPlugin;
 use ilTstManualScoringQuestionUIHookGUI;
@@ -138,7 +138,7 @@ class TstManualScoringQuestion
     protected function getAnswerData(ilObjTest $test, int $pass, int $questionId): array
     {
         $answersData = [];
-        $data = $test->getCompleteEvaluationData(false);
+        $data = $test->getCompleteEvaluationData();
         $participants = $data->getParticipants();
 
         $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
@@ -161,7 +161,7 @@ class TstManualScoringQuestion
                     continue;
                 }
 
-                $user = ilObjUser::_getUserData([$participant->user_id]);
+                $user = ilObjUser::_getUserData([$participant->getUserID()]);
                 $answersData[] = [
                     'active_id' => $active_id,
                     'reached_points' => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
@@ -785,7 +785,7 @@ class TstManualScoringQuestion
         int $questionId,
         ilTestAccess $testAccess
     ): string {
-        if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
+        if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId, $test->getId())) {
             $this->plugin->accessViolationRedirect();
         }
 
@@ -866,7 +866,7 @@ class TstManualScoringQuestion
     {
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
         return $this->ctrl->getLinkTargetByClass(
-            [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
+            [ilObjTestGUI::class, TestScoringByQuestionGUI::class],
             "showManScoringByQuestionParticipantsTable"
         );
     }
