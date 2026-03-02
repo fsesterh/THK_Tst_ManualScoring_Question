@@ -242,7 +242,7 @@ class TstManualScoringQuestion
         $testAccess = new ilTestAccess($test->getRefId());
 
         if (!$testAccess->checkScoreParticipantsAccess()) {
-            ilObjTestGUI::accessViolationRedirect();
+            $this->plugin->accessViolationRedirect();
         }
 
         $this->mainTpl->addCss($this->plugin->assetsFile(PluginAsset::CSS, "tstManualScoringQuestion.css"));
@@ -555,7 +555,7 @@ class TstManualScoringQuestion
             }
 
             if (!$testAccess->checkScoreParticipantsAccess()) {
-                ilObjTestGUI::accessViolationRedirect();
+                $this->plugin->accessViolationRedirect();
             }
 
             //Check all answer forms
@@ -786,7 +786,7 @@ class TstManualScoringQuestion
         ilTestAccess $testAccess
     ): string {
         if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
-            ilObjTestGUI::accessViolationRedirect();
+            $this->plugin->accessViolationRedirect();
         }
 
         $question_gui = $test->createQuestionGUI('', $questionId);

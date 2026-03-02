@@ -20,6 +20,8 @@ declare(strict_types=1);
 
 use ILIAS\DI\Container;
 use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
+use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
+use ILIAS\Test\Presentation\TestScreenGUI;
 
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
@@ -64,6 +66,21 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 
         self::$instance = $componentFactory->getPlugin(self::ID);
         return self::$instance;
+    }
+
+
+    public function accessViolationRedirect(): never
+    {
+        $uiUtil = new UiUtil($this->dic);
+        $uiUtil->sendFailure(
+            $this->dic->language()->txt("no_permission"),
+            true
+        );
+        $this->dic->ctrl()->redirectByClass(
+            [ilObjTestGUI::class, TestScreenGUI::class],
+            TestScreenGUI::DEFAULT_CMD
+        );
+        exit;
     }
 
     public function redirectToHome(): void
