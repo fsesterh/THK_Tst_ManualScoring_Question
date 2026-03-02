@@ -26,6 +26,7 @@ use ILIAS\Refinery\Factory;
 
 /**
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
+ * @ilCtrl_Calls ilTstManualScoringQuestionUIHookGUI: ilAssSpecFeedbackPageGUI
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
