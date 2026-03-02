@@ -158,18 +158,18 @@ class TstManualScoringQuestion
 
             $testResultData = $test->getTestResult($active_id, $pass);
             foreach ($testResultData as $key => $questionData) {
-                if (!isset($questionData['qid']) || (int) $questionData['qid'] !== $questionId) {
+                if (!isset($questionData["qid"]) || (int) $questionData["qid"] !== $questionId) {
                     continue;
                 }
 
                 $user = ilObjUser::_getUserData([$participant->getUserID()]);
                 $answersData[] = [
-                    'active_id' => $active_id,
-                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
-                    'participant' => $participant,
-                    'lastname' => $user[0]['lastname'],
-                    'firstname' => $user[0]['firstname'],
-                    'login' => $participant->getLogin(),
+                    "active_id" => $active_id,
+                    "reached_points" => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
+                    "participant" => $participant,
+                    "lastname" => $user[0]["lastname"],
+                    "firstname" => $user[0]["firstname"],
+                    "login" => $participant->getLogin(),
                 ];
             }
         }
@@ -346,11 +346,11 @@ class TstManualScoringQuestion
             );
 
             $tpl->setVariable("SUBMIT_BUTTON_TEXT", $this->lng->txt("save"));
-            $tpl->setVariable("SUBMIT_CMD", 'saveManualScoring');
+            $tpl->setVariable("SUBMIT_CMD", "saveManualScoring");
 
             $this->ctrl->setParameterByClass(
                 ilTstManualScoringQuestionUIHookGUI::class,
-                'ref_id',
+                "ref_id",
                 $test->getRefId()
             );
 
@@ -393,8 +393,8 @@ class TstManualScoringQuestion
                     );
 
                     $formHtml = $form->getHTML();
-                    $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
-                    $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', "", $formHtml);
+                    $formHtml = preg_replace('/<\/form>/ms', "", $formHtml);
 
                     $tpl->setVariable("ANSWER_FORM", $formHtml);
                     $tpl->parseCurrentBlock("answer");
@@ -420,8 +420,8 @@ class TstManualScoringQuestion
                     );
 
                     $formHtml = $form->getHTML();
-                    $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
-                    $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', "", $formHtml);
+                    $formHtml = preg_replace('/<\/form>/ms', "", $formHtml);
 
                     $tpl->setVariable("ANSWER_FORM", $formHtml);
                     $tpl->parseCurrentBlock("answer");
@@ -611,7 +611,7 @@ class TstManualScoringQuestion
         $renderer = $this->dic->ui()->renderer();
         $url = $this->request->getRequestTarget();
 
-        $parameterName = 'page';
+        $parameterName = "page";
 
         $page = $this->httpWrapper->query()->retrieve(
             "page",
@@ -648,15 +648,15 @@ class TstManualScoringQuestion
             $pageLength = $range->getLength();
         }
 
-        $html = '<div class="tmsq-pagination">' .
+        $html = "<div class='tmsq-pagination'>" .
             $renderer->render($pagination)
-            . '<hr class="tmsq-pagination-separator">'
+            . "<hr class='tmsq-pagination-separator'>"
             . sprintf(
                 $this->plugin->txt("answersFromTo"),
                 $totalNumberOfElements === 0 ? 0 : $start + 1,
                 $start + $pageLength
             )
-            . '</div>';
+            . "</div>";
 
         return [
             "html" => $html,
@@ -682,9 +682,9 @@ class TstManualScoringQuestion
         );
 
         $scoringCompletedOptions = [
-            self::ALL_USERS => $this->lng->txt('all_users'),
-            self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
-            self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
+            self::ALL_USERS => $this->lng->txt("all_users"),
+            self::ONLY_FINALIZED => $this->lng->txt("evaluated_users"),
+            self::EXCEPT_FINALIZED => $this->lng->txt("not_evaluated_users"),
         ];
         $selectScoringCompletedInput = $this->uiFieldFactory->select(
             $this->lng->txt("finalized_evaluation"),
@@ -744,7 +744,7 @@ class TstManualScoringQuestion
         $this->fixIlias8FilterOptionError($filterInputs);
 
         return $this->uiFilterService->standard(
-            'tstFilter',
+            "tstFilter",
             $filterBaseAction,
             $filterInputs,
             [
@@ -764,10 +764,10 @@ class TstManualScoringQuestion
     {
         $objTestGui = new ilObjTestGUI($refId);
 
-        $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, 'setTitleAndDescription');
+        $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, "setTitleAndDescription");
         $reflectionMethod->invoke($objTestGui);
 
-        $this->dic['ilLocator']->addRepositoryItems($refId);
+        $this->dic["ilLocator"]->addRepositoryItems($refId);
         $this->dic["ilLocator"]->addItem(
             $objTestGui->getObject()->getTitle(),
             $this->getManualScoringByQuestionTarget($refId)
@@ -790,13 +790,13 @@ class TstManualScoringQuestion
             $this->plugin->accessViolationRedirect();
         }
 
-        $question_gui = $test->createQuestionGUI('', $questionId);
+        $question_gui = $test->createQuestionGUI("", $questionId);
 
         if (!$question_gui) {
             return "";
         }
 
-        $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'components/ILIAS/Test');
+        $tmp_tpl = new ilTemplate("tpl.il_as_tst_correct_solution_output.html", true, true, "components/ILIAS/Test");
 
         if (
             method_exists($question_gui, "supportsIntermediateSolutionOutput") &&
@@ -817,8 +817,8 @@ class TstManualScoringQuestion
             );
             $question_gui->setUseIntermediateSolution(false);
 
-            $tmp_tpl->setVariable('TEXT_ASOLUTION_OUTPUT', $this->lng->txt('autosavecontent'));
-            $tmp_tpl->setVariable('ASOLUTION_OUTPUT', $aresult_output);
+            $tmp_tpl->setVariable("TEXT_ASOLUTION_OUTPUT", $this->lng->txt("autosavecontent"));
+            $tmp_tpl->setVariable("ASOLUTION_OUTPUT", $aresult_output);
         }
 
         $result_output = $question_gui->getSolutionOutput(
@@ -833,29 +833,29 @@ class TstManualScoringQuestion
         );
 
         $tmp_tpl->setVariable(
-            'TEXT_YOUR_SOLUTION',
-            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+            "TEXT_YOUR_SOLUTION",
+            $this->lng->txt("answers_of") . " " . $participant->getName()
         );
 
         $tmp_tpl->setVariable(
-            'TEXT_SOLUTION_OUTPUT',
-            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+            "TEXT_SOLUTION_OUTPUT",
+            $this->lng->txt("answers_of") . " " . $participant->getName()
         );
 
-        $tmp_tpl->setVariable('TEXT_RECEIVED_POINTS', $this->lng->txt('scoring'));
+        $tmp_tpl->setVariable("TEXT_RECEIVED_POINTS", $this->lng->txt("scoring"));
 
-        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
+        $tmp_tpl->setVariable("SOLUTION_OUTPUT", $result_output);
 
         $tmp_tpl->setVariable(
-            'RECEIVED_POINTS',
+            "RECEIVED_POINTS",
             sprintf(
-                $this->lng->txt('part_received_a_of_b_points'),
+                $this->lng->txt("part_received_a_of_b_points"),
                 $question_gui->getObject()->getReachedPoints($activeId, $pass),
                 $question_gui->getObject()->getMaximumPoints()
             )
         );
 
-        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
+        $tmp_tpl->setVariable("SOLUTION_OUTPUT", $result_output);
 
         return $tmp_tpl->get();
     }

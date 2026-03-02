@@ -83,20 +83,20 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $maximumPointsNonEditInput->setValue($question->getMaximumPoints());
 
         $manualFeedPackAreaInput = new ilTextAreaInputGUI(
-            $this->lng->txt('set_manual_feedback'),
+            $this->lng->txt("set_manual_feedback"),
             "tmsq[$questionId][answers][$activeId][feedback]"
         );
 
         if ($answer->isScoringCompleted()) {
             $manualFeedPackAreaInput = new HtmlAreaInput(
-                $this->lng->txt('set_manual_feedback'),
+                $this->lng->txt("set_manual_feedback"),
                 "tmsq[$questionId][answers][$activeId][feedback]"
             );
             $manualFeedPackAreaInput->setDisabled(true);
             $manualFeedPackAreaInput->setHtmlClass("tmsq-html-area-input");
         } else {
             $manualFeedPackAreaInput->setUseRTE(true);
-            $manualFeedPackAreaInput->setRteTagSet('standard');
+            $manualFeedPackAreaInput->setRteTagSet("standard");
         }
 
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
@@ -153,7 +153,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
                         $ascii_breaklines = chr(13) . chr(10);
 
                         $to_replace = [$ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;"];
-                        $replace_to = [' ', '', "_", "_", "_"];
+                        $replace_to = [" ", "", "_", "_", "_"];
 
                         #20630 mbstring extension is mandatory for 5.4
                         $chars_entered = mb_strlen(strip_tags(str_replace(

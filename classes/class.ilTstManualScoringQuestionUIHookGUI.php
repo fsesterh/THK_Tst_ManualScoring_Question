@@ -54,7 +54,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     {
         $this->dic->ctrl()->setParameterByClass(
             self::class,
-            'ref_id',
+            "ref_id",
             $ref_id
         );
 
@@ -95,7 +95,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
      */
     protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array
     {
-        return ['mode' => $mode, 'html' => $html];
+        return ["mode" => $mode, "html" => $html];
     }
 
     /**
@@ -112,7 +112,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         }
 
         if ($user->isAnonymous()) {
-            $ctrl->redirectToURL('login.php');
+            $ctrl->redirectToURL("login.php");
         }
 
         (new TstManualScoringQuestion($this->dic))->performCommand($cmd);
