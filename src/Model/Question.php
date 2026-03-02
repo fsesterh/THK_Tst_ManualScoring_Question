@@ -21,7 +21,6 @@ declare(strict_types=1);
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use assQuestion;
-use ilObjTest;
 
 class Question
 {
@@ -40,18 +39,12 @@ class Question
         if ($id !== null) {
             $this->id = $id;
             $this->setMaximumPoints($this->readMaximumPoints());
-            $this->setIsObligatory($this->readIsObligatory());
         }
     }
 
     public function readMaximumPoints(): float
     {
         return assQuestion::instantiateQuestion($this->id)->getMaximumPoints();
-    }
-
-    public function readIsObligatory(): bool
-    {
-        return ilObjTest::isQuestionObligatory($this->id);
     }
 
     public function loadFromPost($questionData): ?Question
@@ -75,7 +68,6 @@ class Question
 
         if (is_numeric($this->getId())) {
             $this->setMaximumPoints($this->readMaximumPoints());
-            $this->setIsObligatory($this->readIsObligatory());
         }
 
         /**
@@ -159,17 +151,6 @@ class Question
     public function setMaximumPoints(float $maximumPoints): Question
     {
         $this->maximumPoints = $maximumPoints;
-        return $this;
-    }
-
-    public function isObligatory(): bool
-    {
-        return $this->isObligatory;
-    }
-
-    public function setIsObligatory(bool $isObligatory): Question
-    {
-        $this->isObligatory = $isObligatory;
         return $this;
     }
 }
