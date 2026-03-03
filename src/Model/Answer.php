@@ -29,23 +29,24 @@ use ilRTE;
 class Answer
 {
     protected ilDBInterface $db;
-    protected string $userName;
-    protected string $login;
-    protected int $activeId;
-    protected string $feedback = "";
-    protected string $answerHtml = "";
-    protected ?float $points;
     protected Question $question;
-    protected bool $scoringCompleted;
 
-    public function __construct(Question $question)
-    {
+    public function __construct(
+        Question $question,
+        private readonly int $activeId,
+        private ?bool $scoringCompleted = null,
+        private ?float $points = null,
+        private ?string $feedback = null,
+        private readonly string $login = "",
+        private readonly string $userName = "",
+        private readonly string $answerHtml = ""
+    ) {
         global $DIC;
         $this->db = $DIC->database();
         $this->question = $question;
     }
 
-    public function readScoringCompleted(): bool
+    private function readScoringCompleted(): bool
     {
         global $DIC;
         $result = $DIC->database()->queryF(
@@ -63,7 +64,7 @@ class Answer
         return false;
     }
 
-    public function readFeedback(): string
+    private function readFeedback(): string
     {
         $result = $this->db->queryF(
             "SELECT feedback FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
@@ -79,21 +80,9 @@ class Answer
         return $this->userName;
     }
 
-    public function setUserName(string $userName): Answer
-    {
-        $this->userName = $userName;
-        return $this;
-    }
-
     public function getLogin(): string
     {
         return $this->login;
-    }
-
-    public function setLogin(string $login): Answer
-    {
-        $this->login = $login;
-        return $this;
     }
 
     public function writeFeedback(): bool
@@ -108,7 +97,7 @@ class Answer
         );
     }
 
-    protected function readPoints(): float
+    private function readPoints(): float
     {
         return assQuestion::_getReachedPoints(
             $this->activeId,
@@ -152,49 +141,17 @@ class Answer
         return (bool) $this->db->fetchAssoc($result)["does_exist"];
     }
 
-    public function loadFromPost(array $answerData): Answer
-    {
-        $this->setActiveId((int) $answerData["activeId"]);
-
-        if (!isset($answerData["points"])) {
-            $this->setPoints($this->readPoints());
-        } elseif (is_numeric($answerData["points"])) {
-            $this->setPoints((float) $answerData["points"]);
-        }
-
-        if (!isset($answerData["feedback"])) {
-            $this->setFeedback($this->readFeedback());
-        } elseif (is_string($answerData["feedback"])) {
-            $this->setFeedback($answerData["feedback"]);
-        }
-
-        $scoringCompleted = (bool) ($answerData["scoringCompleted"] ?? false);
-
-        $this->setScoringCompleted($scoringCompleted);
-
-        return $this;
-    }
-
     public function getActiveId(): int
     {
         return $this->activeId;
     }
 
-    public function setActiveId(int $activeId): Answer
-    {
-        $this->activeId = $activeId;
-        return $this;
-    }
-
     public function getFeedback(): string
     {
+        if ($this->feedback === null) {
+            $this->feedback = $this->readFeedback();
+        }
         return $this->feedback;
-    }
-
-    public function setFeedback(string $feedback): Answer
-    {
-        $this->feedback = $feedback;
-        return $this;
     }
 
     public function getAnswerHtml(): string
@@ -202,21 +159,12 @@ class Answer
         return $this->answerHtml;
     }
 
-    public function setAnswerHtml(string $answerHtml): Answer
-    {
-        $this->answerHtml = $answerHtml;
-        return $this;
-    }
-
     public function getPoints(): ?float
     {
+        if ($this->points === null) {
+            $this->points = $this->readPoints();
+        }
         return $this->points;
-    }
-
-    public function setPoints(float $points): Answer
-    {
-        $this->points = $points;
-        return $this;
     }
 
     public function getQuestion(): Question
@@ -226,14 +174,12 @@ class Answer
 
     public function isScoringCompleted(): bool
     {
+        if ($this->scoringCompleted === null) {
+            $this->scoringCompleted = $this->readScoringCompleted();
+        }
         return $this->scoringCompleted;
     }
 
-    public function setScoringCompleted(bool $scoringCompleted): Answer
-    {
-        $this->scoringCompleted = $scoringCompleted;
-        return $this;
-    }
 
     private function saveManualFeedback(
         int $active_id,

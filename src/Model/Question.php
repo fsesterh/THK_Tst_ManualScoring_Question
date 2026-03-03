@@ -47,7 +47,7 @@ class Question
         return assQuestion::instantiateQuestion($this->id)->getMaximumPoints();
     }
 
-    public function loadFromPost($questionData): ?Question
+    public function loadFromPost(array $questionData): ?Question
     {
         $answersData = $questionData["answers"];
         $testRefId = $questionData["testRefId"];
@@ -77,8 +77,18 @@ class Question
 
         if (isset($answersData) && is_array($answersData)) {
             foreach ($answersData as $answerData) {
-                $answer = new Answer($this);
-                $answer->loadFromPost($answerData);
+                $answer = new Answer(
+                    $this,
+                    (int) $answerData["activeId"],
+                    (bool) ($answerData["scoringCompleted"] ?? false),
+                    isset($answerData["points"]) && is_numeric($answerData["points"])
+                        ? (float) $answerData["points"]
+                        : null,
+                    isset($answerData["feedback"]) && is_string($answerData["feedback"])
+                        ? $answerData["feedback"]
+                        : null
+                );
+
                 $answers[] = $answer;
             }
         }

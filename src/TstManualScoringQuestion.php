@@ -345,22 +345,25 @@ class TstManualScoringQuestion
          */
 
         foreach (array_slice($answersData, $paginationData["start"], $paginationData["stop"]) as $answerData) {
-            $answer = new Answer($question);
-            $answer
-                ->setActiveId((int) $answerData["active_id"])
-                ->setUserName($answerData["participant"]->getName())
-                ->setLogin($answerData["login"])
-                ->setAnswerHtml($this->getAnswerDetail(
+            $activeId = (int) $answerData["active_id"];
+            $answer = new Answer(
+                $question,
+                $activeId,
+                null,
+                (float) $answerData["reached_points"],
+                null,
+                $answerData["login"],
+                $answerData["participant"]->getName(),
+                $this->getAnswerDetail(
                     $answerData["participant"],
                     $test,
-                    $answer->getActiveId(),
+                    $activeId,
                     $selectedPass,
                     $selectedQuestionId,
                     $testAccess
-                ))
-                ->setFeedback($answer->readFeedback())
-                ->setPoints((float) $answerData["reached_points"])
-                ->setScoringCompleted($answer->readScoringCompleted());
+                )
+            );
+
             $question->addAnswer($answer);
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
         }
@@ -613,7 +616,7 @@ class TstManualScoringQuestion
             }
 
             foreach ($question->getAnswers() as $answer) {
-                $scoringCompleted = $answer->readScoringCompleted();
+                $scoringCompleted = $answer->isScoringCompleted();
 
                 if (!$scoringCompleted && $answer->getPoints() > $question->getMaximumPoints()) {
                     $this->sendInvalidForm($question->getTestRefId());
