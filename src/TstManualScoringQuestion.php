@@ -290,7 +290,6 @@ class TstManualScoringQuestion
         $selectedScoringCompleted = (int) ($filterData["scoringCompleted"] !== "" ? $filterData["scoringCompleted"] : self::ALL_USERS);
         $selectedAnswersPerPage = (int) ($filterData["answersPerPage"] !== "" ? $filterData["answersPerPage"] : 10);
 
-
         $question = new Question(
             $selectedQuestionId,
             $test->getRefId(),
@@ -797,7 +796,6 @@ class TstManualScoringQuestion
             $selectScoringCompletedInput->withValue(self::ALL_USERS);
         }
 
-
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $testRefId);
         $filterBaseAction = $this->ctrl->getLinkTargetByClass(
             [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
@@ -810,7 +808,6 @@ class TstManualScoringQuestion
             "answersPerPage" => $selectAnswersPerPageInput,
             "scoringCompleted" => $selectScoringCompletedInput
         ];
-
 
         $this->fixIlias8FilterOptionError($filterInputs);
 

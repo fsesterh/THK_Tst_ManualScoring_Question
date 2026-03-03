@@ -115,7 +115,6 @@ class Answer
             true
         );
 
-
         $result = $this->db->queryF(
             "SELECT EXISTS(SELECT 1 FROM tst_test_result "
             . "WHERE question_fi = %s AND active_fi = %s AND pass = %s AND points = %s"
@@ -175,7 +174,6 @@ class Answer
         }
         return $this->scoringCompleted;
     }
-
 
     private function saveManualFeedback(
         int $active_id,

@@ -79,7 +79,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
             return;
         }
 
-
         $refId = $this->httpWrapper->query()->retrieve(
             "ref_id",
             $this->refinery->byTrying([

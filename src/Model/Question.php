@@ -66,7 +66,6 @@ class Question
         return $this->pass;
     }
 
-
     public function getTestRefId(): int
     {
         return $this->testRefId;

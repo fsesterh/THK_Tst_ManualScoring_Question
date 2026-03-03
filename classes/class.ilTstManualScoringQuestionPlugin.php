@@ -68,7 +68,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         return self::$instance;
     }
 
-
     public function accessViolationRedirect(): never
     {
         $uiUtil = new UiUtil($this->dic);
