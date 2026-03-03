@@ -35,9 +35,9 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     protected ilLanguage $lng;
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected Container $dic;
-    private UiUtil $uiUtil;
-    private WrapperFactory $httpWrapper;
-    private Factory $refinery;
+    private readonly UiUtil $uiUtil;
+    private readonly WrapperFactory $httpWrapper;
+    private readonly Factory $refinery;
 
     public function __construct()
     {

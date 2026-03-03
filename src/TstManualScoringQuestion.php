@@ -81,13 +81,13 @@ class TstManualScoringQuestion
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected ilLanguage $lng;
     protected Container $dic;
-    private UiUtil $uiUtil;
+    private readonly UiUtil $uiUtil;
     protected Renderer $uiRenderer;
     protected ilUIFilterService $uiFilterService;
     protected \ILIAS\UI\Component\Input\Field\Factory $uiFieldFactory;
-    private Factory $uiFactory;
-    private WrapperFactory $httpWrapper;
-    private \ILIAS\Refinery\Factory $refinery;
+    private readonly Factory $uiFactory;
+    private readonly WrapperFactory $httpWrapper;
+    private readonly \ILIAS\Refinery\Factory $refinery;
 
     public function __construct(Container $dic = null)
     {
@@ -318,14 +318,11 @@ class TstManualScoringQuestion
                     (int) $answerData["active_id"],
                     $question->getPass()
                 );
-                switch ($selectedScoringCompleted) {
-                    case self::ONLY_FINALIZED:
-                        return $scoringCompleted;
-                    case self::EXCEPT_FINALIZED:
-                        return !$scoringCompleted;
-                    default:
-                        return true;
-                }
+                return match ($selectedScoringCompleted) {
+                    self::ONLY_FINALIZED => $scoringCompleted,
+                    self::EXCEPT_FINALIZED => !$scoringCompleted,
+                    default => true,
+                };
             }
         );
 
@@ -432,7 +429,7 @@ class TstManualScoringQuestion
                     );
 
                     $formHtml = $form->getHTML();
-                    $formHtml = preg_replace('/<form.*"novalidate">/ms', "", $formHtml);
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', "", (string) $formHtml);
                     $formHtml = preg_replace('/<\/form>/ms', "", $formHtml);
 
                     $tpl->setVariable("ANSWER_FORM", $formHtml);

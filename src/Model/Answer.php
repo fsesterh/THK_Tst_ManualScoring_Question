@@ -29,10 +29,9 @@ use ilRTE;
 class Answer
 {
     protected ilDBInterface $db;
-    protected Question $question;
 
     public function __construct(
-        Question $question,
+        protected Question $question,
         private readonly int $activeId,
         private ?bool $scoringCompleted = null,
         private ?float $points = null,
@@ -43,7 +42,6 @@ class Answer
     ) {
         global $DIC;
         $this->db = $DIC->database();
-        $this->question = $question;
     }
 
     public function readScoringCompleted(): bool
