@@ -654,7 +654,7 @@ class TstManualScoringQuestion
             }
 
             foreach ($question->getAnswers() as $answer) {
-                $scoringCompleted = $answer->isScoringCompleted();
+                $scoringCompleted = $answer->readScoringCompleted();
 
                 if (!$scoringCompleted && $answer->getPoints() > $question->getMaximumPoints()) {
                     $this->sendInvalidForm($question->getTestRefId());

@@ -46,7 +46,7 @@ class Answer
         $this->question = $question;
     }
 
-    private function readScoringCompleted(): bool
+    public function readScoringCompleted(): bool
     {
         global $DIC;
         $result = $DIC->database()->queryF(
