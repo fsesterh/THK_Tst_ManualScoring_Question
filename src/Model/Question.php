@@ -28,73 +28,18 @@ class Question
      * @var Answer[]
      */
     protected array $answers = [];
-    protected int $id;
-    protected int $pass;
-    protected int $testRefId;
-    protected float $maximumPoints;
-    protected bool $isObligatory;
+    protected ?float $maximumPoints = null;
 
-    public function __construct(int $id = null)
-    {
-        if ($id !== null) {
-            $this->id = $id;
-            $this->setMaximumPoints($this->readMaximumPoints());
-        }
+    public function __construct(
+        private readonly int $id,
+        private readonly int $testRefId,
+        private readonly int $pass,
+    ) {
     }
 
-    public function readMaximumPoints(): float
+    private function readMaximumPoints(): float
     {
         return assQuestion::instantiateQuestion($this->id)->getMaximumPoints();
-    }
-
-    public function loadFromPost(array $questionData): ?Question
-    {
-        $answersData = $questionData["answers"];
-        $testRefId = $questionData["testRefId"];
-        $pass = $questionData["pass"];
-        $questionId = $questionData["questionId"];
-
-        if (is_numeric($testRefId)) {
-            $this->setTestRefId((int) $testRefId);
-        }
-
-        if (is_numeric($pass)) {
-            $this->setPass((int) $pass);
-        }
-
-        if (is_numeric($questionId)) {
-            $this->setId((int) $questionId);
-        }
-
-        if (is_numeric($this->getId())) {
-            $this->setMaximumPoints($this->readMaximumPoints());
-        }
-
-        /**
-         * @var Answer[] $answers
-         */
-        $answers = [];
-
-        if (isset($answersData) && is_array($answersData)) {
-            foreach ($answersData as $answerData) {
-                $answer = new Answer(
-                    $this,
-                    (int) $answerData["activeId"],
-                    (bool) ($answerData["scoringCompleted"] ?? false),
-                    isset($answerData["points"]) && is_numeric($answerData["points"])
-                        ? (float) $answerData["points"]
-                        : null,
-                    isset($answerData["feedback"]) && is_string($answerData["feedback"])
-                        ? $answerData["feedback"]
-                        : null
-                );
-
-                $answers[] = $answer;
-            }
-        }
-        $this->setAnswers($answers);
-
-        return $this;
     }
 
     /**
@@ -103,15 +48,6 @@ class Question
     public function getAnswers(): array
     {
         return $this->answers;
-    }
-
-    /**
-     * @param Answer[] $answers
-     */
-    public function setAnswers(array $answers): Question
-    {
-        $this->answers = $answers;
-        return $this;
     }
 
     public function addAnswer(Answer $answer): Question
@@ -125,42 +61,22 @@ class Question
         return $this->id;
     }
 
-    public function setId(int $id): Question
-    {
-        $this->id = $id;
-        return $this;
-    }
-
     public function getPass(): int
     {
         return $this->pass;
     }
 
-    public function setPass(int $pass): Question
-    {
-        $this->pass = $pass;
-        return $this;
-    }
 
     public function getTestRefId(): int
     {
         return $this->testRefId;
     }
 
-    public function setTestRefId(int $testRefId): Question
-    {
-        $this->testRefId = $testRefId;
-        return $this;
-    }
-
     public function getMaximumPoints(): float
     {
+        if ($this->maximumPoints === null) {
+            $this->maximumPoints = $this->readMaximumPoints();
+        }
         return $this->maximumPoints;
-    }
-
-    public function setMaximumPoints(float $maximumPoints): Question
-    {
-        $this->maximumPoints = $maximumPoints;
-        return $this;
     }
 }

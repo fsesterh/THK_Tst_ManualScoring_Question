@@ -291,10 +291,11 @@ class TstManualScoringQuestion
         $selectedAnswersPerPage = (int) ($filterData["answersPerPage"] !== "" ? $filterData["answersPerPage"] : 10);
 
 
-        $question = new Question($selectedQuestionId);
-        $question
-            ->setTestRefId($test->getRefId())
-            ->setPass($selectedPass);
+        $question = new Question(
+            $selectedQuestionId,
+            $test->getRefId(),
+            $selectedPass
+        );
 
         //Pagination
         /**
@@ -575,9 +576,46 @@ class TstManualScoringQuestion
          */
         $questions = [];
 
+        /**
+         * @var array{
+         *     testRefId: int,
+         *     pass: int,
+         *     questionId: int,
+         *     answers: list<array{
+         *         points: float,
+         *         feedpack: string,
+         *         scoringCompleted: bool,
+         *         activeId: int
+         *     }
+         * } $questionData
+         */
         foreach ($tmsq as $questionData) {
-            $question = new Question();
-            $question->loadFromPost($questionData);
+            $question = new Question(
+                (int) $questionData["questionId"],
+                (int) $questionData["testRefId"],
+                (int) $questionData["pass"]
+            );
+
+            $answersData = $questionData["answers"];
+
+            if (isset($answersData) && is_array($answersData)) {
+                foreach ($answersData as $answerData) {
+                    $answer = new Answer(
+                        $question,
+                        (int) $answerData["activeId"],
+                        (bool) ($answerData["scoringCompleted"] ?? false),
+                        isset($answerData["points"]) && is_numeric($answerData["points"])
+                            ? (float) $answerData["points"]
+                            : null,
+                        isset($answerData["feedback"]) && is_string($answerData["feedback"])
+                            ? $answerData["feedback"]
+                            : null
+                    );
+
+                    $question->addAnswer($answer);
+                }
+            }
+
             $questions[] = $question;
         }
 
