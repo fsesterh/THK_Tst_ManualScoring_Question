@@ -136,6 +136,16 @@ class TstManualScoringQuestion
         return false;
     }
 
+    /**
+     * @return list<array{
+     *     active_id: int,
+     *     reached_points: float,
+     *     participant: ilTestEvaluationUserData,
+     *     lastname: string,
+     *     firstname: string,
+     *     login: string
+     * }>
+     */
     protected function getAnswerData(ilObjTest $test, int $pass, int $questionId): array
     {
         $answersData = [];
@@ -176,6 +186,9 @@ class TstManualScoringQuestion
         return $answersData;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function generateQuestionOptions(ilObjTest $test): array
     {
         $questionOptions = [];
@@ -194,6 +207,9 @@ class TstManualScoringQuestion
         return $questionOptions;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function generatePassOptions(ilObjTest $test): array
     {
         $passOptions = [];
@@ -281,6 +297,16 @@ class TstManualScoringQuestion
             ->setPass($selectedPass);
 
         //Pagination
+        /**
+         * @var list<array{
+         *      active_id: int,
+         *      reached_points: float,
+         *      participant: ilTestEvaluationUserData,
+         *      lastname: string,
+         *      firstname: string,
+         *      login: string
+         *  }> $answersData
+         */
         $answersData = $this->getAnswerData($test, $selectedPass, $selectedQuestionId);
 
         $answersData = array_filter(
@@ -303,13 +329,22 @@ class TstManualScoringQuestion
         );
 
         $numberOfAnswersData = count($answersData);
-        $paginationData = $this->setupPagination((int) $selectedAnswersPerPage, $numberOfAnswersData);
+        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);
         $currentPage = $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
-        $paginatedAnswersData = array_slice($answersData, $paginationData["start"], $paginationData["stop"]);
+        /**
+         * @var array{
+         *      active_id: int,
+         *      reached_points: float,
+         *      participant: ilTestEvaluationUserData,
+         *      lastname: string,
+         *      firstname: string,
+         *      login: string
+         *  } $answerData
+         */
 
-        foreach ($paginatedAnswersData as $answerData) {
+        foreach (array_slice($answersData, $paginationData["start"], $paginationData["stop"]) as $answerData) {
             $answer = new Answer($question);
             $answer
                 ->setActiveId((int) $answerData["active_id"])
