@@ -717,7 +717,7 @@ class TstManualScoringQuestion
             $pageLength = 0;
         } else {
             $range = $pagination->getRange();
-            $pageLength = $range->getLength();
+            $pageLength = $range?->getLength() ?? 5;
         }
 
         $html = "<div class='tmsq-pagination'>" .
@@ -837,7 +837,7 @@ class TstManualScoringQuestion
 
         $this->dic["ilLocator"]->addRepositoryItems($refId);
         $this->dic["ilLocator"]->addItem(
-            $objTestGui->getObject()->getTitle(),
+            $objTestGui->getObject()?->getTitle(),
             $this->getManualScoringByQuestionTarget($refId)
         );
         $this->mainTpl->setLocator();
