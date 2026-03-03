@@ -691,7 +691,6 @@ class TstManualScoringQuestion
             $scoringCompletedOptions
         );
 
-        //ToDo: doesn't do anything right now because ilias loads values from session regardless => https://mantis.ilias.de/view.php?id=37741
         if (
             $selectQuestionInput->getValue() === []
             || !in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions), true)
@@ -704,7 +703,6 @@ class TstManualScoringQuestion
             array_keys($passOptions),
             true
         )) {
-            //alternative as array_key_first() is not available in php 7.2
             $selectPassInput = $selectPassInput->withValue(array_key_first($passOptions));
         }
 
@@ -762,7 +760,7 @@ class TstManualScoringQuestion
      */
     protected function drawHeader(int $refId): void
     {
-        $objTestGui = new ilObjTestGUI($refId);
+        $objTestGui = new ilObjTestGUI();
 
         $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, "setTitleAndDescription");
         $reflectionMethod->invoke($objTestGui);
