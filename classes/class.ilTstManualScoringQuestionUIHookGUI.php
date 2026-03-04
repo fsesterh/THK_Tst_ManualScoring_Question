@@ -26,6 +26,7 @@ use ILIAS\Refinery\Factory;
 
 /**
  * @ilCtrl_isCalledBy ilTstManualScoringQuestionUIHookGUI: ilUIPluginRouterGUI
+ * @ilCtrl_Calls ilTstManualScoringQuestionUIHookGUI: ilAssSpecFeedbackPageGUI
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
@@ -34,9 +35,9 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     protected ilLanguage $lng;
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected Container $dic;
-    private UiUtil $uiUtil;
-    private WrapperFactory $httpWrapper;
-    private Factory $refinery;
+    private readonly UiUtil $uiUtil;
+    private readonly WrapperFactory $httpWrapper;
+    private readonly Factory $refinery;
 
     public function __construct()
     {
@@ -50,11 +51,11 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->uiUtil = new UiUtil($this->dic);
     }
 
-    protected function injectSubTab(int $ref_id)
+    protected function injectSubTab(int $ref_id): void
     {
         $this->dic->ctrl()->setParameterByClass(
-            ilTstManualScoringQuestionUIHookGUI::class,
-            'ref_id',
+            self::class,
+            "ref_id",
             $ref_id
         );
 
@@ -78,7 +79,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
             return;
         }
 
-
         $refId = $this->httpWrapper->query()->retrieve(
             "ref_id",
             $this->refinery->byTrying([
@@ -95,7 +95,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
      */
     protected function uiHookResponse(string $mode = self::KEEP, string $html = ""): array
     {
-        return ['mode' => $mode, 'html' => $html];
+        return ["mode" => $mode, "html" => $html];
     }
 
     /**
@@ -112,7 +112,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         }
 
         if ($user->isAnonymous()) {
-            $ctrl->redirectToURL('login.php');
+            $ctrl->redirectToURL("login.php");
         }
 
         (new TstManualScoringQuestion($this->dic))->performCommand($cmd);

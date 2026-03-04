@@ -35,6 +35,10 @@
     overflow-x: auto;
 }
 
+.tmsq-scoring-panel-header button {
+    height: fit-content;
+}
+
 .tmsq-scoring-panel-header {
     font-size: 1.8rem;
     display: flex;

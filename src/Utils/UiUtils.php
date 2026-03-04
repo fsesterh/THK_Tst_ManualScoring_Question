@@ -24,7 +24,7 @@ use ILIAS\DI\Container;
 
 class UiUtil
 {
-    private Container $dic;
+    private readonly Container $dic;
 
     public function __construct(Container $dic = null)
     {

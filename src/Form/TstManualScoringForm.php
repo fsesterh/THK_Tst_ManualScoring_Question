@@ -23,7 +23,7 @@ namespace ILIAS\Plugin\TstManualScoringQuestion\Form;
 use Exception;
 use ilCheckboxInputGUI;
 use ilHiddenInputGUI;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\HtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ilLanguage;
 use ilNonEditableValueGUI;
@@ -39,7 +39,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
 
     public function __construct(ilLanguage $lng, Answer $answer)
     {
-        global $DIC;
         $this->lng = $lng;
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
 
@@ -56,13 +55,13 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $questionIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][questionId]");
         $questionIdHiddenInput->setRequired(true);
 
-        $activeIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][answers][{$activeId}][activeId]");
+        $activeIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][answers][$activeId][activeId]");
         $activeIdHiddenInput->setValue((string) $activeId);
         $activeIdHiddenInput->setRequired(true);
 
         $pointsForAnswerInput = new ilNumberInputGUI(
             $this->lng->txt("tst_change_points_for_question"),
-            "tmsq[$questionId][answers][{$activeId}][points]"
+            "tmsq[$questionId][answers][$activeId][points]"
         );
         $pointsForAnswerInput->setDisabled($answer->isScoringCompleted());
         $pointsForAnswerInput->setMinValue(0.00);
@@ -72,7 +71,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $pointsForAnswerInput->setDecimals(2);
         $pointsForAnswerInput->setSize(5);
 
-        $userSolutionHtmlAreaInput = new ilHtmlAreaInput($this->plugin->txt("userSolution"));
+        $userSolutionHtmlAreaInput = new HtmlAreaInput($this->plugin->txt("userSolution"));
         $userSolutionHtmlAreaInput->setValue($answer->getAnswerHtml());
         $userSolutionHtmlAreaInput->setEditable(false);
         $userSolutionHtmlAreaInput->setHtmlClass("tmsq-html-area-input");
@@ -84,25 +83,25 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $maximumPointsNonEditInput->setValue($question->getMaximumPoints());
 
         $manualFeedPackAreaInput = new ilTextAreaInputGUI(
-            $this->lng->txt('set_manual_feedback'),
-            "tmsq[$questionId][answers][{$activeId}][feedback]"
+            $this->lng->txt("set_manual_feedback"),
+            "tmsq[$questionId][answers][$activeId][feedback]"
         );
 
         if ($answer->isScoringCompleted()) {
-            $manualFeedPackAreaInput = new ilHtmlAreaInput(
-                $this->lng->txt('set_manual_feedback'),
-                "tmsq[$questionId][answers][{$activeId}][feedback]"
+            $manualFeedPackAreaInput = new HtmlAreaInput(
+                $this->lng->txt("set_manual_feedback"),
+                "tmsq[$questionId][answers][$activeId][feedback]"
             );
             $manualFeedPackAreaInput->setDisabled(true);
             $manualFeedPackAreaInput->setHtmlClass("tmsq-html-area-input");
         } else {
             $manualFeedPackAreaInput->setUseRTE(true);
-            $manualFeedPackAreaInput->setRteTagSet('standard');
+            $manualFeedPackAreaInput->setRteTagSet("standard");
         }
 
         $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
             $this->lng->txt("finalized_evaluation"),
-            "tmsq[$questionId][answers][{$activeId}][scoringCompleted]"
+            "tmsq[$questionId][answers][$activeId][scoringCompleted]"
         );
 
         $this->addItem($testRefIdHiddenInput);
@@ -128,7 +127,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $valid = true;
         foreach ($this->getItems() as $item) {
             //Check required
-            if ($item->getRequired() && trim((string) $item->getValue()) == "") {
+            if ($item->getRequired() && trim((string) $item->getValue()) === "") {
                 $item->setAlert($lng->txt("msg_input_is_required"));
                 $valid = false;
             }
@@ -154,7 +153,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
                         $ascii_breaklines = chr(13) . chr(10);
 
                         $to_replace = [$ascii_whitespaces, $ascii_breaklines, "&lt;", "&gt;", "&amp;"];
-                        $replace_to = [' ', '', "_", "_", "_"];
+                        $replace_to = [" ", "", "_", "_", "_"];
 
                         #20630 mbstring extension is mandatory for 5.4
                         $chars_entered = mb_strlen(strip_tags(str_replace(
@@ -190,12 +189,10 @@ class TstManualScoringForm extends ilPropertyFormGUI
                             $item->setAlert($lng->txt("form_msg_value_too_low"));
                             $valid = false;
                         }
-                    } else {
-                        if ($item->getMinValue() !== false && $item->getValue() < $item->getMinValue()) {
-                            $item->setMinValue($item->getMinValue(), true);
-                            $item->setAlert($lng->txt("form_msg_value_too_low"));
-                            $valid = false;
-                        }
+                    } elseif ($item->getMinValue() !== false && $item->getValue() < $item->getMinValue()) {
+                        $item->setMinValue($item->getMinValue(), true);
+                        $item->setAlert($lng->txt("form_msg_value_too_low"));
+                        $valid = false;
                     }
 
                     if ($item->maxvalueShouldBeLess()) {
@@ -204,12 +201,10 @@ class TstManualScoringForm extends ilPropertyFormGUI
                             $item->setAlert($lng->txt("form_msg_value_too_high"));
                             $valid = false;
                         }
-                    } else {
-                        if ($item->getMaxValue() !== false && $item->getValue() > $item->getMaxValue()) {
-                            $item->setMaxValue($item->getMaxValue(), true);
-                            $item->setAlert($lng->txt("form_msg_value_too_high"));
-                            $valid = false;
-                        }
+                    } elseif ($item->getMaxValue() !== false && $item->getValue() > $item->getMaxValue()) {
+                        $item->setMaxValue($item->getMaxValue(), true);
+                        $item->setAlert($lng->txt("form_msg_value_too_high"));
+                        $valid = false;
                     }
 
                     $valid = $valid ? $item->checkSubItemsInput() : false;
@@ -236,10 +231,10 @@ class TstManualScoringForm extends ilPropertyFormGUI
             "tmsq[$questionId][testRefId]" => $question->getTestRefId(),
             "tmsq[$questionId][pass]" => $question->getPass(),
             "tmsq[$questionId][questionId]" => $questionId,
-            "tmsq[$questionId][answers][{$activeId}][activeId]" => $activeId,
-            "tmsq[$questionId][answers][{$activeId}][points]" => $answer->getPoints(),
-            "tmsq[$questionId][answers][{$activeId}][feedback]" => $answer->getFeedback(),
-            "tmsq[$questionId][answers][{$activeId}][scoringCompleted]" => $answer->isScoringCompleted()
+            "tmsq[$questionId][answers][$activeId][activeId]" => $activeId,
+            "tmsq[$questionId][answers][$activeId][points]" => $answer->getPoints(),
+            "tmsq[$questionId][answers][$activeId][feedback]" => $answer->getFeedback(),
+            "tmsq[$questionId][answers][$activeId][scoringCompleted]" => $answer->isScoringCompleted()
         ], true);
     }
 }

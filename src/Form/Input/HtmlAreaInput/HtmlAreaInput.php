@@ -25,7 +25,7 @@ use ilSystemStyleException;
 use ilTemplate;
 use ilTemplateException;
 
-class ilHtmlAreaInput extends ilFormPropertyGUI
+class HtmlAreaInput extends ilFormPropertyGUI
 {
     protected bool $disabled = false;
     protected bool $editable = true;
@@ -69,8 +69,8 @@ class ilHtmlAreaInput extends ilFormPropertyGUI
         $tpl->setVariable("EDITABLE", $this->editable ? "true" : "false");
         $tpl->setVariable("DISABLED", $this->disabled ? "cursor: not-allowed; background-color: #eeeeee;" : "");
 
-        $a_tpl->setCurrentBlock('prop_generic');
-        $a_tpl->setVariable('PROP_GENERIC', $tpl->get());
+        $a_tpl->setCurrentBlock("prop_generic");
+        $a_tpl->setVariable("PROP_GENERIC", $tpl->get());
         $a_tpl->parseCurrentBlock();
     }
 

@@ -25,15 +25,18 @@ use Exception;
 use ilAccessHandler;
 use ilCtrlException;
 use ilCtrlInterface;
+use ilDBConstants;
 use ilGlobalTemplateInterface;
 use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
 use ILIAS\HTTP\Wrapper\WrapperFactory;
-use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\ilHtmlAreaInput;
+use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
+use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\HtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
+use ILIAS\Test\Scoring\Manual\TestScoringByQuestionGUI;
 use ILIAS\UI\Component\Input\Container\Filter\Standard;
 use ILIAS\UI\Component\Input\Field\Select;
 use ILIAS\UI\Factory;
@@ -41,7 +44,6 @@ use ILIAS\UI\Implementation\Component\Input\Field\FormInput;
 use ILIAS\UI\Renderer;
 use ilLanguage;
 use ilLogger;
-use ilObjAssessmentFolder;
 use ilObjTest;
 use ilObjTestGUI;
 use ilObjUser;
@@ -52,7 +54,6 @@ use ilTestAccess;
 use ilTestEvaluationUserData;
 use ilTestParticipantAccessFilterFactory;
 use ilTestParticipantData;
-use ilTestScoringByQuestionsGUI;
 use ilToolbarGUI;
 use ilTstManualScoringQuestionPlugin;
 use ilTstManualScoringQuestionUIHookGUI;
@@ -80,13 +81,13 @@ class TstManualScoringQuestion
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected ilLanguage $lng;
     protected Container $dic;
-    private UiUtil $uiUtil;
+    private readonly UiUtil $uiUtil;
     protected Renderer $uiRenderer;
     protected ilUIFilterService $uiFilterService;
     protected \ILIAS\UI\Component\Input\Field\Factory $uiFieldFactory;
-    private Factory $uiFactory;
-    private WrapperFactory $httpWrapper;
-    private \ILIAS\Refinery\Factory $refinery;
+    private readonly Factory $uiFactory;
+    private readonly WrapperFactory $httpWrapper;
+    private readonly \ILIAS\Refinery\Factory $refinery;
 
     public function __construct(Container $dic = null)
     {
@@ -122,7 +123,7 @@ class TstManualScoringQuestion
     {
         $result = $this->dic->database()->queryF(
             "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
-            ['integer', 'integer', 'integer'],
+            [ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER],
             [$activeId, $questionId, $pass]
         );
         if ($result->numRows()) {
@@ -135,10 +136,20 @@ class TstManualScoringQuestion
         return false;
     }
 
+    /**
+     * @return list<array{
+     *     active_id: int,
+     *     reached_points: float,
+     *     participant: ilTestEvaluationUserData,
+     *     lastname: string,
+     *     firstname: string,
+     *     login: string
+     * }>
+     */
     protected function getAnswerData(ilObjTest $test, int $pass, int $questionId): array
     {
         $answersData = [];
-        $data = $test->getCompleteEvaluationData(false);
+        $data = $test->getCompleteEvaluationData();
         $participants = $data->getParticipants();
 
         $participantData = new ilTestParticipantData($this->dic->database(), $this->lng);
@@ -157,24 +168,27 @@ class TstManualScoringQuestion
 
             $testResultData = $test->getTestResult($active_id, $pass);
             foreach ($testResultData as $key => $questionData) {
-                if (!isset($questionData['qid']) || (int) $questionData['qid'] !== $questionId) {
+                if (!isset($questionData["qid"]) || (int) $questionData["qid"] !== $questionId) {
                     continue;
                 }
 
-                $user = ilObjUser::_getUserData([$participant->user_id]);
+                $user = ilObjUser::_getUserData([$participant->getUserID()]);
                 $answersData[] = [
-                    'active_id' => $active_id,
-                    'reached_points' => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
-                    'participant' => $participant,
-                    'lastname' => $user[0]['lastname'],
-                    'firstname' => $user[0]['firstname'],
-                    'login' => $participant->getLogin(),
+                    "active_id" => $active_id,
+                    "reached_points" => assQuestion::_getReachedPoints($active_id, $questionId, $pass),
+                    "participant" => $participant,
+                    "lastname" => $user[0]["lastname"],
+                    "firstname" => $user[0]["firstname"],
+                    "login" => $participant->getLogin(),
                 ];
             }
         }
         return $answersData;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function generateQuestionOptions(ilObjTest $test): array
     {
         $questionOptions = [];
@@ -184,13 +198,7 @@ class TstManualScoringQuestion
             $questions = $test->getPotentialRandomTestQuestions();
         }
 
-        $enabledManualScoringTypes = ilObjAssessmentFolder::_getManualScoringTypes();
-
         foreach ($questions as $questionData) {
-            if (!in_array($questionData["type_tag"], $enabledManualScoringTypes, true)) {
-                continue;
-            }
-
             $questionId = $questionData["question_id"];
             $title = $questionData["title"];
             $points = $questionData["points"];
@@ -199,6 +207,9 @@ class TstManualScoringQuestion
         return $questionOptions;
     }
 
+    /**
+     * @return array<int, string>
+     */
     protected function generatePassOptions(ilObjTest $test): array
     {
         $passOptions = [];
@@ -245,14 +256,18 @@ class TstManualScoringQuestion
     public function modify(int $refId): string
     {
         $test = new ilObjTest($refId, true);
-        $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+        $testAccess = new ilTestAccess($test->getRefId());
 
         if (!$testAccess->checkScoreParticipantsAccess()) {
-            ilObjTestGUI::accessViolationRedirect();
+            $this->plugin->accessViolationRedirect();
         }
 
-        $this->mainTpl->addCss($this->plugin->cssFolder("tstManualScoringQuestion.css"));
-        $tpl = new ilTemplate($this->plugin->templatesFolder("tpl.manualScoringQuestionPanel.html"), true, true);
+        $this->mainTpl->addCss($this->plugin->assetsFile(PluginAsset::CSS, "tstManualScoringQuestion.css"));
+        $tpl = new ilTemplate(
+            $this->plugin->assetsFile(PluginAsset::TEMPLATES, "tpl.manualScoringQuestionPanel.html", false),
+            true,
+            true
+        );
 
         $questionOptions = $this->generateQuestionOptions($test);
 
@@ -275,13 +290,23 @@ class TstManualScoringQuestion
         $selectedScoringCompleted = (int) ($filterData["scoringCompleted"] !== "" ? $filterData["scoringCompleted"] : self::ALL_USERS);
         $selectedAnswersPerPage = (int) ($filterData["answersPerPage"] !== "" ? $filterData["answersPerPage"] : 10);
 
-
-        $question = new Question($selectedQuestionId);
-        $question
-            ->setTestRefId($test->getRefId())
-            ->setPass($selectedPass);
+        $question = new Question(
+            $selectedQuestionId,
+            $test->getRefId(),
+            $selectedPass
+        );
 
         //Pagination
+        /**
+         * @var list<array{
+         *      active_id: int,
+         *      reached_points: float,
+         *      participant: ilTestEvaluationUserData,
+         *      lastname: string,
+         *      firstname: string,
+         *      login: string
+         *  }> $answersData
+         */
         $answersData = $this->getAnswerData($test, $selectedPass, $selectedQuestionId);
 
         $answersData = array_filter(
@@ -292,41 +317,50 @@ class TstManualScoringQuestion
                     (int) $answerData["active_id"],
                     $question->getPass()
                 );
-                switch ($selectedScoringCompleted) {
-                    case self::ONLY_FINALIZED:
-                        return $scoringCompleted;
-                    case self::EXCEPT_FINALIZED:
-                        return !$scoringCompleted;
-                    default:
-                        return true;
-                }
+                return match ($selectedScoringCompleted) {
+                    self::ONLY_FINALIZED => $scoringCompleted,
+                    self::EXCEPT_FINALIZED => !$scoringCompleted,
+                    default => true,
+                };
             }
         );
 
         $numberOfAnswersData = count($answersData);
-        $paginationData = $this->setupPagination((int) $selectedAnswersPerPage, $numberOfAnswersData);
+        $paginationData = $this->setupPagination($selectedAnswersPerPage, $numberOfAnswersData);
         $currentPage = $paginationData["currentPage"];
         $tpl->setVariable("PAGINATION_HTML", $paginationData["html"]);
 
-        $paginatedAnswersData = array_slice($answersData, $paginationData["start"], $paginationData["stop"]);
+        /**
+         * @var array{
+         *      active_id: int,
+         *      reached_points: float,
+         *      participant: ilTestEvaluationUserData,
+         *      lastname: string,
+         *      firstname: string,
+         *      login: string
+         *  } $answerData
+         */
 
-        foreach ($paginatedAnswersData as $answerData) {
-            $answer = new Answer($question);
-            $answer
-                ->setActiveId((int) $answerData["active_id"])
-                ->setUserName($answerData["participant"]->getName())
-                ->setLogin($answerData["login"])
-                ->setAnswerHtml($this->getAnswerDetail(
+        foreach (array_slice($answersData, $paginationData["start"], $paginationData["stop"]) as $answerData) {
+            $activeId = (int) $answerData["active_id"];
+            $answer = new Answer(
+                $question,
+                $activeId,
+                null,
+                (float) $answerData["reached_points"],
+                null,
+                $answerData["login"],
+                $answerData["participant"]->getName(),
+                $this->getAnswerDetail(
                     $answerData["participant"],
                     $test,
-                    $answer->getActiveId(),
+                    $activeId,
                     $selectedPass,
                     $selectedQuestionId,
                     $testAccess
-                ))
-                ->setFeedback($answer->readFeedback())
-                ->setPoints((float) $answerData["reached_points"])
-                ->setScoringCompleted($answer->readScoringCompleted());
+                )
+            );
+
             $question->addAnswer($answer);
             $this->logger->debug("TMSQ : Added answer of activeId {$answer->getActiveId()} for questionId {$question->getId()}");
         }
@@ -347,11 +381,11 @@ class TstManualScoringQuestion
             );
 
             $tpl->setVariable("SUBMIT_BUTTON_TEXT", $this->lng->txt("save"));
-            $tpl->setVariable("SUBMIT_CMD", 'saveManualScoring');
+            $tpl->setVariable("SUBMIT_CMD", "saveManualScoring");
 
             $this->ctrl->setParameterByClass(
                 ilTstManualScoringQuestionUIHookGUI::class,
-                'ref_id',
+                "ref_id",
                 $test->getRefId()
             );
 
@@ -373,7 +407,7 @@ class TstManualScoringQuestion
                             $correctAnswer = $answer;
                             $form = $answerAndForm["form"];
                             foreach ($form->getItems() as $item) {
-                                if ($item instanceof ilHtmlAreaInput) {
+                                if ($item instanceof HtmlAreaInput) {
                                     $item->setValue($correctAnswer->getAnswerHtml());
                                     break;
                                 }
@@ -394,8 +428,8 @@ class TstManualScoringQuestion
                     );
 
                     $formHtml = $form->getHTML();
-                    $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
-                    $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', "", (string) $formHtml);
+                    $formHtml = preg_replace('/<\/form>/ms', "", $formHtml);
 
                     $tpl->setVariable("ANSWER_FORM", $formHtml);
                     $tpl->parseCurrentBlock("answer");
@@ -421,8 +455,8 @@ class TstManualScoringQuestion
                     );
 
                     $formHtml = $form->getHTML();
-                    $formHtml = preg_replace('/<form.*"novalidate">/ms', '', $formHtml);
-                    $formHtml = preg_replace('/<\/form>/ms', '', $formHtml);
+                    $formHtml = preg_replace('/<form.*"novalidate">/ms', "", $formHtml);
+                    $formHtml = preg_replace('/<\/form>/ms', "", $formHtml);
 
                     $tpl->setVariable("ANSWER_FORM", $formHtml);
                     $tpl->parseCurrentBlock("answer");
@@ -538,9 +572,46 @@ class TstManualScoringQuestion
          */
         $questions = [];
 
+        /**
+         * @var array{
+         *     testRefId: int,
+         *     pass: int,
+         *     questionId: int,
+         *     answers: list<array{
+         *         points: float,
+         *         feedpack: string,
+         *         scoringCompleted: bool,
+         *         activeId: int
+         *     }
+         * } $questionData
+         */
         foreach ($tmsq as $questionData) {
-            $question = new Question();
-            $question->loadFromPost($questionData);
+            $question = new Question(
+                (int) $questionData["questionId"],
+                (int) $questionData["testRefId"],
+                (int) $questionData["pass"]
+            );
+
+            $answersData = $questionData["answers"];
+
+            if (isset($answersData) && is_array($answersData)) {
+                foreach ($answersData as $answerData) {
+                    $answer = new Answer(
+                        $question,
+                        (int) $answerData["activeId"],
+                        (bool) ($answerData["scoringCompleted"] ?? false),
+                        isset($answerData["points"]) && is_numeric($answerData["points"])
+                            ? (float) $answerData["points"]
+                            : null,
+                        isset($answerData["feedback"]) && is_string($answerData["feedback"])
+                            ? $answerData["feedback"]
+                            : null
+                    );
+
+                    $question->addAnswer($answer);
+                }
+            }
+
             $questions[] = $question;
         }
 
@@ -549,7 +620,7 @@ class TstManualScoringQuestion
         foreach ($questions as $question) {
             $testRefId = $question->getTestRefId();
             $test = new ilObjTest($testRefId, true);
-            $testAccess = new ilTestAccess($test->getRefId(), $test->getTestId());
+            $testAccess = new ilTestAccess($test->getRefId());
 
             if (!$testRefId) {
                 $this->uiUtil->sendFailure($this->plugin->txt("unknownError"), true);
@@ -557,7 +628,7 @@ class TstManualScoringQuestion
             }
 
             if (!$testAccess->checkScoreParticipantsAccess()) {
-                ilObjTestGUI::accessViolationRedirect();
+                $this->plugin->accessViolationRedirect();
             }
 
             //Check all answer forms
@@ -612,7 +683,7 @@ class TstManualScoringQuestion
         $renderer = $this->dic->ui()->renderer();
         $url = $this->request->getRequestTarget();
 
-        $parameterName = 'page';
+        $parameterName = "page";
 
         $page = $this->httpWrapper->query()->retrieve(
             "page",
@@ -646,18 +717,18 @@ class TstManualScoringQuestion
             $pageLength = 0;
         } else {
             $range = $pagination->getRange();
-            $pageLength = $range->getLength();
+            $pageLength = $range?->getLength() ?? 5;
         }
 
-        $html = '<div class="tmsq-pagination">' .
+        $html = "<div class='tmsq-pagination'>" .
             $renderer->render($pagination)
-            . '<hr class="tmsq-pagination-separator">'
+            . "<hr class='tmsq-pagination-separator'>"
             . sprintf(
                 $this->plugin->txt("answersFromTo"),
                 $totalNumberOfElements === 0 ? 0 : $start + 1,
                 $start + $pageLength
             )
-            . '</div>';
+            . "</div>";
 
         return [
             "html" => $html,
@@ -683,16 +754,15 @@ class TstManualScoringQuestion
         );
 
         $scoringCompletedOptions = [
-            self::ALL_USERS => $this->lng->txt('all_users'),
-            self::ONLY_FINALIZED => $this->lng->txt('evaluated_users'),
-            self::EXCEPT_FINALIZED => $this->lng->txt('not_evaluated_users'),
+            self::ALL_USERS => $this->lng->txt("all_users"),
+            self::ONLY_FINALIZED => $this->lng->txt("evaluated_users"),
+            self::EXCEPT_FINALIZED => $this->lng->txt("not_evaluated_users"),
         ];
         $selectScoringCompletedInput = $this->uiFieldFactory->select(
             $this->lng->txt("finalized_evaluation"),
             $scoringCompletedOptions
         );
 
-        //ToDo: doesn't do anything right now because ilias loads values from session regardless => https://mantis.ilias.de/view.php?id=37741
         if (
             $selectQuestionInput->getValue() === []
             || !in_array((int) $selectQuestionInput->getValue(), array_keys($questionOptions), true)
@@ -701,11 +771,10 @@ class TstManualScoringQuestion
         }
 
         if ($selectPassInput->getValue() === null || !in_array(
-                (int) $selectPassInput->getValue(),
-                array_keys($passOptions),
-                true
-            )) {
-            //alternative as array_key_first() is not available in php 7.2
+            (int) $selectPassInput->getValue(),
+            array_keys($passOptions),
+            true
+        )) {
             $selectPassInput = $selectPassInput->withValue(array_key_first($passOptions));
         }
 
@@ -727,7 +796,6 @@ class TstManualScoringQuestion
             $selectScoringCompletedInput->withValue(self::ALL_USERS);
         }
 
-
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $testRefId);
         $filterBaseAction = $this->ctrl->getLinkTargetByClass(
             [ilUIPluginRouterGUI::class, ilTstManualScoringQuestionUIHookGUI::class],
@@ -741,11 +809,10 @@ class TstManualScoringQuestion
             "scoringCompleted" => $selectScoringCompletedInput
         ];
 
-
         $this->fixIlias8FilterOptionError($filterInputs);
 
         return $this->uiFilterService->standard(
-            'tstFilter',
+            "tstFilter",
             $filterBaseAction,
             $filterInputs,
             [
@@ -763,14 +830,14 @@ class TstManualScoringQuestion
      */
     protected function drawHeader(int $refId): void
     {
-        $objTestGui = new ilObjTestGUI($refId);
+        $objTestGui = new ilObjTestGUI();
 
-        $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, 'setTitleAndDescription');
+        $reflectionMethod = new ReflectionMethod(ilObjTestGUI::class, "setTitleAndDescription");
         $reflectionMethod->invoke($objTestGui);
 
-        $this->dic['ilLocator']->addRepositoryItems($refId);
+        $this->dic["ilLocator"]->addRepositoryItems($refId);
         $this->dic["ilLocator"]->addItem(
-            $objTestGui->getObject()->getTitle(),
+            $objTestGui->getObject()?->getTitle(),
             $this->getManualScoringByQuestionTarget($refId)
         );
         $this->mainTpl->setLocator();
@@ -781,24 +848,23 @@ class TstManualScoringQuestion
      */
     protected function getAnswerDetail(
         ilTestEvaluationUserData $participant,
-        ilObjTest                $test,
-        int                      $activeId,
-        int                      $pass,
-        int                      $questionId,
-        ilTestAccess             $testAccess
-    ): string
-    {
-        if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId)) {
-            ilObjTestGUI::accessViolationRedirect();
+        ilObjTest $test,
+        int $activeId,
+        int $pass,
+        int $questionId,
+        ilTestAccess $testAccess
+    ): string {
+        if (!$testAccess->checkScoreParticipantsAccessForActiveId($activeId, $test->getTestId())) {
+            $this->plugin->accessViolationRedirect();
         }
 
-        $question_gui = $test->createQuestionGUI('', $questionId);
+        $question_gui = $test->createQuestionGUI("", $questionId);
 
         if (!$question_gui) {
             return "";
         }
 
-        $tmp_tpl = new ilTemplate('tpl.il_as_tst_correct_solution_output.html', true, true, 'Modules/Test');
+        $tmp_tpl = new ilTemplate("tpl.il_as_tst_correct_solution_output.html", true, true, "components/ILIAS/Test");
 
         if (
             method_exists($question_gui, "supportsIntermediateSolutionOutput") &&
@@ -819,8 +885,8 @@ class TstManualScoringQuestion
             );
             $question_gui->setUseIntermediateSolution(false);
 
-            $tmp_tpl->setVariable('TEXT_ASOLUTION_OUTPUT', $this->lng->txt('autosavecontent'));
-            $tmp_tpl->setVariable('ASOLUTION_OUTPUT', $aresult_output);
+            $tmp_tpl->setVariable("TEXT_ASOLUTION_OUTPUT", $this->lng->txt("autosavecontent"));
+            $tmp_tpl->setVariable("ASOLUTION_OUTPUT", $aresult_output);
         }
 
         $result_output = $question_gui->getSolutionOutput(
@@ -835,29 +901,29 @@ class TstManualScoringQuestion
         );
 
         $tmp_tpl->setVariable(
-            'TEXT_YOUR_SOLUTION',
-            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+            "TEXT_YOUR_SOLUTION",
+            $this->lng->txt("answers_of") . " " . $participant->getName()
         );
 
         $tmp_tpl->setVariable(
-            'TEXT_SOLUTION_OUTPUT',
-            $this->lng->txt('answers_of') . ' ' . $participant->getName()
+            "TEXT_SOLUTION_OUTPUT",
+            $this->lng->txt("answers_of") . " " . $participant->getName()
         );
 
-        $tmp_tpl->setVariable('TEXT_RECEIVED_POINTS', $this->lng->txt('scoring'));
+        $tmp_tpl->setVariable("TEXT_RECEIVED_POINTS", $this->lng->txt("scoring"));
 
-        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
+        $tmp_tpl->setVariable("SOLUTION_OUTPUT", $result_output);
 
         $tmp_tpl->setVariable(
-            'RECEIVED_POINTS',
+            "RECEIVED_POINTS",
             sprintf(
-                $this->lng->txt('part_received_a_of_b_points'),
-                $question_gui->object->getReachedPoints($activeId, $pass),
-                $question_gui->object->getMaximumPoints()
+                $this->lng->txt("part_received_a_of_b_points"),
+                $question_gui->getObject()->getReachedPoints($activeId, $pass),
+                $question_gui->getObject()->getMaximumPoints()
             )
         );
 
-        $tmp_tpl->setVariable('SOLUTION_OUTPUT', $result_output);
+        $tmp_tpl->setVariable("SOLUTION_OUTPUT", $result_output);
 
         return $tmp_tpl->get();
     }
@@ -869,7 +935,7 @@ class TstManualScoringQuestion
     {
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
         return $this->ctrl->getLinkTargetByClass(
-            [ilObjTestGUI::class, ilTestScoringByQuestionsGUI::class],
+            [ilObjTestGUI::class, TestScoringByQuestionGUI::class],
             "showManScoringByQuestionParticipantsTable"
         );
     }

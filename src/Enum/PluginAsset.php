@@ -16,12 +16,14 @@
  *
  *********************************************************************/
 
-$id = "tmsq";
+declare(strict_types=1);
 
-$version = "10.0.0";
+namespace ILIAS\Plugin\TstManualScoringQuestion\Enum;
 
-$ilias_min_version = "10.0";
-$ilias_max_version = "10.999";
-
-$responsible = "Fabian Sesterhenn / Marvin Beym";
-$responsible_mail = "fabian.sesterhenn@th-koeln.de / mbeym@databay.de";
+enum PluginAsset: string
+{
+    case JS = "js";
+    case CSS = "css";
+    case IMAGES = "images";
+    case TEMPLATES = "templates";
+}

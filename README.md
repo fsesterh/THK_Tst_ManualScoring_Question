@@ -1,9 +1,23 @@
-# UIHook Plugin - TstManualScoringQuestion
+# UserInterfaceHook Plugin - TstManualScoringQuestion
 
-| Component | Version(s)                                                                                    | Link                      |
-|-----------|-----------------------------------------------------------------------------------------------|---------------------------|
-| PHP       | ![](https://img.shields.io/badge/8.1-blue.svg) ![](https://img.shields.io/badge/8.2-blue.svg) | [PHP](https://php.net)    |
-| ILIAS     | ![](https://img.shields.io/badge/9.x-orange.svg)                                              | [ILIAS](https://ilias.de) |
+## Requirements
+
+| Component | Version(s)                                                                                             | Link                      |
+|-----------|--------------------------------------------------------------------------------------------------------|---------------------------|
+| PHP       | ![](https://img.shields.io/badge/8.2-blue.svg) ![](https://img.shields.io/badge/8.3-blue.svg)          | [PHP](https://php.net)    |
+| ILIAS     | ![](https://img.shields.io/badge/10-orange.svg) to ![](https://img.shields.io/badge/10.999-orange.svg) | [ILIAS](https://ilias.de) |
+---
+
+## Table of contents
+
+<!-- TOC -->
+* [UserInterfaceHook Plugin - TstManualScoringQuestion](#userinterfacehook-plugin---tstmanualscoringquestion)
+  * [Requirements](#requirements)
+  * [Table of contents](#table-of-contents)
+  * [Description](#description)
+  * [Installation](#installation)
+  * [Usage](#usage)
+<!-- TOC -->
 
 ---
 
@@ -17,19 +31,19 @@ It is highly recommended to rename the original scoring by question tab via the 
 
 ## Installation
 
-1. Clone this repository to **Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion**
+1. Clone this repository to **public/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion**
 2. Install the Composer dependencies  
    ```bash
-   cd Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
+   cd public/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
    composer install --no-dev
    ```
    Developers **MUST** omit the `--no-dev` argument.
-
-
-3. Login to ILIAS with an administrator account (e.g. root)
-4. Select **Plugins** in **Extending ILIAS** inside the **Administration** main menu.
-5. Search for the **TstManualScoringQuestion** plugin in the list of plugin and choose **Install** from the **Actions** drop down.
-6. Choose **Activate** from the **Actions** dropdown.
+3. Run ``composer install --no-dev`` in the ilias root directory!
+4. Login to ILIAS with an administrator account (e.g. root)
+5. Select **Plugins** in **Extending ILIAS** inside the **Administration** main menu.
+6. Search for the **TstManualScoringQuestion** plugin in the list of plugin and choose **Install** from the **Actions**
+   drop-down.
+7. Choose **Activate** from the **Actions** dropdown.
 
 ## Usage
 

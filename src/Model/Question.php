@@ -21,7 +21,6 @@ declare(strict_types=1);
 namespace ILIAS\Plugin\TstManualScoringQuestion\Model;
 
 use assQuestion;
-use ilObjTest;
 
 class Question
 {
@@ -29,78 +28,18 @@ class Question
      * @var Answer[]
      */
     protected array $answers = [];
-    protected int $id;
-    protected int $pass;
-    protected int $testId;
-    protected int $testRefId;
-    protected float $maximumPoints;
-    protected bool $isObligatory;
+    protected ?float $maximumPoints = null;
 
-    public function __construct(int $id = null)
-    {
-        if ($id !== null) {
-            $this->id = $id;
-            $this->setMaximumPoints($this->readMaximumPoints());
-            $this->setIsObligatory($this->readIsObligatory());
-        }
+    public function __construct(
+        private readonly int $id,
+        private readonly int $testRefId,
+        private readonly int $pass,
+    ) {
     }
 
-    public function readMaximumPoints(): float
+    private function readMaximumPoints(): float
     {
         return assQuestion::instantiateQuestion($this->id)->getMaximumPoints();
-    }
-
-    public function readIsObligatory(): bool
-    {
-        return ilObjTest::isQuestionObligatory($this->id);
-    }
-
-    public function loadFromPost($questionData): ?Question
-    {
-        $answersData = $questionData["answers"];
-        $testRefId = $questionData["testRefId"];
-        $pass = $questionData["pass"];
-        $questionId = $questionData["questionId"];
-
-        if (is_numeric($testRefId)) {
-            $this->setTestRefId((int) $testRefId);
-        }
-
-        $this->setTestId(
-            ilObjTest::_getTestIDFromObjectID(
-                ilObjTest::_lookupObjId($this->getTestRefId())
-            )
-        );
-
-
-        if (is_numeric($pass)) {
-            $this->setPass((int) $pass);
-        }
-
-        if (is_numeric($questionId)) {
-            $this->setId((int) $questionId);
-        }
-
-        if (is_numeric($this->getId())) {
-            $this->setMaximumPoints($this->readMaximumPoints());
-            $this->setIsObligatory($this->readIsObligatory());
-        }
-
-        /**
-         * @var Answer[] $answers
-         */
-        $answers = [];
-
-        if (isset($answersData) && is_array($answersData)) {
-            foreach ($answersData as $answerData) {
-                $answer = new Answer($this);
-                $answer->loadFromPost($answerData);
-                $answers[] = $answer;
-            }
-        }
-        $this->setAnswers($answers);
-
-        return $this;
     }
 
     /**
@@ -109,15 +48,6 @@ class Question
     public function getAnswers(): array
     {
         return $this->answers;
-    }
-
-    /**
-     * @param Answer[] $answers
-     */
-    public function setAnswers(array $answers): Question
-    {
-        $this->answers = $answers;
-        return $this;
     }
 
     public function addAnswer(Answer $answer): Question
@@ -131,32 +61,9 @@ class Question
         return $this->id;
     }
 
-    public function setId(int $id): Question
-    {
-        $this->id = $id;
-        return $this;
-    }
-
     public function getPass(): int
     {
         return $this->pass;
-    }
-
-    public function setPass(int $pass): Question
-    {
-        $this->pass = $pass;
-        return $this;
-    }
-
-    public function getTestId(): int
-    {
-        return $this->testId;
-    }
-
-    public function setTestId(int $testId): Question
-    {
-        $this->testId = $testId;
-        return $this;
     }
 
     public function getTestRefId(): int
@@ -164,31 +71,11 @@ class Question
         return $this->testRefId;
     }
 
-    public function setTestRefId(int $testRefId): Question
-    {
-        $this->testRefId = $testRefId;
-        return $this;
-    }
-
     public function getMaximumPoints(): float
     {
+        if ($this->maximumPoints === null) {
+            $this->maximumPoints = $this->readMaximumPoints();
+        }
         return $this->maximumPoints;
-    }
-
-    public function setMaximumPoints(float $maximumPoints): Question
-    {
-        $this->maximumPoints = $maximumPoints;
-        return $this;
-    }
-
-    public function isObligatory(): bool
-    {
-        return $this->isObligatory;
-    }
-
-    public function setIsObligatory(bool $isObligatory): Question
-    {
-        $this->isObligatory = $isObligatory;
-        return $this;
     }
 }

@@ -16,12 +16,24 @@
  *
  *********************************************************************/
 
-$id = "tmsq";
+declare(strict_types=1);
 
-$version = "10.0.0";
+use Rector\Config\RectorConfig;
+use Rector\Set\ValueObject\LevelSetList;
+use Rector\Set\ValueObject\SetList;
+use Rector\ValueObject\PhpVersion;
 
-$ilias_min_version = "10.0";
-$ilias_max_version = "10.999";
+$dirs = array_filter([
+    __DIR__ . "/classes",
+    __DIR__ . "/src"
+], is_dir(...));
 
-$responsible = "Fabian Sesterhenn / Marvin Beym";
-$responsible_mail = "fabian.sesterhenn@th-koeln.de / mbeym@databay.de";
+return RectorConfig::configure()
+    ->withPaths($dirs)
+    ->withoutParallel()
+    ->withPhpVersion(PhpVersion::PHP_82)
+    ->withSets([
+        SetList::PHP_82,
+        SetList::PHP_83,
+        LevelSetList::UP_TO_PHP_82,
+    ]);
