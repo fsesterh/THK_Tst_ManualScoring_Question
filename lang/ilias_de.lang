@@ -28,4 +28,4 @@ answersPerPage#:#Antworten pro Seite
 userSolution#:#Lösung des Benutzers
 
 answersFromTo#:#Antworten %s bis %s
-tmsq_scoring#:#Bewertung nach Frage
+tmsq_scoring#:#Bewertung nach Frage (Plugin)

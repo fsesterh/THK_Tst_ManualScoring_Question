@@ -1,38 +1,31 @@
 # UserInterfaceHook Plugin - TstManualScoringQuestion
 
-## Requirements
-
-| Component | Version(s)                                                                                             | Link                      |
-|-----------|--------------------------------------------------------------------------------------------------------|---------------------------|
-| PHP       | ![](https://img.shields.io/badge/8.2-blue.svg) ![](https://img.shields.io/badge/8.3-blue.svg)          | [PHP](https://php.net)    |
-| ILIAS     | ![](https://img.shields.io/badge/10-orange.svg) to ![](https://img.shields.io/badge/10.999-orange.svg) | [ILIAS](https://ilias.de) |
----
-
 ## Table of contents
 
 <!-- TOC -->
 * [UserInterfaceHook Plugin - TstManualScoringQuestion](#userinterfacehook-plugin---tstmanualscoringquestion)
   * [Requirements](#requirements)
-  * [Table of contents](#table-of-contents)
   * [Description](#description)
   * [Installation](#installation)
   * [Usage](#usage)
+  * [Changelog](#changelog)
 <!-- TOC -->
 
----
+## Requirements
+
+| Component | Version(s)                                                                                             | Link                      |
+|-----------|--------------------------------------------------------------------------------------------------------|---------------------------|
+| PHP       | ![](https://img.shields.io/badge/8.2-blue.svg) ![](https://img.shields.io/badge/8.3-blue.svg)          | [PHP](https://php.net)    |
+| ILIAS     | ![](https://img.shields.io/badge/10-orange.svg) ![](https://img.shields.io/badge/10.999-orange.svg) | [ILIAS](https://ilias.de) |
 
 ## Description
 
 Adds a second sub-tab for scoring by question. Users are able to score/correct up to 10 answers to a question per page without having to open up each answer first.
 
-It is highly recommended to rename the original scoring by question tab via the ILIAS language files to something different in order to avoid having to sub-tabs with the same name.
-
----
-
 ## Installation
 
 1. Clone this repository to **public/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion**
-2. Install the Composer dependencies  
+2. Install the Composer dependencies
    ```bash
    cd public/Customizing/global/plugins/Services/UIComponent/UserInterfaceHook/TstManualScoringQuestion
    composer install --no-dev
@@ -43,12 +36,13 @@ It is highly recommended to rename the original scoring by question tab via the 
 5. Select **Plugins** in **Extending ILIAS** inside the **Administration** main menu.
 6. Search for the **TstManualScoringQuestion** plugin in the list of plugin and choose **Install** from the **Actions**
    drop-down.
-7. Choose **Activate** from the **Actions** dropdown.
+7. Choose **Activate** from the **Actions** drop-down.
 
 ## Usage
 
 1. Enter a **Test** object with a user that has permission to manually score answers.
-2. Go to the **Manual Scoring** Tab.
+2. Go to the **Manual Scoring** tab.
+3. Go to the new **Scoring by Question (Plugin)** subtab.
 
-If answers are available they will be shown in the new design.
-
+## Changelog
+See [Changelog](CHANGELOG.md)
