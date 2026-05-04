@@ -2,8 +2,8 @@
 
 ## 10.0.0
 
-* Improvement: Added "(Plugin)" to tmsq_scoring language variable to avoid duplicate names for subtab links
 * Added support for ILIAS 10
+* Improvement: Added "(Plugin)" to tmsq_scoring language variable to avoid duplicate names for subtab links
 
 ## 9.0.1
 
