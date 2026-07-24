@@ -509,6 +509,11 @@ class TstManualScoringQuestion
                                 "scoringCompleted" => $this->refinery->kindlyTo()->bool(),
                                 "activeId" => $this->refinery->kindlyTo()->int()
                             ])),
+                            //Scoring is currently completed
+                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
+                                "scoringCompleted" => $this->refinery->kindlyTo()->bool(),
+                                "activeId" => $this->refinery->kindlyTo()->int()
+                            ])),
                             $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
                                 "points" => $this->refinery->kindlyTo()->float(),
                                 "feedback" => $this->refinery->kindlyTo()->string(),
