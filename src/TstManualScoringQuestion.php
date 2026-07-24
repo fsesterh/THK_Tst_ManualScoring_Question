@@ -501,29 +501,28 @@ class TstManualScoringQuestion
             $this->refinery->byTrying([
                 $this->refinery->kindlyTo()->listOf(
                     $this->refinery->kindlyTo()->recordOf([
-                        "answers" => $this->refinery->byTrying([
-                            //When checking scoringCompleted
-                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
-                                "points" => $this->refinery->kindlyTo()->float(),
-                                "feedback" => $this->refinery->kindlyTo()->string(),
-                                "scoringCompleted" => $this->refinery->kindlyTo()->bool(),
-                                "activeId" => $this->refinery->kindlyTo()->int()
-                            ])),
-                            //Scoring is currently completed
-                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
-                                "scoringCompleted" => $this->refinery->kindlyTo()->bool(),
-                                "activeId" => $this->refinery->kindlyTo()->int()
-                            ])),
-                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
-                                "points" => $this->refinery->kindlyTo()->float(),
-                                "feedback" => $this->refinery->kindlyTo()->string(),
-                                "activeId" => $this->refinery->kindlyTo()->int()
-                            ])),
-                            //When unchecking scoring completed checkbox
-                            $this->refinery->kindlyTo()->listOf($this->refinery->kindlyTo()->recordOf([
-                                "activeId" => $this->refinery->kindlyTo()->int()
-                            ]))
-                        ]),
+                        "answers" => $this->refinery->kindlyTo()->listOf(
+                            $this->refinery->custom()->transformation(function (array $answer_data): array {
+                                foreach (["points", "feedback", "scoringCompleted", "activeId"] as $key) {
+                                    if (isset($answer_data[$key])) {
+                                        $value = $answer_data[$key];
+                                        switch ($key) {
+                                            case "points":
+                                                $value = (float) $value;
+                                                break;
+                                            case "scoringCompleted":
+                                                $value = (bool) $value;
+                                                break;
+                                            case "activeId":
+                                                $value = (int) $value;
+                                                break;
+                                        }
+
+                                        $answer_data[$key] = $value;
+                                    }
+                                }
+                                return $answer_data;
+                            })),
                         "testRefId" => $this->refinery->kindlyTo()->int(),
                         "pass" => $this->refinery->kindlyTo()->int(),
                         "questionId" => $this->refinery->kindlyTo()->int()
