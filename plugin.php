@@ -18,7 +18,7 @@
 
 $id = "tmsq";
 
-$version = "10.0.0";
+$version = "10.0.1";
 
 $ilias_min_version = "10.0";
 $ilias_max_version = "10.999";
