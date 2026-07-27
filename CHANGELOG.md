@@ -9,6 +9,10 @@ Fixed: Grading inputs are lost when saving multiple times
 * Added support for ILIAS 10
 * Improvement: Added "(Plugin)" to tmsq_scoring language variable to avoid duplicate names for subtab links
 
+## 9.0.2
+
+Fixed: Grading inputs are lost when saving multiple times
+
 ## 9.0.1
 
 Fixed: ilCtrl cannot find a path for 'ilassspecfeedbackpagegui' that reaches 'iluipluginroutergui'
