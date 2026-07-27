@@ -1,5 +1,9 @@
 # Change-Log
 
+## 9.0.2
+
+Fixed: Grading inputs are lost when saving multiple times
+
 ## 9.0.1
 
 Fixed: ilCtrl cannot find a path for 'ilassspecfeedbackpagegui' that reaches 'iluipluginroutergui'
