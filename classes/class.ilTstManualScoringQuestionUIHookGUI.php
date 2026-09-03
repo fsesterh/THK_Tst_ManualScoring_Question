@@ -30,7 +30,7 @@ use ILIAS\Refinery\Factory;
  */
 class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
 {
-    private const TMSQ_TAB = "tmsq_man_scoring";
+    private const string TMSQ_TAB = "tmsq_man_scoring";
 
     protected ilLanguage $lng;
     protected ilTstManualScoringQuestionPlugin $plugin;
