@@ -14,9 +14,11 @@
 ## Requirements
 
 | Component | Version(s)                                                                                             | Link                      |
-|-----------|--------------------------------------------------------------------------------------------------------|---------------------------|
-| PHP       | ![](https://img.shields.io/badge/8.2-blue.svg) ![](https://img.shields.io/badge/8.3-blue.svg)          | [PHP](https://php.net)    |
-| ILIAS     | ![](https://img.shields.io/badge/10-orange.svg) ![](https://img.shields.io/badge/10.999-orange.svg) | [ILIAS](https://ilias.de) |
+|-----------|-----------------------------------------------------------------------------------------------|---------------------------|
+| PHP       | ![](https://img.shields.io/badge/8.3-blue.svg) ![](https://img.shields.io/badge/8.4-blue.svg) | [PHP](https://php.net)    |
+| ILIAS     | ![](https://img.shields.io/badge/11-orange.svg)                                               | [ILIAS](https://ilias.de) |
+
+---
 
 ## Description
 
