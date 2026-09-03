@@ -556,7 +556,8 @@ class TstManualScoringQuestion
                                     }
                                 }
                                 return $answer_data;
-                            })),
+                            })
+                        ),
                         "testRefId" => $this->refinery->kindlyTo()->int(),
                         "pass" => $this->refinery->kindlyTo()->int(),
                         "questionId" => $this->refinery->kindlyTo()->int()
