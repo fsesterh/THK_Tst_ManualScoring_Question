@@ -16,7 +16,7 @@
     "roave/security-advisories": "dev-latest",
     "captainhook/plugin-composer": "^5.3",
     "friendsofphp/php-cs-fixer": "^3.16",
-    "rector/rector": "^2.3"
+    "rector/rector": "^2.6"
   },
   "autoload": {
     "psr-4": {

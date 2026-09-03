@@ -19,21 +19,27 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
+use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use Rector\Set\ValueObject\LevelSetList;
 use Rector\Set\ValueObject\SetList;
 use Rector\ValueObject\PhpVersion;
 
 $dirs = array_filter([
-    __DIR__ . "/classes",
-    __DIR__ . "/src"
+    __DIR__ . "/src",
+    __DIR__ . "/classes"
 ], is_dir(...));
 
 return RectorConfig::configure()
     ->withPaths($dirs)
     ->withoutParallel()
-    ->withPhpVersion(PhpVersion::PHP_82)
+    ->withPhpVersion(PhpVersion::PHP_83)
     ->withSets([
-        SetList::PHP_82,
         SetList::PHP_83,
-        LevelSetList::UP_TO_PHP_82,
+        SetList::PHP_84,
+        LevelSetList::UP_TO_PHP_83,
+    ])
+    ->withSkip([
+        AddOverrideAttributeToOverriddenMethodsRector::class,
+        ClosureToArrowFunctionRector::class
     ]);
