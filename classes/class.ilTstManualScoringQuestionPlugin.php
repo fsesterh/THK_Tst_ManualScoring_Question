@@ -20,8 +20,11 @@ declare(strict_types=1);
 
 use ILIAS\DI\Container;
 use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
+use ILIAS\Plugin\TstManualScoringQuestion\Renderer\ManualScoringQuestionRenderer;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
 use ILIAS\Test\Presentation\TestScreenGUI;
+
+require_once __DIR__ . '/../vendor/autoload.php';
 
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
@@ -80,5 +83,17 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
     public function redirectToHome(): void
     {
         $this->dic->ctrl()->redirectByClass(ilDashboardGUI::class, "show");
+    }
+
+    public function exchangeUIRendererAfterInitialization(Container $dic): Closure
+    {
+        $renderer = $dic->raw("ui.renderer");
+        if (!$this->isActive()) {
+            return $renderer;
+        }
+
+        return static function () use ($dic, $renderer): ManualScoringQuestionRenderer {
+            return new ManualScoringQuestionRenderer($dic, $renderer);
+        };
     }
 }

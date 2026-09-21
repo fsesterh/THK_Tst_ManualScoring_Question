@@ -36,7 +36,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
-use ILIAS\Test\Scoring\Manual\TestScoringByQuestionGUI;
+use ILIAS\Test\Scoring\Manual\ConsecutiveScoringGUI;
 use ILIAS\UI\Component\Input\Container\Filter\Standard;
 use ILIAS\UI\Component\Input\Field\Select;
 use ILIAS\UI\Factory;
@@ -939,10 +939,7 @@ class TstManualScoringQuestion
     protected function getManualScoringByQuestionTarget(int $refId): string
     {
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", (int) $refId);
-        return $this->ctrl->getLinkTargetByClass(
-            [ilObjTestGUI::class, TestScoringByQuestionGUI::class],
-            "showManScoringByQuestionParticipantsTable"
-        );
+        return $this->ctrl->getLinkTargetByClass([ilObjTestGUI::class, ConsecutiveScoringGUI::class]);
     }
 
     /**
