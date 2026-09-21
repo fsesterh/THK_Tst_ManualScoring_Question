@@ -25,7 +25,7 @@ use ILIAS\Test\Presentation\TestScreenGUI;
 
 class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
 {
-    public const ID = "tmsq";
+    public const string ID = "tmsq";
 
     protected Container $dic;
 
@@ -51,7 +51,7 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         return $basePath . "/assets/" . $assetType->value . "/" . $file;
     }
 
-    public static function getInstance(): ilTstManualScoringQuestionPlugin
+    public static function getInstance(): self
     {
         global $DIC;
 

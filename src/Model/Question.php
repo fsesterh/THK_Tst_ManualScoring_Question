@@ -50,7 +50,7 @@ class Question
         return $this->answers;
     }
 
-    public function addAnswer(Answer $answer): Question
+    public function addAnswer(Answer $answer): self
     {
         $this->answers[] = $answer;
         return $this;

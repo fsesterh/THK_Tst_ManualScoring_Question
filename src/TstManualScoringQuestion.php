@@ -66,9 +66,9 @@ use ReflectionMethod;
 
 class TstManualScoringQuestion
 {
-    public const ALL_USERS = 0;
-    public const ONLY_FINALIZED = 1;
-    public const EXCEPT_FINALIZED = 2;
+    public const int ALL_USERS = 0;
+    public const int ONLY_FINALIZED = 1;
+    public const int EXCEPT_FINALIZED = 2;
     protected array $answersAndForms = [];
     protected ilLogger $logger;
     protected ilObjUser $user;
