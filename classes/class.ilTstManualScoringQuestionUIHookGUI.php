@@ -51,45 +51,6 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->uiUtil = new UiUtil($this->dic);
     }
 
-    protected function injectSubTab(int $ref_id): void
-    {
-        $this->dic->ctrl()->setParameterByClass(
-            self::class,
-            "ref_id",
-            $ref_id
-        );
-
-        $this->dic->tabs()->addSubTab(
-            self::TMSQ_TAB,
-            $this->plugin->txt("tmsq_scoring"),
-            $this->dic->ctrl()->getLinkTargetByClass(
-                [ilUIPluginRouterGUI::class, self::class],
-                "showTmsqManualScoring"
-            )
-        );
-    }
-
-    public function modifyGUI(string $a_comp, string $a_part, array $a_par = []): void
-    {
-        if ($a_part !== "sub_tabs") {
-            return;
-        }
-
-        if ($this->dic->tabs()->getActiveTab() !== "manscoring") {
-            return;
-        }
-
-        $refId = $this->httpWrapper->query()->retrieve(
-            "ref_id",
-            $this->refinery->byTrying([
-                $this->refinery->kindlyTo()->int(),
-                $this->refinery->always(null)
-            ])
-        );
-
-        $this->injectSubTab($refId);
-    }
-
     /**
      * @return string[]
      */
