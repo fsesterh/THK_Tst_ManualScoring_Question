@@ -40,11 +40,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         parent::__construct($db, $component_repository, $id);
     }
 
-    public function getRelativeDirectory(): string
-    {
-        return str_replace(ILIAS_ABSOLUTE_PATH . "/public/", "", realpath($this->getDirectory()));
-    }
-
     public function assetsFile(PluginAsset $assetType, string $file, bool $relative = true): string
     {
         $basePath = $relative ? $this->getRelativeDirectory() : $this->getDirectory();
