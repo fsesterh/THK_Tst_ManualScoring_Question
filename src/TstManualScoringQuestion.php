@@ -446,7 +446,7 @@ class TstManualScoringQuestion
                         "QUESTION_HEADER_TEXT",
                         sprintf(
                             "%s %s (%s)",
-                            $this->plugin->txt("manual_scoring.answer_of"),
+                            $this->plugin->txt("answer_of"),
                             $answer->getUserName(),
                             $test->getAnonymity() ? $this->lng->txt("anonymous") : $answer->getLogin()
                         )
@@ -811,7 +811,7 @@ class TstManualScoringQuestion
             "scoring_completed" => $select_scoring_completed_input
         ];
 
-        $this->fixIlias8FilterOptionError($filter_inputs);
+        $this->fixUndefinedFilterOptionError($filter_inputs);
 
         return $this->ui_filter_service->standard(
             "tstFilter",
@@ -972,7 +972,7 @@ class TstManualScoringQuestion
      *
      * @param FormInput[] $filter_inputs
      */
-    private function fixIlias8FilterOptionError(array $filter_inputs): void
+    private function fixUndefinedFilterOptionError(array $filter_inputs): void
     {
         $filter_service_session_gateway = new ilUIFilterServiceSessionGateway();
 
@@ -994,7 +994,7 @@ class TstManualScoringQuestion
             }
 
             if (!$option_found) {
-                $filter_service_session_gateway->writeValue("tstFilter", $input_id, $input->getValue());
+                $filter_service_session_gateway->writeValue("tstFilter", $input_id, (int) $input->getValue());
             }
         }
     }
