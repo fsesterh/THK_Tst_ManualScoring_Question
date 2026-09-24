@@ -1,31 +1,22 @@
-config#:#Konfiguration
-save#:#Speichern
-config_saved#:#Konfiguration gespeichert
-cmdNotSupported#:#Kommando wird nicht unterstützt
-noEntries#:#Keine Einträge vorhanden
-nothingReceivedInPost#:#POST ist leer oder nicht definiert
+general.cmd.undefined#:#Kein Kommando wurde gefunden
+general.cmd.notFound#:#Kommando '%s' wurde nicht gefunden
+general.update.success#:#Aktualisierung erfolgreich
+general.update.failed#:#Aktualisierung fehlgeschlagen
+general.plugin.settings#:#Plugin-Einstellungen
+general.plugin.notActivated#:#Das Plugin ist nicht aktiviert. Bitte aktivieren Sie dieses zunächst.
+general.plugin.requiredParameterMissing#:#Der Parameter "%s" wurde in der Anfrage nicht gefunden, ist jedoch erforderlich.
+
 unknownError#:#Unbekannter Fehler. Es könnten informationen fehlen
 invalid_post_data#:#Unerwarteten POST erhalten
 
-answer_of#:#Antwort von
+manual_scoring.title#:#Bewertung nach Frage (Plugin)
+manual_scoring.no_entries#:#Keine Einträge vorhanden
+manual_scoring.answer_of#:#Antwort von
+manual_scoring.answers_from_to#:#Antworten %s bis %s
+manual_scoring.user_solution#:#Lösung des Benutzers
 
-missing_get_parameter_cmd#:#Der GET parameter 'cmd' fehlt
-missing_get_parameter_refId#:#Der GET parameter 'ref_id' fehlt
+manual_scoring.filter.answers_per_page#:#Antworten pro Seite
 
-saving_manualScoring#:#Manuelle Bewertung wurde gespeichert
-saving_points_failed#:#Speichern der Punkte für eine Antwort schlug fehl
-saving_feedback_failed#:#Speichern des Feedbacks für eine Antwort schlug fehlt
-
-filter_missing_question#:#Keine Frage im Filter definiert
-filter_missing_pass#:#Kein Durchlauf im Filter definiert
-filter_missing_scoringCompleted#:#Es fehlt die Filteroption für Scoring completed
-filter_missing_answersPerPage#:#Keine Antworten pro Seite im Filter definiert
-filter_applied#:#Filter wurde angewendet
-filter_reset#:#Filter wurde zurückgesetzt
-filter_invalid_command#:#Nicht unterstütztes Filter Kommando
-
-answersPerPage#:#Antworten pro Seite
-userSolution#:#Lösung des Benutzers
-
-answersFromTo#:#Antworten %s bis %s
-tmsq_scoring#:#Bewertung nach Frage (Plugin)
+manual_scoring.save.success#:#Manuelle Bewertung wurde gespeichert
+manual_scoring.save.failure#:#Speichern der Punkte für eine Antwort schlug fehl
+manual_scoring.save.feedback.failure#:#Speichern des Feedbacks für eine Antwort schlug fehlt

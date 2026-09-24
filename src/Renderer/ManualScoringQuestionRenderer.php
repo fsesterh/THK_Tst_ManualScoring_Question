@@ -142,7 +142,7 @@ class ManualScoringQuestionRenderer extends DecoratedRenderer
                 continue;
             }
 
-            $plugin_link = $dom->createElement("a", $this->plugin->txt("tmsq_scoring"));
+            $plugin_link = $dom->createElement("a", $this->plugin->txt("manual_scoring.title"));
             $plugin_link->className = "btn btn-default";
 
             $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $ref_id);

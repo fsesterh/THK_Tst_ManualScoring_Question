@@ -71,7 +71,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $points_for_answer_input->setDecimals(2);
         $points_for_answer_input->setSize(5);
 
-        $user_solution_html_area_input = new HtmlAreaInput($this->plugin->txt("userSolution"));
+        $user_solution_html_area_input = new HtmlAreaInput($this->plugin->txt("manual_scoring.user_solution"));
         $user_solution_html_area_input->setValue($answer->getAnswerHtml());
         $user_solution_html_area_input->setEditable(false);
         $user_solution_html_area_input->setHtmlClass("tmsq-html-area-input");

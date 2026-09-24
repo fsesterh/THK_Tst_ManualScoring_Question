@@ -231,7 +231,7 @@ class TstManualScoringQuestion
         );
 
         if (!$ref_id) {
-            $this->ui_util->sendFailure($this->plugin->txt("missing_get_parameter_refId"), true);
+            $this->ui_util->sendFailure(sprintf($this->plugin->txt("general.plugin.requiredParameterMissing#"), "ref_id"), true);
             $this->plugin->redirectToHome();
         }
 
@@ -241,7 +241,7 @@ class TstManualScoringQuestion
                 break;
 
             default:
-                $this->ui_util->sendFailure($this->plugin->txt("cmdNotSupported"), true);
+                $this->ui_util->sendFailure(sprintf($this->plugin->txt("general.cmd.notFound"), $cmd), true);
                 $this->redirectToManualScoringTab($ref_id);
         }
     }
@@ -419,7 +419,7 @@ class TstManualScoringQuestion
                         "QUESTION_HEADER_TEXT",
                         sprintf(
                             "%s %s (%s)",
-                            $this->plugin->txt("answer_of"),
+                            $this->plugin->txt("manual_scoring.answer_of"),
                             $correct_answer->getUserName(),
                             $test->getAnonymity() ? $this->lng->txt("anonymous") : $correct_answer->getLogin()
                         )
@@ -446,7 +446,7 @@ class TstManualScoringQuestion
                         "QUESTION_HEADER_TEXT",
                         sprintf(
                             "%s %s (%s)",
-                            $this->plugin->txt("answer_of"),
+                            $this->plugin->txt("manual_scoring.answer_of"),
                             $answer->getUserName(),
                             $test->getAnonymity() ? $this->lng->txt("anonymous") : $answer->getLogin()
                         )
@@ -476,7 +476,7 @@ class TstManualScoringQuestion
      */
     protected function showNoEntries(ilObjTest $test, ilTemplate $tpl): string
     {
-        $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("noEntries"));
+        $tpl->setVariable("NO_ENTRIES", $this->plugin->txt("manual_scoring.no_entries"));
         $filter = $this->setupFilter(
             $test->getRefId(),
             $this->generateQuestionOptions($test),
@@ -660,12 +660,12 @@ class TstManualScoringQuestion
                 }
 
                 if (!$scoring_completed && !$answer->writePoints()) {
-                    $this->ui_util->sendFailure($this->plugin->txt("saving_points_failed"), true);
+                    $this->ui_util->sendFailure($this->plugin->txt("manual_scoring.save.failure"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId(), $current_page);
                 }
 
                 if (!$answer->writeFeedback()) {
-                    $this->ui_util->sendFailure($this->plugin->txt("saving_feedback_failed"), true);
+                    $this->ui_util->sendFailure($this->plugin->txt("manual_scoring.save.feedback.failure"), true);
                     $this->redirectToManualScoringTab($question->getTestRefId(), $current_page);
                 }
             }
@@ -675,7 +675,7 @@ class TstManualScoringQuestion
             $this->ui_util->sendFailure($this->plugin->txt("unknownError"), true);
             $this->plugin->redirectToHome();
         } else {
-            $this->ui_util->sendSuccess($this->plugin->txt("saving_manualScoring"), true);
+            $this->ui_util->sendSuccess($this->plugin->txt("manual_scoring.save.success"), true);
             $this->redirectToManualScoringTab($test_ref_id, $current_page);
         }
     }
@@ -727,7 +727,7 @@ class TstManualScoringQuestion
             $renderer->render($pagination)
             . "<hr class='tmsq-pagination-separator'>"
             . sprintf(
-                $this->plugin->txt("answersFromTo"),
+                $this->plugin->txt("manual_scoring.answers_from_to"),
                 $total_number_of_elements === 0 ? 0 : $start + 1,
                 $start + $page_length
             )
@@ -752,7 +752,7 @@ class TstManualScoringQuestion
         $select_question_input = $this->ui_field_factory->select($this->lng->txt("question"), $question_options);
         $select_pass_input = $this->ui_field_factory->select($this->lng->txt("pass"), $pass_options);
         $select_answers_per_page_input = $this->ui_field_factory->select(
-            $this->plugin->txt("answersPerPage"),
+            $this->plugin->txt("manual_scoring.filter.answers_per_page"),
             $answers_per_page_options
         );
 

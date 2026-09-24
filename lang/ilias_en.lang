@@ -1,31 +1,22 @@
-config#:#Configuration
-save#:#Save
-config_saved#:#Configuration saved
-cmdNotSupported#:#Command not supported
-noEntries#:#No entries available
-nothingReceivedInPost#:#POST is empty or not defined
+general.cmd.undefined#:#No command was found
+general.cmd.notFound#:#Command '%s' could not be found
+general.update.success#:#Update successful
+general.update.failed#:#Update failed
+general.plugin.settings#:#Plugin Settings
+general.plugin.notActivated#:#Plugin is not active, yet. Please activate it.
+general.plugin.requiredParameterMissing#:#The parameter "%s" could not be found in the request but is required.
+
 unknownError#:#Unknown error. Information could be empty
 invalid_post_data#:#Unexpected POST received
 
-answer_of#:#Answer of
+manual_scoring.title#:#Scoring by Question (Plugin)
+manual_scoring.no_entries#:#No entries available
+manual_scoring.answer_of#:#Answer of
+manual_scoring.answers_from_to#:#Answers %s to %s
+manual_scoring.user_solution#:#User solution
 
-missing_get_parameter_cmd#:#The GET parameter 'cmd' is missing
-missing_get_parameter_refId#:#The GET parameter 'ref_id' is missing
+manual_scoring.filter.answers_per_page#:#Answers per page
 
-saving_manualScoring#:#Manual scoring was saved
-saving_points_failed#:#Saving of the points for an answer failed
-saving_feedback_failed#:#Saving of the feedback for an answer failed
-
-filter_missing_question#:#No question in filter defined
-filter_missing_pass#:#No pass in filter defined
-filter_missing_scoringCompleted#:#The filteroption for scoring completed is missing
-filter_missing_answersPerPage#:#No answers per page in filter defined
-filter_applied#:#Filter was applied
-filter_reset#:#Filter was reset
-filter_invalid_command#:#Not supported filter command
-
-answersPerPage#:#Answers per page
-userSolution#:#User solution
-
-answersFromTo#:#Answers %s to %s
-tmsq_scoring#:#Scoring by Question (Plugin)
+manual_scoring.save.success#:#Manual scoring was saved
+manual_scoring.save.failure#:#Saving of the points for an answer failed
+manual_scoring.save.feedback.failure#:#Saving of the feedback for an answer failed
