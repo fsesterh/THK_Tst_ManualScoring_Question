@@ -35,8 +35,8 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
     protected ilLanguage $lng;
     protected ilTstManualScoringQuestionPlugin $plugin;
     protected Container $dic;
-    private readonly UiUtil $uiUtil;
-    private readonly WrapperFactory $httpWrapper;
+    private readonly UiUtil $ui_util;
+    private readonly WrapperFactory $http_wrapper;
     private readonly Factory $refinery;
 
     public function __construct()
@@ -46,9 +46,9 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         $this->lng = $this->dic->language();
         $this->lng->loadLanguageModule("assessment");
-        $this->httpWrapper = $this->dic->http()->wrapper();
+        $this->http_wrapper = $this->dic->http()->wrapper();
         $this->refinery = $this->dic->refinery();
-        $this->uiUtil = new UiUtil($this->dic);
+        $this->ui_util = new UiUtil($this->dic);
     }
 
     /**
@@ -68,7 +68,7 @@ class ilTstManualScoringQuestionUIHookGUI extends ilUIHookPluginGUI
         $ctrl = $this->dic->ctrl();
         $cmd = $ctrl->getCmd();
         if (!isset($cmd)) {
-            $this->uiUtil->sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
+            $this->ui_util->sendFailure($this->plugin->txt("missing_get_parameter_cmd"), true);
             $ctrl->redirectToURL("ilias.php");
         }
 

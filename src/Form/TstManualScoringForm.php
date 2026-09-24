@@ -43,76 +43,76 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
 
         $question = $answer->getQuestion();
-        $questionId = $question->getId();
-        $activeId = $answer->getActiveId();
+        $question_id = $question->getId();
+        $active_id = $answer->getActiveId();
 
-        $testRefIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][testRefId]");
-        $testRefIdHiddenInput->setRequired(true);
+        $test_ref_id_hidden_input = new ilHiddenInputGUI("tmsq[$question_id][test_ref_id]");
+        $test_ref_id_hidden_input->setRequired(true);
 
-        $passHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][pass]");
-        $passHiddenInput->setRequired(true);
+        $pass_hidden_input = new ilHiddenInputGUI("tmsq[$question_id][pass]");
+        $pass_hidden_input->setRequired(true);
 
-        $questionIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][questionId]");
-        $questionIdHiddenInput->setRequired(true);
+        $question_id_hidden_input = new ilHiddenInputGUI("tmsq[$question_id][question_id]");
+        $question_id_hidden_input->setRequired(true);
 
-        $activeIdHiddenInput = new ilHiddenInputGUI("tmsq[$questionId][answers][$activeId][activeId]");
-        $activeIdHiddenInput->setValue((string) $activeId);
-        $activeIdHiddenInput->setRequired(true);
+        $active_id_hidden_input = new ilHiddenInputGUI("tmsq[$question_id][answers][$active_id][active_id]");
+        $active_id_hidden_input->setValue((string) $active_id);
+        $active_id_hidden_input->setRequired(true);
 
-        $pointsForAnswerInput = new ilNumberInputGUI(
+        $points_for_answer_input = new ilNumberInputGUI(
             $this->lng->txt("tst_change_points_for_question"),
-            "tmsq[$questionId][answers][$activeId][points]"
+            "tmsq[$question_id][answers][$active_id][points]"
         );
-        $pointsForAnswerInput->setDisabled($answer->isScoringCompleted());
-        $pointsForAnswerInput->setMinValue(0.00);
-        $pointsForAnswerInput->setMaxValue($question->getMaximumPoints());
-        $pointsForAnswerInput->allowDecimals(true);
-        $pointsForAnswerInput->setRequired(true);
-        $pointsForAnswerInput->setDecimals(2);
-        $pointsForAnswerInput->setSize(5);
+        $points_for_answer_input->setDisabled($answer->isScoringCompleted());
+        $points_for_answer_input->setMinValue(0.00);
+        $points_for_answer_input->setMaxValue($question->getMaximumPoints());
+        $points_for_answer_input->allowDecimals(true);
+        $points_for_answer_input->setRequired(true);
+        $points_for_answer_input->setDecimals(2);
+        $points_for_answer_input->setSize(5);
 
-        $userSolutionHtmlAreaInput = new HtmlAreaInput($this->plugin->txt("userSolution"));
-        $userSolutionHtmlAreaInput->setValue($answer->getAnswerHtml());
-        $userSolutionHtmlAreaInput->setEditable(false);
-        $userSolutionHtmlAreaInput->setHtmlClass("tmsq-html-area-input");
+        $user_solution_html_area_input = new HtmlAreaInput($this->plugin->txt("userSolution"));
+        $user_solution_html_area_input->setValue($answer->getAnswerHtml());
+        $user_solution_html_area_input->setEditable(false);
+        $user_solution_html_area_input->setHtmlClass("tmsq-html-area-input");
 
-        $maximumPointsNonEditInput = new ilNonEditableValueGUI(
+        $maximum_points_non_edit_input = new ilNonEditableValueGUI(
             $this->lng->txt("tst_manscoring_input_max_points_for_question")
         );
-        $maximumPointsNonEditInput->setRequired(true);
-        $maximumPointsNonEditInput->setValue($question->getMaximumPoints());
+        $maximum_points_non_edit_input->setRequired(true);
+        $maximum_points_non_edit_input->setValue($question->getMaximumPoints());
 
-        $manualFeedPackAreaInput = new ilTextAreaInputGUI(
+        $manual_feed_pack_area_input = new ilTextAreaInputGUI(
             $this->lng->txt("set_manual_feedback"),
-            "tmsq[$questionId][answers][$activeId][feedback]"
+            "tmsq[$question_id][answers][$active_id][feedback]"
         );
 
         if ($answer->isScoringCompleted()) {
-            $manualFeedPackAreaInput = new HtmlAreaInput(
+            $manual_feed_pack_area_input = new HtmlAreaInput(
                 $this->lng->txt("set_manual_feedback"),
-                "tmsq[$questionId][answers][$activeId][feedback]"
+                "tmsq[$question_id][answers][$active_id][feedback]"
             );
-            $manualFeedPackAreaInput->setDisabled(true);
-            $manualFeedPackAreaInput->setHtmlClass("tmsq-html-area-input");
+            $manual_feed_pack_area_input->setDisabled(true);
+            $manual_feed_pack_area_input->setHtmlClass("tmsq-html-area-input");
         } else {
-            $manualFeedPackAreaInput->setUseRTE(true);
-            $manualFeedPackAreaInput->setRteTagSet("standard");
+            $manual_feed_pack_area_input->setUseRTE(true);
+            $manual_feed_pack_area_input->setRteTagSet("standard");
         }
 
-        $scoringCompletedCheckboxInput = new ilCheckboxInputGUI(
+        $scoring_completed_checkbox_input = new ilCheckboxInputGUI(
             $this->lng->txt("finalized_evaluation"),
-            "tmsq[$questionId][answers][$activeId][scoringCompleted]"
+            "tmsq[$question_id][answers][$active_id][scoring_completed]"
         );
 
-        $this->addItem($testRefIdHiddenInput);
-        $this->addItem($passHiddenInput);
-        $this->addItem($questionIdHiddenInput);
-        $this->addItem($activeIdHiddenInput);
-        $this->addItem($userSolutionHtmlAreaInput);
-        $this->addItem($pointsForAnswerInput);
-        $this->addItem($maximumPointsNonEditInput);
-        $this->addItem($manualFeedPackAreaInput);
-        $this->addItem($scoringCompletedCheckboxInput);
+        $this->addItem($test_ref_id_hidden_input);
+        $this->addItem($pass_hidden_input);
+        $this->addItem($question_id_hidden_input);
+        $this->addItem($active_id_hidden_input);
+        $this->addItem($user_solution_html_area_input);
+        $this->addItem($points_for_answer_input);
+        $this->addItem($maximum_points_non_edit_input);
+        $this->addItem($manual_feed_pack_area_input);
+        $this->addItem($scoring_completed_checkbox_input);
 
         parent::__construct();
     }
@@ -224,17 +224,17 @@ class TstManualScoringForm extends ilPropertyFormGUI
     public function fillForm(Answer $answer): void
     {
         $question = $answer->getQuestion();
-        $questionId = $question->getId();
-        $activeId = $answer->getActiveId();
+        $question_id = $question->getId();
+        $active_id = $answer->getActiveId();
 
         $this->setValuesByArray([
-            "tmsq[$questionId][testRefId]" => $question->getTestRefId(),
-            "tmsq[$questionId][pass]" => $question->getPass(),
-            "tmsq[$questionId][questionId]" => $questionId,
-            "tmsq[$questionId][answers][$activeId][activeId]" => $activeId,
-            "tmsq[$questionId][answers][$activeId][points]" => $answer->getPoints(),
-            "tmsq[$questionId][answers][$activeId][feedback]" => $answer->getFeedback(),
-            "tmsq[$questionId][answers][$activeId][scoringCompleted]" => $answer->isScoringCompleted()
+            "tmsq[$question_id][test_ref_id]" => $question->getTestRefId(),
+            "tmsq[$question_id][pass]" => $question->getPass(),
+            "tmsq[$question_id][question_id]" => $question_id,
+            "tmsq[$question_id][answers][$active_id][active_id]" => $active_id,
+            "tmsq[$question_id][answers][$active_id][points]" => $answer->getPoints(),
+            "tmsq[$question_id][answers][$active_id][feedback]" => $answer->getFeedback(),
+            "tmsq[$question_id][answers][$active_id][scoring_completed]" => $answer->isScoringCompleted()
         ], true);
     }
 }

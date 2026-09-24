@@ -28,11 +28,11 @@ class Question
      * @var Answer[]
      */
     protected array $answers = [];
-    protected ?float $maximumPoints = null;
+    protected ?float $maximum_points = null;
 
     public function __construct(
         private readonly int $id,
-        private readonly int $testRefId,
+        private readonly int $test_ref_id,
         private readonly int $pass,
     ) {
     }
@@ -68,14 +68,14 @@ class Question
 
     public function getTestRefId(): int
     {
-        return $this->testRefId;
+        return $this->test_ref_id;
     }
 
     public function getMaximumPoints(): float
     {
-        if ($this->maximumPoints === null) {
-            $this->maximumPoints = $this->readMaximumPoints();
+        if ($this->maximum_points === null) {
+            $this->maximum_points = $this->readMaximumPoints();
         }
-        return $this->maximumPoints;
+        return $this->maximum_points;
     }
 }

@@ -43,10 +43,10 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         parent::__construct($db, $component_repository, $id);
     }
 
-    public function assetsFile(PluginAsset $assetType, string $file, bool $relative = true): string
+    public function assetsFile(PluginAsset $asset_type, string $file, bool $relative = true): string
     {
-        $basePath = $relative ? $this->getRelativeDirectory() : $this->getDirectory();
-        return $basePath . "/assets/" . $assetType->value . "/" . $file;
+        $base_path = $relative ? $this->getRelativeDirectory() : $this->getDirectory();
+        return $base_path . "/assets/" . $asset_type->value . "/" . $file;
     }
 
     public static function getInstance(): self
@@ -58,18 +58,18 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         }
 
         /**
-         * @var ilComponentFactory $componentFactory
+         * @var ilComponentFactory $component_factory
          */
-        $componentFactory = $DIC["component.factory"];
+        $component_factory = $DIC["component.factory"];
 
-        self::$instance = $componentFactory->getPlugin(self::ID);
+        self::$instance = $component_factory->getPlugin(self::ID);
         return self::$instance;
     }
 
     public function accessViolationRedirect(): never
     {
-        $uiUtil = new UiUtil($this->dic);
-        $uiUtil->sendFailure(
+        $ui_util = new UiUtil($this->dic);
+        $ui_util->sendFailure(
             $this->dic->language()->txt("no_permission"),
             true
         );

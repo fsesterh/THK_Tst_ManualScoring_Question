@@ -44,7 +44,7 @@ class ManualScoringQuestionRenderer extends DecoratedRenderer
     private readonly ilTstManualScoringQuestionPlugin $plugin;
     private readonly ilCtrlInterface $ctrl;
     private readonly Factory $refinery;
-    private WrapperFactory $http_Wrapper;
+    private WrapperFactory $http_wrapper;
 
     private static bool $injected_plugin_scoring_mode = false;
 
@@ -53,19 +53,19 @@ class ManualScoringQuestionRenderer extends DecoratedRenderer
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
         $this->ctrl = $this->dic->ctrl();
         $this->refinery = $this->dic->refinery();
-        $this->http_Wrapper = $this->dic->http()->wrapper();
+        $this->http_wrapper = $this->dic->http()->wrapper();
         parent::__construct($closure($dic));
     }
 
     protected function manipulateRendering($component, Renderer $root): ?string
     {
         if (strtolower($this->ctrl->getCmdClass()) === strtolower(ilObjTestGUI::class)) {
-            $cmd_class = $this->http_Wrapper->query()->retrieve("cmdClass", $this->refinery->kindlyTo()->string());
+            $cmd_class = $this->http_wrapper->query()->retrieve("cmdClass", $this->refinery->kindlyTo()->string());
             if (strtolower($cmd_class) !== strtolower(str_replace("\\", "", ConsecutiveScoringGUI::class))) {
                 return null;
             }
 
-            $ref_id = $this->http_Wrapper->query()->retrieve(
+            $ref_id = $this->http_wrapper->query()->retrieve(
                 "ref_id",
                 $this->refinery->byTrying([
                     $this->refinery->kindlyTo()->int(),

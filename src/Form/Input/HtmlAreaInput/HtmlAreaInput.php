@@ -29,7 +29,7 @@ class HtmlAreaInput extends ilFormPropertyGUI
 {
     protected bool $disabled = false;
     protected bool $editable = true;
-    protected string $htmlClass = "html-area-input";
+    protected string $html_class = "html-area-input";
     protected string $value = "";
 
     public function checkInput(): bool
@@ -65,7 +65,7 @@ class HtmlAreaInput extends ilFormPropertyGUI
         $tpl = new ilTemplate($this->getFolderPath() . "tpl.htmlAreaInput.html", true, true);
         $tpl->setVariable("TEXT", $this->value);
         $tpl->setVariable("POST_VAR", $this->getPostVar());
-        $tpl->setVariable("HTML_CLASS", $this->htmlClass);
+        $tpl->setVariable("HTML_CLASS", $this->html_class);
         $tpl->setVariable("EDITABLE", $this->editable ? "true" : "false");
         $tpl->setVariable("DISABLED", $this->disabled ? "cursor: not-allowed; background-color: #eeeeee;" : "");
 
@@ -79,9 +79,9 @@ class HtmlAreaInput extends ilFormPropertyGUI
         return strstr(realpath(__DIR__), "Customizing") . "/";
     }
 
-    public function setHtmlClass(string $htmlClass): void
+    public function setHtmlClass(string $html_class): void
     {
-        $this->htmlClass = $htmlClass;
+        $this->html_class = $html_class;
     }
 
     public function setEditable(bool $editable): void

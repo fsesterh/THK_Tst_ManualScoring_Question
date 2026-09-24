@@ -32,13 +32,13 @@ class Answer
 
     public function __construct(
         protected Question $question,
-        private readonly int $activeId,
-        private ?bool $scoringCompleted = null,
+        private readonly int $active_id,
+        private ?bool $scoring_completed = null,
         private ?float $points = null,
         private ?string $feedback = null,
         private readonly string $login = "",
-        private readonly string $userName = "",
-        private readonly string $answerHtml = ""
+        private readonly string $user_name = "",
+        private readonly string $answer_html = ""
     ) {
         global $DIC;
         $this->db = $DIC->database();
@@ -50,7 +50,7 @@ class Answer
         $result = $DIC->database()->queryF(
             "SELECT finalized_evaluation FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
             [ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER],
-            [$this->activeId, $this->question->getId(), $this->getQuestion()->getPass()]
+            [$this->active_id, $this->question->getId(), $this->getQuestion()->getPass()]
         );
         if ($result->numRows()) {
             $row = $DIC->database()->fetchAssoc($result);
@@ -67,7 +67,7 @@ class Answer
         $result = $this->db->queryF(
             "SELECT feedback FROM tst_manual_fb WHERE active_fi = %s AND question_fi = %s AND pass = %s",
             [ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER, ilDBConstants::T_INTEGER],
-            [$this->activeId, $this->question->getId(), $this->question->getPass()]
+            [$this->active_id, $this->question->getId(), $this->question->getPass()]
         );
 
         return $this->db->fetchAssoc($result)["feedback"] ?? "";
@@ -75,7 +75,7 @@ class Answer
 
     public function getUserName(): string
     {
-        return $this->userName;
+        return $this->user_name;
     }
 
     public function getLogin(): string
@@ -86,7 +86,7 @@ class Answer
     public function writeFeedback(): bool
     {
         return $this->saveManualFeedback(
-            $this->activeId,
+            $this->active_id,
             $this->question->getId(),
             $this->question->getPass(),
             $this->readScoringCompleted() ? $this->readFeedback() : $this->feedback,
@@ -98,7 +98,7 @@ class Answer
     private function readPoints(): float
     {
         return assQuestion::_getReachedPoints(
-            $this->activeId,
+            $this->active_id,
             $this->question->getId(),
             $this->question->getPass()
         );
@@ -107,7 +107,7 @@ class Answer
     public function writePoints(): bool
     {
         assQuestion::_setReachedPoints(
-            $this->activeId,
+            $this->active_id,
             $this->question->getId(),
             $this->points,
             $this->question->getMaximumPoints(),
@@ -127,7 +127,7 @@ class Answer
             ],
             [
                 $this->question->getId(),
-                $this->activeId,
+                $this->active_id,
                 $this->question->getPass(),
                 $this->getPoints(),
             ]
@@ -138,7 +138,7 @@ class Answer
 
     public function getActiveId(): int
     {
-        return $this->activeId;
+        return $this->active_id;
     }
 
     public function getFeedback(): string
@@ -151,7 +151,7 @@ class Answer
 
     public function getAnswerHtml(): string
     {
-        return $this->answerHtml;
+        return $this->answer_html;
     }
 
     public function getPoints(): ?float
@@ -169,10 +169,10 @@ class Answer
 
     public function isScoringCompleted(): bool
     {
-        if ($this->scoringCompleted === null) {
-            $this->scoringCompleted = $this->readScoringCompleted();
+        if ($this->scoring_completed === null) {
+            $this->scoring_completed = $this->readScoringCompleted();
         }
-        return $this->scoringCompleted;
+        return $this->scoring_completed;
     }
 
     private function saveManualFeedback(
@@ -211,10 +211,10 @@ class Answer
     ): void {
         global $DIC;
 
-        $ilDB = $DIC->database();
-        $ilUser = $DIC->user();
-        $next_id = $ilDB->nextId("tst_manual_fb");
-        $user = $ilUser->getId();
+        $il_db = $DIC->database();
+        $il_user = $DIC->user();
+        $next_id = $il_db->nextId("tst_manual_fb");
+        $user = $il_user->getId();
         $finalized_time = time();
 
         $update_default = [
@@ -237,6 +237,6 @@ class Answer
             $update_default["finalized_tstamp"] = [ilDBConstants::T_INTEGER, $finalized_time];
         }
 
-        $ilDB->insert("tst_manual_fb", $update_default);
+        $il_db->insert("tst_manual_fb", $update_default);
     }
 }
