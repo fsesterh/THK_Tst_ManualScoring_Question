@@ -31,6 +31,7 @@ use ILIAS\DI\Container;
 use ILIAS\DI\UIServices;
 use ILIAS\HTTP\Wrapper\WrapperFactory;
 use ILIAS\Plugin\TstManualScoringQuestion\Enum\PluginAsset;
+use ILIAS\Plugin\TstManualScoringQuestion\Enum\ScoringCompletedOptions;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\Input\HtmlAreaInput\HtmlAreaInput;
 use ILIAS\Plugin\TstManualScoringQuestion\Form\TstManualScoringForm;
 use ILIAS\Plugin\TstManualScoringQuestion\Model\Answer;
@@ -66,9 +67,6 @@ use ReflectionMethod;
 
 class TstManualScoringQuestion
 {
-    public const int ALL_USERS = 0;
-    public const int ONLY_FINALIZED = 1;
-    public const int EXCEPT_FINALIZED = 2;
     protected array $answers_and_forms = [];
     protected ilLogger $logger;
     protected ilObjUser $user;
@@ -281,13 +279,13 @@ class TstManualScoringQuestion
         $filter_data = $this->ui_filter_service->getData($filter) ?? [
             "question" => array_key_first($question_options),
             "pass" => array_key_first($pass_options),
-            "scoring_completed" => self::ALL_USERS,
+            "scoring_completed" => ScoringCompletedOptions::ALL_USERS->value,
             "answers_per_page" => 10
         ];
 
         $selected_question_id = (int) ($filter_data["question"] !== "" ? $filter_data["question"] : array_key_first($question_options));
         $selected_pass = (int) ($filter_data["pass"] !== "" ? $filter_data["pass"] : array_key_first($pass_options));
-        $selected_scoring_completed = (int) ($filter_data["scoring_completed"] !== "" ? $filter_data["scoring_completed"] : self::ALL_USERS);
+        $selected_scoring_completed = ScoringCompletedOptions::tryFrom((int) $filter_data["scoring_completed"]) ?? ScoringCompletedOptions::ALL_USERS;
         $selected_answers_per_page = (int) ($filter_data["answers_per_page"] !== "" ? $filter_data["answers_per_page"] : 10);
 
         $question = new Question(
@@ -318,8 +316,8 @@ class TstManualScoringQuestion
                     $question->getPass()
                 );
                 return match ($selected_scoring_completed) {
-                    self::ONLY_FINALIZED => $scoring_completed,
-                    self::EXCEPT_FINALIZED => !$scoring_completed,
+                    ScoringCompletedOptions::ONLY_FINALIZED => $scoring_completed,
+                    ScoringCompletedOptions::EXCEPT_FINALIZED => !$scoring_completed,
                     default => true,
                 };
             }
@@ -758,11 +756,10 @@ class TstManualScoringQuestion
             $answers_per_page_options
         );
 
-        $scoring_completed_options = [
-            self::ALL_USERS => $this->lng->txt("all_users"),
-            self::ONLY_FINALIZED => $this->lng->txt("evaluated_users"),
-            self::EXCEPT_FINALIZED => $this->lng->txt("not_evaluated_users"),
-        ];
+        $scoring_completed_options = [];
+        foreach (ScoringCompletedOptions::cases() as $case) {
+            $scoring_completed_options[$case->value] = $this->lng->txt($case->getTranslationKey());
+        }
         $select_scoring_completed_input = $this->ui_field_factory->select(
             $this->lng->txt("finalized_evaluation"),
             $scoring_completed_options
@@ -798,7 +795,7 @@ class TstManualScoringQuestion
                 true
             )
         ) {
-            $select_scoring_completed_input->withValue(self::ALL_USERS);
+            $select_scoring_completed_input->withValue(ScoringCompletedOptions::ALL_USERS->value);
         }
 
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $test_ref_id);
