@@ -39,9 +39,7 @@ use ILIAS\Plugin\TstManualScoringQuestion\Model\Question;
 use ILIAS\Plugin\TstManualScoringQuestion\Utils\UiUtil;
 use ILIAS\Test\Scoring\Manual\ConsecutiveScoringGUI;
 use ILIAS\UI\Component\Input\Container\Filter\Standard;
-use ILIAS\UI\Component\Input\Field\Select;
 use ILIAS\UI\Factory;
-use ILIAS\UI\Implementation\Component\Input\Field\FormInput;
 use ILIAS\UI\Renderer;
 use ilLanguage;
 use ilLogger;
@@ -59,7 +57,6 @@ use ilToolbarGUI;
 use ilTstManualScoringQuestionPlugin;
 use ilTstManualScoringQuestionUIHookGUI;
 use ilUIFilterService;
-use ilUIFilterServiceSessionGateway;
 use ilUIPluginRouterGUI;
 use Psr\Http\Message\RequestInterface;
 use ReflectionException;
@@ -811,8 +808,6 @@ class TstManualScoringQuestion
             "scoring_completed" => $select_scoring_completed_input
         ];
 
-        $this->fixUndefinedFilterOptionError($filter_inputs);
-
         return $this->ui_filter_service->standard(
             "tstFilter",
             $filter_base_action,
@@ -964,38 +959,5 @@ class TstManualScoringQuestion
     {
         $this->ui_util->sendFailure($this->lng->txt("form_input_not_valid"), true);
         $this->redirectToManualScoringTab($ref_id);
-    }
-
-    /**
-     * Fixes an issue in ilias causing an exception when a filter option is no longer available but still stored in
-     * session https://mantis.ilias.de/view.php?id=37741
-     *
-     * @param FormInput[] $filter_inputs
-     */
-    private function fixUndefinedFilterOptionError(array $filter_inputs): void
-    {
-        $filter_service_session_gateway = new ilUIFilterServiceSessionGateway();
-
-        foreach ($filter_inputs as $input_id => $input) {
-            if (!$input instanceof Select) {
-                continue;
-            }
-            $value = $filter_service_session_gateway->getValue("tstFilter", $input_id);
-            $option_found = false;
-
-            if ($value !== null) {
-                foreach ($input->getOptions() as $key => $option_value) {
-                    $key = (string) $key;
-                    if ($value === $key) {
-                        $option_found = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!$option_found) {
-                $filter_service_session_gateway->writeValue("tstFilter", $input_id, (int) $input->getValue());
-            }
-        }
     }
 }
