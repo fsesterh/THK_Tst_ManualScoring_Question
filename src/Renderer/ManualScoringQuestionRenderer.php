@@ -60,8 +60,14 @@ class ManualScoringQuestionRenderer extends DecoratedRenderer
     protected function manipulateRendering($component, Renderer $root): ?string
     {
         if (strtolower($this->ctrl->getCmdClass()) === strtolower(ilObjTestGUI::class)) {
-            $cmd_class = $this->http_wrapper->query()->retrieve("cmdClass", $this->refinery->kindlyTo()->string());
-            if (strtolower($cmd_class) !== strtolower(str_replace("\\", "", ConsecutiveScoringGUI::class))) {
+            $cmd_class = $this->http_wrapper->query()->retrieve(
+                "cmdClass",
+                $this->refinery->byTrying([
+                    $this->refinery->kindlyTo()->string(),
+                    $this->refinery->always(null)
+                ])
+            );
+            if (!$cmd_class || strtolower($cmd_class) !== strtolower(str_replace("\\", "", ConsecutiveScoringGUI::class))) {
                 return null;
             }
 
