@@ -123,8 +123,8 @@ class ManualScoringQuestionRenderer extends DecoratedRenderer
 
         $sequence_html = $ui_renderer->render($sequence);
 
-        $dom = new DOMDocument('1.0', 'utf-8');
-        @$dom->loadHTML($sequence_html);
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        @$dom->loadHTML('<?xml encoding="UTF-8"?>' . $sequence_html);
 
         $x_path = new DOMXPath($dom);
         foreach ($x_path->query("//div[@class='c-sequence__navigation--viewcontrols']/form/div[contains(@class, 'il-viewcontrol')]") as $view_control) {
