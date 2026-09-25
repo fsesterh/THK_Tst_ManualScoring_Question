@@ -89,19 +89,19 @@ class TstManualScoringQuestion
         global $DIC;
         $this->dic = $dic ?? $DIC;
 
-        $this->main_tpl = $dic->ui()->mainTemplate();
-        $this->toolbar = $dic->toolbar();
-        $this->lng = $dic->language();
+        $this->main_tpl = $this->dic->ui()->mainTemplate();
+        $this->toolbar = $this->dic->toolbar();
+        $this->lng = $this->dic->language();
         $this->lng->loadLanguageModule("assessment");
         $this->plugin = ilTstManualScoringQuestionPlugin::getInstance();
-        $this->ui = $dic->ui();
-        $this->ctrl = $dic->ctrl();
+        $this->ui = $this->dic->ui();
+        $this->ctrl = $this->dic->ctrl();
         $this->request = $this->dic->http()->request();
         $this->http_wrapper = $this->dic->http()->wrapper();
         $this->refinery = $this->dic->refinery();
-        $this->access = $dic->access();
-        $this->user = $dic->user();
-        $this->logger = $dic->logger()->root();
+        $this->access = $this->dic->access();
+        $this->user = $this->dic->user();
+        $this->logger = $this->dic->logger()->root();
         $this->ui_util = new UiUtil($this->dic);
 
         $this->ui_factory = $this->dic->ui()->factory();
