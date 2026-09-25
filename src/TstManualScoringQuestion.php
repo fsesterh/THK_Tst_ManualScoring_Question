@@ -578,6 +578,7 @@ class TstManualScoringQuestion
          */
         $questions = [];
 
+        $question_ids = $test->getQuestions();
         $active_ids = $test->getActiveParticipantList()->getAllActiveIds();
 
         /**
@@ -593,8 +594,14 @@ class TstManualScoringQuestion
          * } $question_data
          */
         foreach ($tmsq as $question_data) {
+            $question_id = (int) $question_data["question_id"];
+
+            if (!in_array($question_id, $question_ids, true)) {
+                continue;
+            }
+
             $question = new Question(
-                (int) $question_data["question_id"],
+                $question_id,
                 $ref_id,
                 (int) $question_data["pass"]
             );
