@@ -224,7 +224,7 @@ class TstManualScoringQuestion
         );
 
         if (!$ref_id) {
-            $this->ui_util->sendFailure(sprintf($this->plugin->txt("general.plugin.requiredParameterMissing#"), "ref_id"), true);
+            $this->ui_util->sendFailure(sprintf($this->plugin->txt("general.plugin.requiredParameterMissing"), "ref_id"), true);
             $this->plugin->redirectToHome();
         }
 
