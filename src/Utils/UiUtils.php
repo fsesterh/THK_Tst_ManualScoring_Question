@@ -26,13 +26,10 @@ class UiUtil
 {
     private readonly Container $dic;
 
-    public function __construct(Container $dic = null)
+    public function __construct(?Container $dic = null)
     {
-        if (!$dic) {
-            global $DIC;
-            $dic = $DIC;
-        }
-        $this->dic = $dic;
+        global $DIC;
+        $this->dic = $dic ?? $DIC;
     }
 
     public function sendQuestion(string $message, bool $keep = false): void

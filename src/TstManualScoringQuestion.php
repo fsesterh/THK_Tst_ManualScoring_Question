@@ -84,14 +84,10 @@ class TstManualScoringQuestion
     private readonly WrapperFactory $http_wrapper;
     private readonly \ILIAS\Refinery\Factory $refinery;
 
-    public function __construct(Container $dic = null)
+    public function __construct(?Container $dic = null)
     {
-        if ($dic === null) {
-            global $DIC;
-            $this->dic = $DIC;
-        } else {
-            $this->dic = $dic;
-        }
+        global $DIC;
+        $this->dic = $dic ?? $DIC;
 
         $this->main_tpl = $dic->ui()->mainTemplate();
         $this->toolbar = $dic->toolbar();
