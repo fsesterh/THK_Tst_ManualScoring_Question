@@ -109,7 +109,7 @@ class Answer
         assQuestion::_setReachedPoints(
             $this->active_id,
             $this->question->getId(),
-            $this->points,
+            (float) $this->points,
             $this->question->getMaximumPoints(),
             $this->question->getPass(),
             true
