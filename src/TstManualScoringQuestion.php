@@ -799,7 +799,7 @@ class TstManualScoringQuestion
                 true
             )
         ) {
-            $select_scoring_completed_input->withValue(ScoringCompletedOptions::ALL_USERS->value);
+            $select_scoring_completed_input = $select_scoring_completed_input->withValue(ScoringCompletedOptions::ALL_USERS->value);
         }
 
         $this->ctrl->setParameterByClass(ilTstManualScoringQuestionUIHookGUI::class, "ref_id", $test_ref_id);
