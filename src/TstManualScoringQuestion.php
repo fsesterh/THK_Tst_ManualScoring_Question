@@ -439,7 +439,7 @@ class TstManualScoringQuestion
                         "QUESTION_HEADER_TEXT",
                         sprintf(
                             "%s %s (%s)",
-                            $this->plugin->txt("answer_of"),
+                            $this->plugin->txt("manual_scoring.answer_of"),
                             $answer->getUserName(),
                             $test->getAnonymity() ? $this->lng->txt("anonymous") : $answer->getLogin()
                         )
