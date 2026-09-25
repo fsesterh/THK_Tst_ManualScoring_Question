@@ -133,7 +133,7 @@ class ManualScoringQuestionRenderer extends DecoratedRenderer
         @$dom->loadHTML('<?xml encoding="UTF-8"?>' . $sequence_html);
 
         $x_path = new DOMXPath($dom);
-        foreach ($x_path->query("//div[@class='c-sequence__navigation--viewcontrols']/form/div[contains(@class, 'il-viewcontrol')]") as $view_control) {
+        foreach ($x_path->query("//div[contains(@class, 'c-sequence__navigation--viewcontrols')]/form/div[contains(@class, 'il-viewcontrol')]") as $view_control) {
             $correct_view_control_found = false;
 
             /** @var DOMElement $button */
