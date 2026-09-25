@@ -31,11 +31,12 @@ class HtmlAreaInput extends ilFormPropertyGUI
     protected bool $editable = true;
     protected string $html_class = "html-area-input";
     protected string $value = "";
+    protected bool $escape_value = false;
 
     public function checkInput(): bool
     {
-        if ($this->required) {
-            if (!empty($this->value)) {
+        if ($this->getRequired()) {
+            if (!empty($this->getValue())) {
                 return true;
             }
             return false;
@@ -63,11 +64,11 @@ class HtmlAreaInput extends ilFormPropertyGUI
     public function insert($a_tpl): void
     {
         $tpl = new ilTemplate($this->getFolderPath() . "tpl.htmlAreaInput.html", true, true);
-        $tpl->setVariable("TEXT", $this->value);
+        $tpl->setVariable("TEXT", $this->isEscapeValue() ? htmlspecialchars($this->getValue()) : $this->getValue());
         $tpl->setVariable("POST_VAR", $this->getPostVar());
-        $tpl->setVariable("HTML_CLASS", $this->html_class);
-        $tpl->setVariable("EDITABLE", $this->editable ? "true" : "false");
-        $tpl->setVariable("DISABLED", $this->disabled ? "cursor: not-allowed; background-color: #eeeeee;" : "");
+        $tpl->setVariable("HTML_CLASS", $this->getHtmlClass());
+        $tpl->setVariable("EDITABLE", $this->isEditable() ? "true" : "false");
+        $tpl->setVariable("DISABLED", $this->isDisabled() ? "cursor: not-allowed; background-color: #eeeeee;" : "");
 
         $a_tpl->setCurrentBlock("prop_generic");
         $a_tpl->setVariable("PROP_GENERIC", $tpl->get());
@@ -79,9 +80,19 @@ class HtmlAreaInput extends ilFormPropertyGUI
         return strstr(realpath(__DIR__), "Customizing") . "/";
     }
 
+    public function getHtmlClass(): string
+    {
+        return $this->html_class;
+    }
+
     public function setHtmlClass(string $html_class): void
     {
         $this->html_class = $html_class;
+    }
+
+    public function isEditable(): bool
+    {
+        return $this->editable;
     }
 
     public function setEditable(bool $editable): void
@@ -91,11 +102,31 @@ class HtmlAreaInput extends ilFormPropertyGUI
         }
     }
 
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
     public function setDisabled(bool $a_disabled): void
     {
         $this->disabled = $a_disabled;
         if ($a_disabled) {
             $this->editable = false;
         }
+    }
+
+    public function isEscapeValue(): bool
+    {
+        return $this->escape_value;
+    }
+
+    public function setEscapeValue(bool $escape_value): void
+    {
+        $this->escape_value = $escape_value;
+    }
+
+    public function getValue(): string
+    {
+        return $this->value;
     }
 }

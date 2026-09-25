@@ -91,6 +91,7 @@ class TstManualScoringForm extends ilPropertyFormGUI
             );
             $manual_feed_pack_area_input->setDisabled(true);
             $manual_feed_pack_area_input->setHtmlClass("tmsq-html-area-input");
+            $manual_feed_pack_area_input->setEscapeValue(true);
         } else {
             $manual_feed_pack_area_input->setUseRTE(true);
             $manual_feed_pack_area_input->setRteTagSet("standard");
