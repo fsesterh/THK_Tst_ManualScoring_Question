@@ -573,6 +573,10 @@ class TstManualScoringQuestion
         $test = new ilObjTest($ref_id, true);
         $test_access = new ilTestAccess($test->getRefId());
 
+        if (!$test_access->checkScoreParticipantsAccess()) {
+            $this->plugin->accessViolationRedirect();
+        }
+
         /**
          * @var Question[] $questions
          */
@@ -611,11 +615,11 @@ class TstManualScoringQuestion
             if (isset($answers_data) && is_array($answers_data)) {
                 foreach ($answers_data as $answer_data) {
                     $active_id = (int) $answer_data["active_id"];
-                    if (!in_array($active_id, $active_ids, true)) {
-                        continue;
-                    }
-
-                    if (!$test_access->checkScoreParticipantsAccessForActiveId($active_id, $test->getTestId())) {
+                    if (
+                        !in_array($active_id, $active_ids, true)
+                        || !$test_access->checkScoreParticipantsAccessForActiveId($active_id, $test->getTestId())
+                        || !$test->getNrOfResultsForPass($active_id, $question->getPass())
+                    ) {
                         continue;
                     }
 
@@ -639,10 +643,6 @@ class TstManualScoringQuestion
         }
 
         foreach ($questions as $question) {
-            if (!$test_access->checkScoreParticipantsAccess()) {
-                $this->plugin->accessViolationRedirect();
-            }
-
             //Check all answer forms
             $forms_valid = true;
             $this->answers_and_forms = [];
