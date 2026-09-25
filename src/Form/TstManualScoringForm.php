@@ -46,9 +46,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $question_id = $question->getId();
         $active_id = $answer->getActiveId();
 
-        $test_ref_id_hidden_input = new ilHiddenInputGUI("tmsq[$question_id][test_ref_id]");
-        $test_ref_id_hidden_input->setRequired(true);
-
         $pass_hidden_input = new ilHiddenInputGUI("tmsq[$question_id][pass]");
         $pass_hidden_input->setRequired(true);
 
@@ -104,7 +101,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
             "tmsq[$question_id][answers][$active_id][scoring_completed]"
         );
 
-        $this->addItem($test_ref_id_hidden_input);
         $this->addItem($pass_hidden_input);
         $this->addItem($question_id_hidden_input);
         $this->addItem($active_id_hidden_input);
@@ -228,7 +224,6 @@ class TstManualScoringForm extends ilPropertyFormGUI
         $active_id = $answer->getActiveId();
 
         $this->setValuesByArray([
-            "tmsq[$question_id][test_ref_id]" => $question->getTestRefId(),
             "tmsq[$question_id][pass]" => $question->getPass(),
             "tmsq[$question_id][question_id]" => $question_id,
             "tmsq[$question_id][answers][$active_id][active_id]" => $active_id,

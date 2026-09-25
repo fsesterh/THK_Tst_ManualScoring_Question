@@ -519,6 +519,14 @@ class TstManualScoringQuestion
             ])
         );
 
+        $ref_id = $this->http_wrapper->query()->retrieve(
+            "ref_id",
+            $this->refinery->byTrying([
+                $this->refinery->kindlyTo()->int(),
+                $this->refinery->always(null)
+            ])
+        );
+
         $current_page = $page ?? -1;
 
         $tmsq = $this->http_wrapper->post()->retrieve(
@@ -549,7 +557,6 @@ class TstManualScoringQuestion
                                 return $answer_data;
                             })
                         ),
-                        "test_ref_id" => $this->refinery->kindlyTo()->int(),
                         "pass" => $this->refinery->kindlyTo()->int(),
                         "question_id" => $this->refinery->kindlyTo()->int()
                     ])
@@ -558,7 +565,7 @@ class TstManualScoringQuestion
             ])
         );
 
-        if (!$tmsq) {
+        if (!$tmsq || !$ref_id) {
             $this->ui_util->sendFailure($this->plugin->txt("invalid_post_data"), true);
             $this->plugin->redirectToHome();
         }
@@ -570,7 +577,6 @@ class TstManualScoringQuestion
 
         /**
          * @var array{
-         *     test_ref_id: int,
          *     pass: int,
          *     question_id: int,
          *     answers: list<array{
@@ -584,7 +590,7 @@ class TstManualScoringQuestion
         foreach ($tmsq as $question_data) {
             $question = new Question(
                 (int) $question_data["question_id"],
-                (int) $question_data["test_ref_id"],
+                $ref_id,
                 (int) $question_data["pass"]
             );
 
@@ -611,18 +617,10 @@ class TstManualScoringQuestion
             $questions[] = $question;
         }
 
-        $test_ref_id = -1;
+        $test = new ilObjTest($ref_id, true);
+        $test_access = new ilTestAccess($test->getRefId());
 
         foreach ($questions as $question) {
-            $test_ref_id = $question->getTestRefId();
-            $test = new ilObjTest($test_ref_id, true);
-            $test_access = new ilTestAccess($test->getRefId());
-
-            if (!$test_ref_id) {
-                $this->ui_util->sendFailure($this->plugin->txt("unknownError"), true);
-                $this->plugin->redirectToHome();
-            }
-
             if (!$test_access->checkScoreParticipantsAccess()) {
                 $this->plugin->accessViolationRedirect();
             }
@@ -664,13 +662,8 @@ class TstManualScoringQuestion
             }
         }
 
-        if ($test_ref_id === -1) {
-            $this->ui_util->sendFailure($this->plugin->txt("unknownError"), true);
-            $this->plugin->redirectToHome();
-        } else {
-            $this->ui_util->sendSuccess($this->plugin->txt("manual_scoring.save.success"), true);
-            $this->redirectToManualScoringTab($test_ref_id, $current_page);
-        }
+        $this->ui_util->sendSuccess($this->plugin->txt("manual_scoring.save.success"), true);
+        $this->redirectToManualScoringTab($ref_id, $current_page);
     }
 
     protected function setupPagination(int $elements_per_page, int $total_number_of_elements): array
