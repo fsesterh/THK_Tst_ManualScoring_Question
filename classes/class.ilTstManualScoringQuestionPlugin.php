@@ -39,8 +39,6 @@ class ilTstManualScoringQuestionPlugin extends ilUserInterfaceHookPlugin
         parent::__construct($db, $component_repository, $id);
         global $DIC;
         $this->dic = $DIC;
-
-        parent::__construct($db, $component_repository, $id);
     }
 
     public function assetsFile(PluginAsset $asset_type, string $file, bool $relative = true): string
