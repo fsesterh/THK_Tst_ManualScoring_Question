@@ -615,6 +615,10 @@ class TstManualScoringQuestion
                         continue;
                     }
 
+                    if (!$test_access->checkScoreParticipantsAccessForActiveId($active_id, $test->getTestId())) {
+                        continue;
+                    }
+
                     $answer = new Answer(
                         $question,
                         $active_id,
