@@ -19,4 +19,4 @@ manual_scoring.filter.answers_per_page#:#Antworten pro Seite
 
 manual_scoring.save.success#:#Manuelle Bewertung wurde gespeichert
 manual_scoring.save.failure#:#Speichern der Punkte für eine Antwort schlug fehl
-manual_scoring.save.feedback.failure#:#Speichern des Feedbacks für eine Antwort schlug fehlt
+manual_scoring.save.feedback.failure#:#Speichern des Feedbacks für eine Antwort schlug fehl
