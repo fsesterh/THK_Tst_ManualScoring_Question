@@ -570,10 +570,15 @@ class TstManualScoringQuestion
             $this->plugin->redirectToHome();
         }
 
+        $test = new ilObjTest($ref_id, true);
+        $test_access = new ilTestAccess($test->getRefId());
+
         /**
          * @var Question[] $questions
          */
         $questions = [];
+
+        $active_ids = $test->getActiveParticipantList()->getAllActiveIds();
 
         /**
          * @var array{
@@ -598,9 +603,14 @@ class TstManualScoringQuestion
 
             if (isset($answers_data) && is_array($answers_data)) {
                 foreach ($answers_data as $answer_data) {
+                    $active_id = (int) $answer_data["active_id"];
+                    if (!in_array($active_id, $active_ids, true)) {
+                        continue;
+                    }
+
                     $answer = new Answer(
                         $question,
-                        (int) $answer_data["active_id"],
+                        $active_id,
                         (bool) ($answer_data["scoring_completed"] ?? false),
                         isset($answer_data["points"]) && is_numeric($answer_data["points"])
                             ? (float) $answer_data["points"]
@@ -616,9 +626,6 @@ class TstManualScoringQuestion
 
             $questions[] = $question;
         }
-
-        $test = new ilObjTest($ref_id, true);
-        $test_access = new ilTestAccess($test->getRefId());
 
         foreach ($questions as $question) {
             if (!$test_access->checkScoreParticipantsAccess()) {
