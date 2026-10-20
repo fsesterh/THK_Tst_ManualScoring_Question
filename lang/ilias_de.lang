@@ -4,7 +4,7 @@ config_saved#:#Konfiguration gespeichert
 cmdNotSupported#:#Kommando wird nicht unterstützt
 noEntries#:#Keine Einträge vorhanden
 nothingReceivedInPost#:#POST ist leer oder nicht definiert
-unknownError#:#Unbekannter Fehler. Es könnten informationen fehlen
+unknownError#:#Unbekannter Fehler. Es könnten Informationen fehlen.
 invalid_post_data#:#Unerwarteten POST erhalten
 
 answer_of#:#Antwort von
@@ -14,7 +14,7 @@ missing_get_parameter_refId#:#Der GET parameter 'ref_id' fehlt
 
 saving_manualScoring#:#Manuelle Bewertung wurde gespeichert
 saving_points_failed#:#Speichern der Punkte für eine Antwort schlug fehl
-saving_feedback_failed#:#Speichern des Feedbacks für eine Antwort schlug fehlt
+saving_feedback_failed#:#Speichern des Feedbacks für eine Antwort schlug fehl
 
 filter_missing_question#:#Keine Frage im Filter definiert
 filter_missing_pass#:#Kein Durchlauf im Filter definiert
@@ -22,10 +22,10 @@ filter_missing_scoringCompleted#:#Es fehlt die Filteroption für Scoring complet
 filter_missing_answersPerPage#:#Keine Antworten pro Seite im Filter definiert
 filter_applied#:#Filter wurde angewendet
 filter_reset#:#Filter wurde zurückgesetzt
-filter_invalid_command#:#Nicht unterstütztes Filter Kommando
+filter_invalid_command#:#Nicht unterstütztes Filter-Kommando
 
 answersPerPage#:#Antworten pro Seite
 userSolution#:#Lösung des Benutzers
 
 answersFromTo#:#Antworten %s bis %s
-tmsq_scoring#:#Bewertung nach Frage (Plugin)
+tmsq_scoring#:#Bewertung nach Frage (mehrere Antworten)
