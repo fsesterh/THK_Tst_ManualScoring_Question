@@ -6,7 +6,7 @@ general.plugin.settings#:#Plugin Settings
 general.plugin.notActivated#:#Plugin is not active, yet. Please activate it.
 general.plugin.requiredParameterMissing#:#The parameter "%s" could not be found in the request but is required.
 
-unknownError#:#Unknown error. Information could be empty
+unknownError#:#Unknown error. Information could be empty.
 invalid_post_data#:#Unexpected POST received
 
 manual_scoring.title#:#Scoring by Question (Plugin)
