@@ -1,8 +1,12 @@
 # Changelog
 
+## 11.0.0
+
+* Added support for ILIAS 11
+
 ## 10.0.1
 
-Fixed: Grading inputs are lost when saving multiple times
+* Fixed: Grading inputs are lost when saving multiple times
 
 ## 10.0.0
 
